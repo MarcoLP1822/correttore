@@ -51,10 +51,8 @@ load_dotenv('.env.local')
 from reports import write_glossary_report, write_markdown_report
 from token_utils import tokenize, token_starts, count_tokens
 from settings import OPENAI_MODEL, MAX_TOKENS
-from utils_openai import (
-    get_corrections_async,
-    build_messages,
-)
+from openai_client import get_async_client
+from utils_openai import get_corrections_async, build_messages
 
 # ───────────────────────── CONFIGURAZIONE ────────────────────────────
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -568,7 +566,7 @@ def process_doc(inp: Path, out: Path):
 
     # 5. Definisce la coroutine che gestisce l'intero flusso asincrono (corpo + note)
     async def handle_all(doc: Document, out_path: Path):
-        async_client = AsyncOpenAI(api_key=OPENAI_API_KEY)
+        async_client = get_async_client()
 
         # 5.1 Corregge il corpo del documento (in parallelo, chunk per chunk)
         await fix_body_chunks(
