@@ -2,9 +2,9 @@
 import re
 import tiktoken
 
-_DEFAULT_MODEL = "gpt-4o-mini"   # o quello che preferisci
+DEFAULT_MODEL = "gpt-4o-mini"
 try:
-    ENC = tiktoken.encoding_for_model(_DEFAULT_MODEL)
+    ENC = tiktoken.encoding_for_model(DEFAULT_MODEL)
 except KeyError:
     ENC = tiktoken.get_encoding("cl100k_base")
 

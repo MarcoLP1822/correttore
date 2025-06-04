@@ -1,10 +1,11 @@
 # utils_openai.py
-import asyncio, json, re, time
+import asyncio, json, re, time, logging
 from typing import List, Dict, Set
-from openai import AsyncOpenAI, OpenAI
+from openai import AsyncOpenAI, OpenAI, RateLimitError, APIConnectionError, BadRequestError
+from settings import OPENAI_MODEL, RETRY_BACKOFF, MAX_RETRY
 
-_OPENAI_MODEL  = "gpt-4o-mini"
-_RETRY_BACKOFF = (1, 2, 4)  # secondi in caso di risposta non valida
+logger = logging.getLogger(__name__)
+
 _FENCE_RE      = re.compile(r"^```[\w]*\n?|```$", re.S)
 
 def _strip_fences(text: str) -> str:
@@ -17,9 +18,9 @@ def _parse_corr(raw: str) -> List[Dict]:
     return data["corr"]
 
 # ------------------------------------------------------------------ #
-#  Costruiamo i messaggi (lo stesso identico schema che usavi prima)
+#  Prompt per il correttore
 SYSTEM_MSG_BASE = """
-Sei un correttore di bozze madrelingua inglese con decenni di esperienza.
+Sei un correttore di bozze madrelingua italiano con decenni di esperienza.
 
 • Correggi **solo** refusi, errori ortografici / grammaticali e punteggiatura.  
 • Non eliminare, spostare o accorciare parole, frasi o capoversi.  
@@ -43,34 +44,46 @@ def build_messages(context: str,
         {"role": "user",      "content": payload_json},
     ]
 # ------------------------------------------------------------------ #
+from random import uniform
+from asyncio import sleep
+
+async def _retry_async(call_coroutine, *, max_attempts, backoff_seq):
+    """
+    Esegue una coroutine con retry esponenziale e jitter.
+    Restituisce il risultato o rilancia dopo max_attempts falliti.
+    """
+    for attempt, delay in enumerate((*backoff_seq, 0), start=1):
+        try:
+            return await call_coroutine()
+        except (RateLimitError, APIConnectionError) as exc:
+            if attempt >= max_attempts:
+                logger.error("OpenAI: troppi errori (%s). Rinuncio.", exc)
+                raise
+            jitter = uniform(0, 0.3 * delay)
+            wait = delay + jitter
+            logger.warning("OpenAI errore (%s). Retry %s/%s fra %.1fs",
+                           exc.__class__.__name__, attempt, max_attempts, wait)
+            await sleep(wait)
+        except BadRequestError as exc:
+            # Context length exceeded o JSON malformato → non ritentare
+            logger.error("Request non valida: %s", exc)
+            raise
 
 async def _chat_async(messages, client):
-    for delay in _RETRY_BACKOFF:
+    async def _one_call():
         resp = await client.chat.completions.create(
-            model=_OPENAI_MODEL,
+            model=OPENAI_MODEL,
             temperature=0.3,
             response_format={"type": "json_object"},
             messages=messages,
         )
-        try:
-            return _parse_corr(_strip_fences(resp.choices[0].message.content))
-        except (json.JSONDecodeError, ValueError):
-            await asyncio.sleep(delay)
-    raise RuntimeError("Risposta non-JSON dopo 3 tentativi")
+        return _parse_corr(_strip_fences(resp.choices[0].message.content))
 
-def _chat_sync(messages, client):
-    for delay in _RETRY_BACKOFF:
-        resp = client.chat.completions.create(
-            model=_OPENAI_MODEL,
-            temperature=0.3,
-            response_format={"type": "json_object"},
-            messages=messages,
-        )
-        try:
-            return _parse_corr(_strip_fences(resp.choices[0].message.content))
-        except (json.JSONDecodeError, ValueError):
-            time.sleep(delay)
-    raise RuntimeError("Risposta non-JSON dopo 3 tentativi")
+    return await _retry_async(
+        _one_call,
+        max_attempts=MAX_RETRY,
+        backoff_seq=RETRY_BACKOFF,
+    )
 
 # ========== FUNZIONI PUBBLICHE (quelle che userai da main.py) ====== #
 async def get_corrections_async(payload_json: str,
@@ -85,4 +98,4 @@ def get_corrections_sync(payload_json: str,
                          glossary: Set[str],
                          context: str = "") -> List[Dict]:
     msgs = build_messages(context, payload_json, glossary)
-    return _chat_sync(msgs, client)
+    return _chat_async(msgs, client)
