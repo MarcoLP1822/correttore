@@ -6,18 +6,17 @@ Genera i due report Markdown:
 """
 
 from __future__ import annotations
+import collections, re, logging
 from pathlib import Path
 from datetime import datetime
-import collections, re
 from typing import List
 
 # ── dipendenze locali da main.py -------------------------------------
-from token_utils import tokenize, token_starts           # se li hai separati
-# oppure, se non hai ancora estratto token_utils:
-# from main import tokenize, token_starts
-
+from token_utils import tokenize, token_starts 
 from dataclasses import dataclass
 from difflib import SequenceMatcher
+
+logger = logging.getLogger(__name__)
 
 @dataclass
 class Modification:
@@ -94,7 +93,7 @@ def write_markdown_report(mods: List[Modification], dst_doc: Path) -> None:
     lines[2:2] = stats_block
 
     md_path.write_text("\n".join(lines), encoding="utf-8")
-    print(f"📄  Report modifiche salvato: {md_path.name}")
+    logger.info("📄  Report modifiche salvato: %s", md_path.name)
 
 
 # ---------- report glossario ----------------------------------------
@@ -118,4 +117,4 @@ def write_glossary_report(glossary: set[str],
         lines.append(f"| {w} | {counts[w]} |")
 
     md_path.write_text("\n".join(lines), encoding="utf-8")
-    print(f"📑  Glossario salvato: {md_path.name}")
+    logger.info("📑  Glossario salvato: %s", md_path.name)

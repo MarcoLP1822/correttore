@@ -14,6 +14,15 @@ Richiede **python-docx ≥ 0.8.11**.
 from __future__ import annotations
 
 # ——— Standard library ————————————————————————————————
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    datefmt="%H:%M:%S",
+)
+logger = logging.getLogger(__name__)
+
 import asyncio
 import aiofiles
 import collections
@@ -53,6 +62,14 @@ from token_utils import tokenize, token_starts, count_tokens
 from settings import OPENAI_MODEL, MAX_TOKENS
 from openai_client import get_async_client
 from utils_openai import get_corrections_async, build_messages
+
+logging.basicConfig(
+    level=logging.INFO,                          # livello minimo di log
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    datefmt="%H:%M:%S",
+)
+logger = logging.getLogger(__name__)
+
 
 # ───────────────────────── CONFIGURAZIONE ────────────────────────────
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -211,7 +228,7 @@ async def correggi_footnotes_xml_async(docx_path: Path,
 
     shutil.move(tmp_docx, docx_path)        # sovrascrive l'originale
     shutil.rmtree(tmp_dir)
-    print("✏️  Note a piè di pagina corrette e formattazione preservata")
+    logger.info("✏️  Note a piè di pagina corrette")
 # ╭─────────────────────────── Data-model modifiche ▾────────────────────╮
 @dataclass
 class Modification:
@@ -559,7 +576,7 @@ def process_doc(inp: Path, out: Path):
     para_chunks = chunk_paragraph_objects(paras_to_fix, max_tokens=4_000)
     total_chunks = len(para_chunks)
 
-    print(f"🔍  Rilevati {total_chunks} chunk (limite {MAX_TOKENS} token).")
+    logger.info("🔍  Rilevati %s chunk (limite %s token).", total_chunks, MAX_TOKENS)
 
     # 4. Lista per raccogliere tutte le modifiche da riportare nel diff finale
     mods: list[Modification] = []
@@ -580,7 +597,7 @@ def process_doc(inp: Path, out: Path):
 
         # 5.2 Salva il documento corretto prima di correggere le note (serve file .docx completo)
         doc.save(out_path)
-        print(f"💾  Documento salvato: {out_path.name}")
+        logger.info("💾  Documento salvato: %s", out_path.name)
 
         # 5.3 Corregge le note a piè di pagina in parallelo
         await correggi_footnotes_xml_async(
@@ -612,9 +629,9 @@ if __name__ == "__main__":
     here = Path(__file__).resolve().parent
     src = find_latest_docx(here)
     dst = src.with_stem(src.stem + "_corretto")
-    print(f"📝  Correggo {src.name} → {dst.name} …")
+    logger.info("📝  Correggo %s → %s …", src.name, dst.name)
     process_doc(src, dst)
 
     # tempo impiegato
     elapsed = time.perf_counter() - start_time
-    print(f"✨  Fatto in {elapsed:.2f} secondi!")
+    logger.info("✨  Fatto in %.2f secondi!", elapsed)

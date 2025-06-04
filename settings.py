@@ -6,4 +6,5 @@ Configurazione centralizzata dell’applicazione
 
 OPENAI_MODEL = "gpt-4o-mini"     # modello da usare ovunque
 MAX_TOKENS   = 10_000            # contesto massimo per i prompt
+MAX_RETRY = 5                    # numero massimo di retry
 RETRY_BACKOFF = (1, 2, 4)        # secondi di attesa ai retry
