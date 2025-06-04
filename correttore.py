@@ -41,7 +41,11 @@ from docx.oxml.ns import qn
 from docx.text.paragraph import Paragraph
 from lxml import etree
 from lxml.etree import XMLSyntaxError
-from openai import AsyncOpenAI
+from openai import AsyncOpenAI, OpenAI
+from dotenv import load_dotenv
+
+# Carica le variabili d'ambiente dal file .env.local
+load_dotenv('.env.local')
 
 # ——— Local modules ————————————————————————————————
 from reports import write_glossary_report, write_markdown_report
@@ -209,7 +213,7 @@ async def correggi_footnotes_xml_async(docx_path: Path,
                 arcname  = os.path.relpath(fullpath, tmp_dir)
                 zf.write(fullpath, arcname)
 
-    shutil.move(tmp_docx, docx_path)        # sovrascrive l’originale
+    shutil.move(tmp_docx, docx_path)        # sovrascrive l'originale
     shutil.rmtree(tmp_dir)
     print("✏️  Note a piè di pagina corrette e formattazione preservata")
 # ╭─────────────────────────── Data-model modifiche ▾────────────────────╮
@@ -360,7 +364,7 @@ async def correct_paragraph_group(
     """
     Corregge un gruppo di Paragraph mantenendo formattazione e glossario.
 
-    · paragraphs   : la “sezione” da correggere (chunk, note, header…)
+    · paragraphs   : la "sezione" da correggere (chunk, note, header…)
     · all_paras    : lista completa per calcolare il contesto
     · start_par_id : id del primo paragrafo nel documento (1-based)
     · client       : istanza AsyncOpenAI condivisa
@@ -382,7 +386,7 @@ async def correct_paragraph_group(
     # 4. CHIAMATA OpenAI (ora delegata alla utility)
     raw = await get_corrections_async(
         payload_json = payload_json,   # JSON già costruito al punto 2
-        client       = client,         # l’istanza AsyncOpenAI passata alla funzione
+        client       = client,         # l'istanza AsyncOpenAI passata alla funzione
         glossary     = glossary,       # il set di nomi canonici
         context      = context,        # le righe di contesto calcolate al punto 1
     )
@@ -401,7 +405,7 @@ async def correct_paragraph_group(
     def _too_much_cut(orig: str, corr: str, thresh: float = 0.02) -> bool:
         """
         True se il testo corretto ha perso > thresh (2 %) dei token
-        **oppure** se contiene meno frasi dell’originale.
+        **oppure** se contiene meno frasi dell'originale.
         """
         tok_orig = tokenize(orig)
         tok_corr = tokenize(corr)
@@ -419,10 +423,10 @@ async def correct_paragraph_group(
 
         # ─── Safety check ────────────────────────────────────────────
         if _too_much_cut(original_text, corrected_text):
-            # ↓↓↓ A) fallback minimo: tieni l’originale  ↓↓↓
+            # ↓↓↓ A) fallback minimo: tieni l'originale  ↓↓↓
             corrected_text = original_text
 
-            # --- B) oppure: ritenta con un modello “maggiore”  -------
+            # --- B) oppure: ritenta con un modello "maggiore"  -------
             # corr_retry = await get_corrections_async(
             #     payload_json=json.dumps([{"id": 0, "txt": original_text}],
             #                            ensure_ascii=False),
@@ -432,7 +436,7 @@ async def correct_paragraph_group(
             # )
             # corrected_text = corr_retry[0]["txt"]
 
-        # se supera i controlli, o dopo l’eventuale retry, applica
+        # se supera i controlli, o dopo l'eventuale retry, applica
         apply_correction_to_paragraph(
             p,
             corrected_text,
@@ -605,8 +609,8 @@ Sei un correttore di bozze madrelingua italiano con decenni di esperienza.
 • Non riformulare lo stile; se una parte è già corretta, lasciala invariata.
 
 NOMI / TERMINI FANTASY ↓  
-Se trovi varianti ortografiche dei nomi presenti nell’elenco seguente,
-uniforma la grafia a quella esatta dell’elenco.
+Se trovi varianti ortografiche dei nomi presenti nell'elenco seguente,
+uniforma la grafia a quella esatta dell'elenco.
 
 OUTPUT: restituisci **SOLO JSON** con la chiave `'corr'`
 ( lista di {id:int, txt:str} ) — niente testo extra.
@@ -615,7 +619,7 @@ OUTPUT: restituisci **SOLO JSON** con la chiave `'corr'`
 def build_messages(context: str, payload_json: str, glossary: set[str]) -> list[dict]:
     """
     Crea i tre messaggi da mandare a OpenAI:
-        1. system    → vincoli + lista dei nomi “canonici”
+        1. system    → vincoli + lista dei nomi "canonici"
         2. assistant → contesto di righe precedenti (NON va modificato)
         3. user      → JSON dei paragrafi da correggere
     """
@@ -627,15 +631,6 @@ def build_messages(context: str, payload_json: str, glossary: set[str]) -> list[
         {"role": "user",      "content": payload_json},
     ]
 # ╰──────────────────────────────────────────────────────────────────────────────╯
-
-    # salva il .docx con le correzioni
-    doc.save(out)
-    print(f"💾  Documento salvato: {out.name}")
-
-    # footnote e report restano sincroni
-    client_sync = OpenAI(api_key=OPENAI_API_KEY)
-    correggi_footnotes_xml(out, client_sync)
-    write_markdown_report(mods, out)
 
 def find_latest_docx(folder: Path) -> Path:
     files = list(folder.glob("*.docx"))
