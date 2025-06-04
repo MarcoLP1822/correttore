@@ -54,6 +54,7 @@ from utils_openai import (
     _OPENAI_MODEL as OPENAI_MODEL,
     get_corrections_async,
     get_corrections_sync,
+    build_messages,
 )
 
 # ───────────────────────── CONFIGURAZIONE ────────────────────────────
@@ -603,38 +604,6 @@ def process_doc(inp: Path, out: Path):
 
 
 # ───────────────────────────────────────────────────────────────────────
-
-# ╭────────────────────────── Prompt & builder messaggi ─────────────────────────╮
-SYSTEM_MSG_BASE = """
-Sei un correttore di bozze madrelingua italiano con decenni di esperienza.
-
-• Correggi **solo** refusi, errori ortografici / grammaticali e punteggiatura.  
-• Non eliminare, spostare o accorciare parole, frasi o capoversi.  
-• Non riformulare lo stile; se una parte è già corretta, lasciala invariata.
-
-NOMI / TERMINI FANTASY ↓  
-Se trovi varianti ortografiche dei nomi presenti nell'elenco seguente,
-uniforma la grafia a quella esatta dell'elenco.
-
-OUTPUT: restituisci **SOLO JSON** con la chiave `'corr'`
-( lista di {id:int, txt:str} ) — niente testo extra.
-"""
-
-def build_messages(context: str, payload_json: str, glossary: set[str]) -> list[dict]:
-    """
-    Crea i tre messaggi da mandare a OpenAI:
-        1. system    → vincoli + lista dei nomi "canonici"
-        2. assistant → contesto di righe precedenti (NON va modificato)
-        3. user      → JSON dei paragrafi da correggere
-    """
-    system_msg = SYSTEM_MSG_BASE + "\nLista: " + ", ".join(sorted(glossary))
-
-    return [
-        {"role": "system",    "content": system_msg},
-        {"role": "assistant", "content": "Contesto (NON modificare):\n" + context},
-        {"role": "user",      "content": payload_json},
-    ]
-# ╰──────────────────────────────────────────────────────────────────────────────╯
 
 def find_latest_docx(folder: Path) -> Path:
     files = list(folder.glob("*.docx"))

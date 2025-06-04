@@ -17,7 +17,7 @@ def _parse_corr(raw: str) -> List[Dict]:
     return data["corr"]
 
 # ------------------------------------------------------------------ #
-#  Costruiamo i messaggi (lo stesso identico schema che usavi prima)
+#  Prompt per il correttore
 SYSTEM_MSG_BASE = """
 Sei un correttore di bozze madrelingua inglese con decenni di esperienza.
 
