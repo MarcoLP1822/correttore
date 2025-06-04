@@ -53,7 +53,7 @@ from utils_openai import (
 )
 
 # ───────────────────────── CONFIGURAZIONE ────────────────────────────
-OPENAI_API_KEY = "******REMOVED******"
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 # Lunghezza massima di contesto (in token) accettata in un singolo prompt
 MAX_TOKENS_GPT4O_MINI = 10000
 
