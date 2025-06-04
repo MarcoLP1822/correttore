@@ -1,3 +1,4 @@
 /backup
 /correttore files
 /__pycache__
+.env.local
