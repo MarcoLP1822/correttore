@@ -237,6 +237,15 @@ def chunk_paragraph_objects(
     for p in paragraphs:
         para_tokens = count_tokens(p.text)
 
+        # 1) se il singolo paragrafo sfora il limite, isolalo
+        if para_tokens > max_tokens:
+            if current:                     # salva il chunk in corso
+                chunks.append(current)
+                current, current_tokens = [], 0
+            chunks.append([p])              # paragrafo “oversize” da solo
+            continue                        # salta al paragrafo successivo
+
+        # 2) comportamento normale
         if current and current_tokens + para_tokens > max_tokens:
             chunks.append(current)
             current = [p]
@@ -244,11 +253,6 @@ def chunk_paragraph_objects(
         else:
             current.append(p)
             current_tokens += para_tokens
-
-        # paragrafo singolo > soglia
-        if not current and para_tokens > max_tokens:
-            chunks.append([p])
-            current_tokens = 0
 
     if current:
         chunks.append(current)
