@@ -50,17 +50,14 @@ load_dotenv('.env.local')
 # ——— Local modules ————————————————————————————————
 from reports import write_glossary_report, write_markdown_report
 from token_utils import tokenize, token_starts, count_tokens
+from settings import OPENAI_MODEL, MAX_TOKENS
 from utils_openai import (
-    _OPENAI_MODEL as OPENAI_MODEL,
     get_corrections_async,
-    get_corrections_sync,
     build_messages,
 )
 
 # ───────────────────────── CONFIGURAZIONE ────────────────────────────
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-# Lunghezza massima di contesto (in token) accettata in un singolo prompt
-MAX_TOKENS_GPT4O_MINI = 10000
 
 try:
     ENC = tiktoken.encoding_for_model(OPENAI_MODEL)
@@ -228,7 +225,7 @@ class Modification:
 # ╭─────────────────────────── Chunking ▾────────────────────────────────╮
 def chunk_paragraph_objects(
     paragraphs: List[Paragraph],
-    max_tokens: int = MAX_TOKENS_GPT4O_MINI,
+    max_tokens: int = MAX_TOKENS,
 ) -> List[List[Paragraph]]:
     """Dividi la lista di oggetti Paragraph in blocchi < max_tokens."""
     chunks: List[List[Paragraph]] = []
@@ -565,7 +562,7 @@ def process_doc(inp: Path, out: Path):
     para_chunks = chunk_paragraph_objects(paras_to_fix, max_tokens=4_000)
     total_chunks = len(para_chunks)
 
-    print(f"🔍  Rilevati {total_chunks} chunk (limite {MAX_TOKENS_GPT4O_MINI} token).")
+    print(f"🔍  Rilevati {total_chunks} chunk (limite {MAX_TOKENS} token).")
 
     # 4. Lista per raccogliere tutte le modifiche da riportare nel diff finale
     mods: list[Modification] = []
