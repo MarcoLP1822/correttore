@@ -550,13 +550,12 @@ def process_doc(inp: Path, out: Path):
     paras_to_fix = [p for p in all_paras if has_errors(p.text)]
 
     # 2. Crea un glossario iniziale con i nomi ricorrenti (apparsi almeno 2 volte)
-    global GLOSSARY
     name_counts = collections.Counter(
         name
         for p in all_paras
         for name in NAME_RE.findall(p.text)
     )
-    GLOSSARY = {w for w, c in name_counts.items() if c >= 2}
+    glossary = {w for w, c in name_counts.items() if c >= 2}
 
     # 3. Suddivide il corpo del documento in chunk, rispettando il limite di token
     para_chunks = chunk_paragraph_objects(paras_to_fix, max_tokens=4_000)
@@ -578,7 +577,7 @@ def process_doc(inp: Path, out: Path):
             para_chunks=para_chunks,
             start_id=1,
             mods=mods,
-            glossary=GLOSSARY,
+            glossary=glossary,
         )
 
         # 5.2 Salva il documento corretto prima di correggere le note (serve file .docx completo)
@@ -589,7 +588,7 @@ def process_doc(inp: Path, out: Path):
         await correggi_footnotes_xml_async(
             docx_path=out_path,
             async_client=async_client,
-            glossary=GLOSSARY,
+            glossary=glossary,
         )
 
     # 6. Avvia l'evento asincrono completo
@@ -597,7 +596,7 @@ def process_doc(inp: Path, out: Path):
 
     # 7. Genera i due report Markdown (diff + glossario)
     write_markdown_report(mods, out)
-    write_glossary_report(GLOSSARY, all_paras, out)
+    write_glossary_report(glossary, all_paras, out)
 
 
 # ───────────────────────────────────────────────────────────────────────
