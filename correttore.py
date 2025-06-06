@@ -556,6 +556,28 @@ def iter_all_paragraphs(doc: Document) -> Iterable[Paragraph]:
     yield from iter_textbox_paragraphs(doc)
 # ──────────────────────────────────────────────────────────────────────
 
+# ───────────────── Deduplica paragrafi clonati dopo un sectPr ────────────────
+def remove_duplicate_after_sectpr(document: Document) -> None:
+    """
+    Se trova la sequenza:
+        A = paragrafo con testo
+        B = paragrafo VUOTO con <w:sectPr>
+        C = paragrafo la cui *intera* stringa è già contenuta in coda ad A
+    elimina C ma mantiene B (così l’interruzione di sezione resta).
+    """
+    paras = list(iter_body_paragraphs(document))
+    for i in range(len(paras) - 2, 0, -1):
+        A, B, C = paras[i - 1], paras[i], paras[i + 1]
+        if B.text.strip():                       # B deve essere vuoto
+            continue
+        if not B._p.xpath("./w:pPr/w:sectPr"):   # B deve avere <w:sectPr>
+            continue
+        text_a = A.text.strip()
+        text_c = C.text.strip()
+        if text_c and text_a.endswith(text_c):
+            C._p.getparent().remove(C._p)
+# ─────────────────────────────────────────────────────────────────────────────
+
 # ───────────────────────── entry-point con logging ────────────────────
 def process_doc(inp: Path, out: Path):
     doc = Document(inp)
@@ -594,6 +616,8 @@ def process_doc(inp: Path, out: Path):
             mods=mods,
             glossary=glossary,
         )
+        # Deduplica cloni post-correzione ma conserva l'interruzione di sezione
+        remove_duplicate_after_sectpr(doc)  
 
         # 5.2 Salva il documento corretto prima di correggere le note (serve file .docx completo)
         doc.save(out_path)
