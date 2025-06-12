@@ -70,7 +70,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-
 # ───────────────────────── CONFIGURAZIONE ────────────────────────────
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
@@ -81,9 +80,31 @@ except KeyError:
     ENC = tiktoken.get_encoding("cl100k_base")
 # ─────────────────────────────────────────────────────────────────────
 
-WORD_RE = re.compile(r"\w+|\W+")
-# 👇 NUOVO: riconosce parole in PascalCase o TUTTO MAIUSCOLO ≥ 3 lettere
-NAME_RE = re.compile(r"\b(?:[A-Z][a-z]{2,}|[A-Z]{2,})\w*\b")
+from token_utils import NAME_RE, WORD_RE
+
+GLOSSARY_STOP = {
+    "CAPITOLO", "CAPITOLI", "PROLOGO", "EPILOGO",
+    "INDICE", "RINGRAZIAMENTI", "DEDICA", "DEDICHE", "PREFAZIONE", "PREFAZIONI",
+}
+# ─────────────────── Pandoc: ODT/DOC → DOCX ──────────────────────────
+import win32com.client as win32
+
+def convert_to_docx(src: Path) -> Path:
+    if src.suffix.lower() == ".docx":
+        return src
+
+    dst = src.with_suffix(".docx")
+    word = win32.Dispatch("Word.Application")
+    word.Visible = False
+    try:
+        doc = word.Documents.Open(str(src))
+        doc.SaveAs(str(dst), FileFormat=16)   # 16 = wdFormatDocumentDefault
+        doc.Close()
+    finally:
+        word.Quit()
+    return dst
+
+# ──────────────────────────────────────────────────────────────────────
 
 # ╭─────────────────────────── Note a piè di pagina ▾──────────────────────────╮
 from collections import defaultdict
@@ -363,10 +384,11 @@ def apply_correction_to_paragraph(
             new_run.text = "".join(toks)
         else:
             p._p.append(deepcopy(run._r))
+
                 # --- aggiorna dinamicamente il glossario -------------------------
     for name in NAME_RE.findall(corrected):
-        glossary.add(name)
-
+        if name.upper() not in GLOSSARY_STOP:
+            glossary.add(name)
 
 # ╭─────────────────── Funzione generica di correzione ─────────────────╮
 async def correct_paragraph_group(
@@ -509,7 +531,18 @@ def char_to_run_map(paragraph) -> List[int]:
         mapping.extend([idx] * len(run.text))
     return mapping
 # ╰──────────────────────────────────────────────────────────────────────╯
-
+# ───────────────────── Detect equazioni OMML ──────────────────────────
+def has_math(paragraph: Paragraph) -> bool:
+    """
+    Ritorna True se il <w:p> contiene almeno un elemento <m:oMath>
+    o <m:oMathPara> (= equazioni Word).
+    """
+    return bool(
+        paragraph._p.xpath(
+            ".//*[local-name()='oMath' or local-name()='oMathPara']"
+        )
+    )
+# ──────────────────────────────────────────────────────────────────────
 # ───────────────────────── traversal del documento ─────────────────────────────
 def iter_body_paragraphs(container) -> Iterable[Paragraph]:
     for para in container.paragraphs:
@@ -556,19 +589,52 @@ def iter_all_paragraphs(doc: Document) -> Iterable[Paragraph]:
     yield from iter_textbox_paragraphs(doc)
 # ──────────────────────────────────────────────────────────────────────
 
+# ───────────────── Helper: verifica se C è interamente contenuto in A ─────────
+def _is_clone(text_a: str, text_c: str) -> bool:
+    norm = lambda s: " ".join(s.split()).lower()
+    return norm(text_c) in norm(text_a)
+# ───────────────────────────────────────────────────────────────────────────────
+
+# ───────────────── FINE DEGLI HELPER ────────────────
+# ───────────────── Deduplica paragrafi clonati dopo un sectPr ────────────────
+def remove_duplicate_after_sectpr(document: Document) -> None:
+    """
+    Se trova la sequenza:
+        A = paragrafo con testo
+        B = paragrafo VUOTO con <w:sectPr>
+        C = paragrafo la cui *intera* stringa è già contenuta in coda ad A
+    elimina C ma mantiene B (così l’interruzione di sezione resta).
+    """
+    paras = list(iter_body_paragraphs(document))
+    for i in range(len(paras) - 2, 0, -1):
+        A, B, C = paras[i - 1], paras[i], paras[i + 1]
+        if B.text.strip():                       # B deve essere vuoto
+            continue
+        if not B._p.xpath("./w:pPr/w:sectPr"):   # B deve avere <w:sectPr>
+            continue
+        text_a = A.text.strip()
+        text_c = C.text.strip()
+        if text_c and _is_clone(text_a, text_c):
+            C._p.getparent().remove(C._p)
+# ─────────────────────────────────────────────────────────────────────────────
+
 # ───────────────────────── entry-point con logging ────────────────────
 def process_doc(inp: Path, out: Path):
     doc = Document(inp)
 
     # 1. Raccoglie tutti i paragrafi del documento (corpo, intestazioni, piè di pagina, note, caselle di testo)
     all_paras = list(iter_all_paragraphs(doc))
-    paras_to_fix = [p for p in all_paras if has_errors(p.text)]
+    paras_to_fix = [
+        p
+        for p in all_paras
+        if has_errors(p.text) and not has_math(p)
+    ]
+
 
     # 2. Crea un glossario iniziale con i nomi ricorrenti (apparsi almeno 2 volte)
     name_counts = collections.Counter(
-        name
-        for p in all_paras
-        for name in NAME_RE.findall(p.text)
+        n for p in all_paras for n in NAME_RE.findall(p.text)
+        if n.upper() not in GLOSSARY_STOP
     )
     glossary = {w for w, c in name_counts.items() if c >= 2}
 
@@ -594,6 +660,8 @@ def process_doc(inp: Path, out: Path):
             mods=mods,
             glossary=glossary,
         )
+        # Deduplica cloni post-correzione ma conserva l'interruzione di sezione
+        remove_duplicate_after_sectpr(doc)  
 
         # 5.2 Salva il documento corretto prima di correggere le note (serve file .docx completo)
         doc.save(out_path)
@@ -615,12 +683,23 @@ def process_doc(inp: Path, out: Path):
 
 
 # ───────────────────────────────────────────────────────────────────────
-
 def find_latest_docx(folder: Path) -> Path:
-    files = list(folder.glob("*.docx"))
-    if not files:
-        raise RuntimeError("Nessun .docx trovato nella cartella")
-    return max(files, key=lambda p: p.stat().st_mtime)
+    """
+    Cerca il file più recente con estensione .docx, .odt o .doc (esclude i
+    file di lock ~$.docx). Se non è già .docx lo converte con Pandoc.
+    """
+    candidates = [
+        p for p in folder.iterdir()
+        if p.is_file()
+        and not p.name.startswith("~$")
+        and p.suffix.lower() in (".docx", ".odt", ".doc")
+    ]
+    if not candidates:
+        raise RuntimeError("Nessun documento .docx/.odt/.doc trovato nella cartella")
+
+    latest = max(candidates, key=lambda p: p.stat().st_mtime)
+    return convert_to_docx(latest)
+
 
 if __name__ == "__main__":
     # marca inizio

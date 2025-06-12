@@ -1,4 +1,16 @@
 /backup
 /correttore files
+/nuovi file buoni
 /__pycache__
 .env.local
+*.docx
+*.doc
+*.pdf
+*.txt
+*.csv
+*.md
+*.xml
+*.html
+*.css
+*.js
+/.venv
