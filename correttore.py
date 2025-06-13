@@ -62,6 +62,8 @@ from token_utils import tokenize, token_starts, count_tokens
 from settings import OPENAI_MODEL, MAX_TOKENS
 from openai_client import get_async_client
 from utils_openai import get_corrections_async, build_messages
+from spellfix import spellfix_paragraph
+
 
 logging.basicConfig(
     level=logging.INFO,                          # livello minimo di log
@@ -331,64 +333,84 @@ def clone_run(src_run, paragraph):
     return new_run
 # ╰──────────────────────────────────────────────────────────────────────╯
 
-# ─────────────────────────── NUOVO BLOCCO paragrafi multipli ──────────────────────────────
+# ───────────────── helper “quanto è diverso?” ────────────────────────
+# ─────────────────────────────────────────────────────────────────────
+def _too_much_cut(orig: str, corr: str,
+                  lost_thresh: float = 0.15) -> bool:
+    """
+    True **solo** se l’output:
+      • perde >10 % dei token **e**
+      • ha meno frasi dell’originale
+    (Quasi impossibile in una correzione normale)
+    """
+    tok_orig = tokenize(orig)
+    tok_corr = tokenize(corr)
+    lost = (len(tok_orig) - len(tok_corr)) / max(1, len(tok_orig))
+    if lost <= lost_thresh:
+        return False                         # taglio contenuto: ok
+
+    # conteggio frasi
+    sent = lambda s: len([t for t in re.split(r"[.!?…]", s) if t.strip()])
+    return sent(corr) < sent(orig)
+
+# ╭──────────────────────── Nuova versione step-safe ───────────────────╮
+def _run_map(paragraph: Paragraph) -> list[int]:
+    """Mappa ogni carattere al run di provenienza (es. [0,0,0,1,1,2,…])."""
+    m = []
+    for idx, r in enumerate(paragraph.runs):
+        m.extend([idx] * len(r.text))
+    return m
+
 def apply_correction_to_paragraph(
     p: Paragraph,
     corrected: str,
-    mods: List[Modification],
+    mods: list[Modification],
     par_id: int,
     glossary: set[str],
 ):
-    """
-    Sovrascrive il paragrafo `p` con il testo già corretto
-    preservandone la formattazione run-per-run.
-    """
     original = p.text
-    if corrected == original:
+    if corrected == original:                 # niente da fare
         return
+
+    # ── filtro sicurezza minimo (problema B, v. § 2 per il resto) ─────
+    if _too_much_cut(original, corrected):
+        return
+
+    # diff token-level → quali token cambiano?
+    orig_tok = tokenize(original)
+    corr_tok = tokenize(corrected)
+    mapping  = align_tokens(orig_tok, corr_tok)
+    if all(a == b for a, b in zip(orig_tok, corr_tok)):
+        return                                # cambi trascurabili
 
     mods.append(Modification(par_id, original, corrected))
 
-    # === ricostruzione dei run (stessa logica di prima) ===============
-    orig_tok  = tokenize(original)
-    corr_tok  = tokenize(corrected)
-    mapping   = align_tokens(orig_tok, corr_tok)
-    starts    = token_starts(orig_tok)
-    char_run  = char_to_run_map(p)
+    # 1) prepara struttura dati
+    char2run = _run_map(p)
+    tok_per_run: dict[int, list[str]] = defaultdict(list)
+    starts_orig = token_starts(orig_tok)
 
-    tokens_per_run: Dict[int, List[str]] = defaultdict(list)
-    last_run_idx: Optional[int] = None
+    # 2) assegna i token corretti al run “ereditato”
+    last_idx = 0
     for ref_idx, tok in mapping:
-        if not char_run:
-            run_idx = 0
-        elif ref_idx is None:
-            run_idx = last_run_idx if last_run_idx is not None else char_run[0]
+        if ref_idx is None:
+            run_idx = last_idx
         else:
-            pos     = starts[ref_idx]
-            run_idx = char_run[pos] if pos < len(char_run) else char_run[-1]
-        last_run_idx = run_idx
-        tokens_per_run[run_idx].append(tok)
+            pos = starts_orig[ref_idx]
+            run_idx = char2run[min(pos, len(char2run)-1)]
+        tok_per_run[run_idx].append(tok)
+        last_idx = run_idx
 
-    old_runs = list(p.runs)
-    p._p.clear_content()
+    # 3) sostituisci solo i run che contengono testo (salvi stili & ponct.)
+    for idx, run in enumerate(p.runs):
+        if idx in tok_per_run:
+            run.text = "".join(tok_per_run[idx])
 
-    for idx, run in enumerate(old_runs):
-        toks = tokens_per_run.get(idx, [])
-        if run.text:
-            if not toks:
-                continue
-            new_run = clone_run(run, p)
-            # 💥 work-around: se add_run ha restituito None rigenera il run
-            if new_run is None:
-                new_run = p.add_run("")
-            new_run.text = "".join(toks)
-        else:
-            p._p.append(deepcopy(run._r))
-
-                # --- aggiorna dinamicamente il glossario -------------------------
+    # 4) aggiorna dinamicamente il glossario
     for name in NAME_RE.findall(corrected):
         if name.upper() not in GLOSSARY_STOP:
             glossary.add(name)
+# ╰─────────────────────────────────────────────────────────────────────╯
 
 # ╭─────────────────── Funzione generica di correzione ─────────────────╮
 async def correct_paragraph_group(
@@ -416,7 +438,10 @@ async def correct_paragraph_group(
     context = "\n".join(p.text for p in all_paras[ctx_start : start_par_id - 1])
 
     # 2.  PAYLOAD JSON
-    payload = [{"id": i, "txt": p.text} for i, p in enumerate(paragraphs)]
+    payload = []
+    for i, p in enumerate(paragraphs):
+        clean_txt = spellfix_paragraph(p.text, glossary)
+        payload.append({"id": i, "txt": clean_txt})
     payload_json = json.dumps(payload, ensure_ascii=False)
 
     # 3.  MESSAGGI
@@ -590,9 +615,13 @@ def iter_all_paragraphs(doc: Document) -> Iterable[Paragraph]:
 # ──────────────────────────────────────────────────────────────────────
 
 # ───────────────── Helper: verifica se C è interamente contenuto in A ─────────
-def _is_clone(text_a: str, text_c: str) -> bool:
+def _is_clone(text_a: str, text_c: str, threshold: float = 0.95) -> bool:
+    """
+    True se C è quasi uguale (≥95 %) alla coda di A.
+    Usa SequenceMatcher per maggiore robustezza.
+    """
     norm = lambda s: " ".join(s.split()).lower()
-    return norm(text_c) in norm(text_a)
+    return SequenceMatcher(None, norm(text_a), norm(text_c)).ratio() >= threshold
 # ───────────────────────────────────────────────────────────────────────────────
 
 # ───────────────── FINE DEGLI HELPER ────────────────
