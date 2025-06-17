@@ -63,6 +63,7 @@ from settings import OPENAI_MODEL, MAX_TOKENS
 from openai_client import get_async_client
 from utils_openai import get_corrections_async, build_messages
 from spellfix import spellfix_paragraph
+from grammarcheck import grammarcheck
 
 
 logging.basicConfig(
@@ -369,7 +370,17 @@ def apply_correction_to_paragraph(
     glossary: set[str],
 ):
     original = p.text
-    if corrected == original:                 # niente da fare
+    # 1) quote  +  line-break(s)  →  quote + space
+    corrected = re.sub(r'([«“"”])\s*[\r\n]+\s*', r'\1 ', corrected)
+
+    # 2) line-break(s)  +  quote  →  space + quote
+    corrected = re.sub(r'[\r\n]+\s*([«“"”])', r' \1', corrected)
+    
+    # 3) se nel testo originale non c'erano line-break interni, eliminali tutti
+    if ("\n" in corrected or "\r" in corrected) and ("\n" not in original and "\r" not in original):
+        corrected = corrected.replace("\r", " ").replace("\n", " ")
+
+    if corrected == original:            
         return
 
     # ── filtro sicurezza minimo (problema B, v. § 2 per il resto) ─────
@@ -405,8 +416,31 @@ def apply_correction_to_paragraph(
     for idx, run in enumerate(p.runs):
         if idx in tok_per_run:
             run.text = "".join(tok_per_run[idx])
+    
+    # 4) post-fix: accorpa run che contengono solo virgolette -------------
+    orphan_quotes = {'"', '«', '“', '”'}
+    runs = list(p.runs)
+    for i, run in enumerate(runs):
+        t = (run.text or "").strip()
+        if t in orphan_quotes:
+            # se c'è un run successivo con testo, fondi la virgoletta all'inizio
+            if i + 1 < len(runs) and (runs[i + 1].text or "").strip():
+                runs[i + 1].text = run.text + runs[i + 1].text
+                run.text = ""           # svuota il run-virgoletta
 
-    # 4) aggiorna dinamicamente il glossario
+    # 5) rimuovi il run che contiene solo <w:br/> dopo una virgoletta ------
+    runs = list(p.runs)                      # lista aggiornata
+    open_quotes = {'"', '«', '“', '”', '‘', '’'}
+    for i in range(len(runs) - 1):
+        prev_txt = (runs[i].text or "")
+        this_txt = (runs[i + 1].text or "")
+        has_only_br = not this_txt.strip() and runs[i + 1]._r.xpath("./w:br")
+        if prev_txt and prev_txt[-1] in open_quotes and has_only_br:
+            # elimina il run con solo <w:br/>
+            parent = runs[i + 1]._r.getparent()
+            parent.remove(runs[i + 1]._r)
+
+    # 6) aggiorna dinamicamente il glossario
     for name in NAME_RE.findall(corrected):
         if name.upper() not in GLOSSARY_STOP:
             glossary.add(name)
@@ -441,6 +475,7 @@ async def correct_paragraph_group(
     payload = []
     for i, p in enumerate(paragraphs):
         clean_txt = spellfix_paragraph(p.text, glossary)
+        clean_txt = grammarcheck(clean_txt)
         payload.append({"id": i, "txt": clean_txt})
     payload_json = json.dumps(payload, ensure_ascii=False)
 
