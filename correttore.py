@@ -22,6 +22,7 @@ logging.basicConfig(
     datefmt="%H:%M:%S",
 )
 logger = logging.getLogger(__name__)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 import asyncio
 import aiofiles
@@ -52,6 +53,8 @@ from lxml import etree
 from lxml.etree import XMLSyntaxError
 from openai import AsyncOpenAI, OpenAI
 from dotenv import load_dotenv
+from concurrent.futures import ThreadPoolExecutor
+
 
 # Carica le variabili d'ambiente dal file .env.local
 load_dotenv('.env.local')
@@ -64,14 +67,9 @@ from openai_client import get_async_client
 from utils_openai import get_corrections_async, build_messages
 from spellfix import spellfix_paragraph
 from grammarcheck import grammarcheck
+from llm_correct import llm_correct, llm_correct_batch
 
-
-logging.basicConfig(
-    level=logging.INFO,                          # livello minimo di log
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-    datefmt="%H:%M:%S",
-)
-logger = logging.getLogger(__name__)
+LT_POOL = ThreadPoolExecutor(max_workers=8)
 
 # ───────────────────────── CONFIGURAZIONE ────────────────────────────
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -260,40 +258,74 @@ class Modification:
     original: str
     corrected: str
 # ╰──────────────────────────────────────────────────────────────────────╯
-
-# ╭─────────────────────────── Chunking ▾────────────────────────────────╮
-def chunk_paragraph_objects(
+# ───────────────────── NEW universal chunker ──────────────────────
+def chunk_paragraphs_all(
     paragraphs: List[Paragraph],
-    max_tokens: int = MAX_TOKENS,
+    max_tokens: int = 3_000,
+    max_pars:   int = 5,
 ) -> List[List[Paragraph]]:
-    """Dividi la lista di oggetti Paragraph in blocchi < max_tokens."""
+    """
+    Divide *tutti* i paragrafi in blocchi:
+      • al massimo `max_pars` paragrafi
+      • e al massimo `max_tokens` token complessivi
+    Ritorna una lista di chunk (liste di Paragraph).
+    """
     chunks: List[List[Paragraph]] = []
-    current: List[Paragraph] = []
-    current_tokens = 0
-
+    current, current_tok = [], 0
     for p in paragraphs:
-        para_tokens = count_tokens(p.text)
-
-        # 1) se il singolo paragrafo sfora il limite, isolalo
-        if para_tokens > max_tokens:
-            if current:                     # salva il chunk in corso
+        tok = count_tokens(p.text)
+        # se il singolo paragrafo supera il limite token, lo isolo
+        if tok > max_tokens:
+            if current:
                 chunks.append(current)
-                current, current_tokens = [], 0
-            chunks.append([p])              # paragrafo “oversize” da solo
-            continue                        # salta al paragrafo successivo
-
-        # 2) comportamento normale
-        if current and current_tokens + para_tokens > max_tokens:
+                current, current_tok = [], 0
+            chunks.append([p])
+            continue
+        # se aggiungerlo sfora i limiti → chiudi chunk e apri nuovo
+        if (current and
+            (current_tok + tok > max_tokens or len(current) >= max_pars)):
             chunks.append(current)
-            current = [p]
-            current_tokens = para_tokens
-        else:
-            current.append(p)
-            current_tokens += para_tokens
-
+            current, current_tok = [], 0
+        current.append(p)
+        current_tok += tok
     if current:
         chunks.append(current)
     return chunks
+# ───────────────────────────────────────────────────────────────────
+
+# ╭─────────────────────────── Chunking ▾────────────────────────────────╮
+#def chunk_paragraph_objects(
+#    paragraphs: List[Paragraph],
+#    max_tokens: int = MAX_TOKENS,
+#) -> List[List[Paragraph]]:
+#    """Dividi la lista di oggetti Paragraph in blocchi < max_tokens."""
+#    chunks: List[List[Paragraph]] = []
+#    current: List[Paragraph] = []
+#    current_tokens = 0
+
+#    for p in paragraphs:
+#        para_tokens = count_tokens(p.text)
+
+        # 1) se il singolo paragrafo sfora il limite, isolalo
+#        if para_tokens > max_tokens:
+#            if current:                     # salva il chunk in corso
+#                chunks.append(current)
+#                current, current_tokens = [], 0
+#            chunks.append([p])              # paragrafo “oversize” da solo
+#            continue                        # salta al paragrafo successivo
+
+#        # 2) comportamento normale
+#        if current and current_tokens + para_tokens > max_tokens:
+#            chunks.append(current)
+#            current = [p]
+#            current_tokens = para
+#        else:
+#            current.append(p)
+#            current_tokens += para_tokens
+
+#    if current:
+#        chunks.append(current)
+#    return chunks
 # ╰──────────────────────────────────────────────────────────────────────╯
 
 # ╭─────────────────────────── Diff token-level ▾────────────────────────╮
@@ -446,104 +478,136 @@ def apply_correction_to_paragraph(
             glossary.add(name)
 # ╰─────────────────────────────────────────────────────────────────────╯
 
-# ╭─────────────────── Funzione generica di correzione ─────────────────╮
+async def grammarcheck_async(text: str) -> str:
+    """
+    Esegue grammarcheck() in un thread del pool,
+    così possiamo processare paragrafi in parallelo.
+    """
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(LT_POOL, grammarcheck, text)
+
+# ─────────── Pipeline locale + batch GPT multiparagrafo ───────────
+# ─────────────────────────── correct_paragraph_group ──────────────────────────
 async def correct_paragraph_group(
     paragraphs:   list[Paragraph],
-    all_paras:    list[Paragraph],
+    all_paras:    list[Paragraph],   # non usato qui, ma lasciato per compatibilità
     start_par_id: int,
     client:       AsyncOpenAI,
     glossary:     set[str],
     mods:         list[Modification],
-    context_size: int = 3,          # quanti paragrafi di contesto ricavare
+    context_size: int = 3,
 ):
     """
-    Corregge un gruppo di Paragraph mantenendo formattazione e glossario.
-
-    · paragraphs   : la "sezione" da correggere (chunk, note, header…)
-    · all_paras    : lista completa per calcolare il contesto
-    · start_par_id : id del primo paragrafo nel documento (1-based)
-    · client       : istanza AsyncOpenAI condivisa
-    · glossary     : set globale dei nomi canonici
-    · mods         : lista in cui accumulare le modifiche per il report
+    • Spell-check + grammar-check su ogni paragrafo.
+    • Se il testo NON cambia → lo accoda per la correzione GPT in batch.
+    • Una sola chiamata GPT per chunk; cache usata automaticamente.
+    • Log dettagliati per capire tempi e cache.
     """
+    logger = logging.getLogger("PAR-GROUP")
+    logger.debug("Chunk START  paragrafi=%d  start_id=%d", len(paragraphs), start_par_id)
 
-    # 1.  CONTEXTO – ultimi `context_size` paragrafi prima di questo blocco
-    ctx_start = max(0, start_par_id - context_size - 1)
-    context = "\n".join(p.text for p in all_paras[ctx_start : start_par_id - 1])
+    # liste per i paragrafi che servono GPT
+    pending_idx: list[int] = []
+    pending_txt: list[str] = []
 
-    # 2.  PAYLOAD JSON
-    payload = []
-    for i, p in enumerate(paragraphs):
-        clean_txt = spellfix_paragraph(p.text, glossary)
-        clean_txt = grammarcheck(clean_txt)
-        payload.append({"id": i, "txt": clean_txt})
-    payload_json = json.dumps(payload, ensure_ascii=False)
+    # ── Passo 1: correzione locale (spellfix + grammarcheck) ─────────────
+    for idx, p in enumerate(paragraphs):
+        original = p.text
+        if not original.strip():
+            continue
 
-    # 3.  MESSAGGI
-    messages = build_messages(context, payload_json, glossary)
+        step1 = spellfix_paragraph(original, glossary)
+        step2 = await grammarcheck_async(step1)
 
-    # 4. CHIAMATA OpenAI (ora delegata alla utility)
-    raw = await get_corrections_async(
-        payload_json = payload_json,   # JSON già costruito al punto 2
-        client       = client,         # l'istanza AsyncOpenAI passata alla funzione
-        glossary     = glossary,       # il set di nomi canonici
-        context      = context,        # le righe di contesto calcolate al punto 1
+        if step2 != original:
+            # ✓ Corretto localmente
+            apply_correction_to_paragraph(
+                p, step2, mods,
+                start_par_id + idx,
+                glossary,
+            )
+            logger.debug("✓ Local fix   id=%d  '%s…'", start_par_id + idx, original[:60])
+        else:
+            # → Da inviare a GPT
+            pending_idx.append(idx)
+            pending_txt.append(step2)
+            logger.debug("→ Needs GPT   id=%d  '%s…'", start_par_id + idx, original[:60])
+
+    logger.info(
+        "Chunk %d: local=%d  GPT=%d",
+        start_par_id,
+        len(paragraphs) - len(pending_idx),
+        len(pending_idx),
     )
-    if isinstance(raw, list):
-        corr_list = raw 
-    elif isinstance(raw, dict) and "corr" in raw:
-        corr_list = raw["corr"]
-    else:
-        raise TypeError(
-            f"Formato inatteso da get_corrections_async(): {type(raw)} – {raw!r}"
-    )
 
-    # 5.  APPLICA LE CORREZIONI  ─────────────────────────────────────────
-    corr_by_id = {d["id"]: d["txt"] for d in corr_list}
+    # ── Passo 2: se nulla richiede GPT, finito ───────────────────────────
+    if not pending_txt:
+        logger.debug("Chunk %d finito (nessuna chiamata GPT).", start_par_id)
+        return
 
-    def _too_much_cut(orig: str, corr: str, thresh: float = 0.02) -> bool:
-        """
-        True se il testo corretto ha perso > thresh (2 %) dei token
-        **oppure** se contiene meno frasi dell'originale.
-        """
-        tok_orig = tokenize(orig)
-        tok_corr = tokenize(corr)
-        if len(tok_orig) and (len(tok_orig) - len(tok_corr)) / len(tok_orig) > thresh:
-            return True
+    # ── Passo 3: correzione batch con GPT (usa cache interna) ────────────
+    corrected_list = await llm_correct_batch(pending_txt, client)
 
-        def _count_sent(txt: str) -> int:
-            return len([s for s in re.split(r"[.!?…]", txt) if s.strip()])
+    # ── Passo 4: applica le correzioni ricevute dal batch GPT ────────────
+    for local_i, new_text in zip(pending_idx, corrected_list):
+        p = paragraphs[local_i]
+        if new_text != p.text:
+            apply_correction_to_paragraph(
+                p, new_text, mods,
+                start_par_id + local_i,
+                glossary,
+            )
+            logger.debug("✓ GPT fix     id=%d", start_par_id + local_i)
 
-        return _count_sent(corr) < _count_sent(orig)
+    logger.debug("Chunk END %d", start_par_id)
+# ───────────────────────────────────────────────────────────────────────────────
 
-    for local_id, p in enumerate(paragraphs):
-        original_text  = p.text                              # copia intatta
-        corrected_text = corr_by_id.get(local_id, original_text)
+# ╭─────────────────── Funzione generica di correzione ─────────────────╮
+#async def correct_paragraph_group(
+#    paragraphs:   list[Paragraph],
+#    all_paras:    list[Paragraph],
+#    start_par_id: int,
+#    client:       AsyncOpenAI,
+#    glossary:     set[str],
+#    mods:         list[Modification],
+#    context_size: int = 3,
+#):
+#    sem = asyncio.Semaphore(10)  # max 10 chiamate in parallelo
 
-        # ─── Safety check ────────────────────────────────────────────
-        if _too_much_cut(original_text, corrected_text):
-            # ↓↓↓ A) fallback minimo: tieni l'originale  ↓↓↓
-            corrected_text = original_text
+#    async def process_one(par_id: int, p: Paragraph) -> tuple[Paragraph, str]:
+#        original_text = p.text
+#        if not original_text.strip():
+#            return p, original_text
 
-            # --- B) oppure: ritenta con un modello "maggiore"  -------
-            # corr_retry = await get_corrections_async(
-            #     payload_json=json.dumps([{"id": 0, "txt": original_text}],
-            #                            ensure_ascii=False),
-            #     client=client_big,          # istanza GPT-4
-            #     glossary=glossary,
-            #     context=context,
-            # )
-            # corrected_text = corr_retry[0]["txt"]
+#        step1 = spellfix_paragraph(original_text, glossary)
+#        step2 = await grammarcheck_async(step1)
 
-        # se supera i controlli, o dopo l'eventuale retry, applica
-        apply_correction_to_paragraph(
-            p,
-            corrected_text,
-            mods,
-            start_par_id + local_id,
-            glossary,
-        )
+        # Solo se spellfix+grammarcheck NON hanno cambiato nulla → LLM
+#            if step2 == original_text:
+#                async with sem:
+#                    final = await llm_correct(step2, client)
+#            else:
+#                final = step2
 
+
+#            return p, final
+
+#        tasks = [
+#            asyncio.create_task(process_one(start_par_id + i, p))
+#            for i, p in enumerate(paragraphs)
+#        ]
+
+#        results = await asyncio.gather(*tasks)
+
+#        for i, (p, corrected_text) in enumerate(results):
+#            if corrected_text != p.text:
+#                apply_correction_to_paragraph(
+#                    p,
+#                    corrected_text,
+#                    mods,
+#                    start_par_id + i,
+#                    glossary,
+#                )
 # ╰──────────────────────────────────────────────────────────────────────╯
 # ╭──────────────────── Wrapper: corpo principale ─────────────────────╮
 async def fix_body_chunks(
@@ -703,10 +767,9 @@ def process_doc(inp: Path, out: Path):
     glossary = {w for w, c in name_counts.items() if c >= 2}
 
     # 3. Suddivide il corpo del documento in chunk, rispettando il limite di token
-    para_chunks = chunk_paragraph_objects(paras_to_fix, max_tokens=4_000)
+    para_chunks = chunk_paragraphs_all(all_paras, max_tokens=3_000, max_pars=5)
     total_chunks = len(para_chunks)
-
-    logger.info("🔍  Rilevati %s chunk (limite %s token).", total_chunks, MAX_TOKENS)
+    logger.info("🔍  Rilevati %s chunk universali (≤5 paragrafi, ≤3000 token).", total_chunks)
 
     # 4. Lista per raccogliere tutte le modifiche da riportare nel diff finale
     mods: list[Modification] = []

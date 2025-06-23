@@ -1,2 +1,5 @@
 from grammarcheck import grammarcheck
-print(grammarcheck("gli e l'hanno diagnosticato"))
+
+txt = "quando gli e l'hanno diagnostico era già a uno stadio avanzato"
+print("PRIMA :", txt)
+print("DOPO  :", grammarcheck(txt))
