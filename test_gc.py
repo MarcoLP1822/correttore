@@ -1,5 +1,4 @@
-from grammarcheck import grammarcheck
-
-txt = "quando gli e l'hanno diagnostico era già a uno stadio avanzato"
-print("PRIMA :", txt)
-print("DOPO  :", grammarcheck(txt))
+import language_tool_python as lt
+tool = lt.LanguageTool('it', remote_server='http://localhost:8082')
+print([m.ruleId for m in tool.check("quando gli e l'hanno diagnostico")])
+tool.close()

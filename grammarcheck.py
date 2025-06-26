@@ -16,7 +16,7 @@ _SAFE_RULES: set[str] = {
     # Maiuscola a inizio frase
     "UPPERCASE_SENTENCE_START",
     # Battitura articoli (gli / l…)
-    "GLI_E_L", "GLI_E_LA", "GLI_E_LI", "GLI_E_LE", "GLI_E_APOSTROPHE"
+    "PRON_GLI_E_L", "PRON_GLI_E_LA", "PRON_GLI_E_LI", "PRON_GLI_E_LE", "PRON_GLI_E_APOSTROPHE",
     # D-eufonica, puntini, doppia ! / ?
     "APOCOPI_VOCALICHE", "DEUFONICA_RIMUOVI_ED",
     "MULTIPLE_EXCLAMATION_MARK", "MULTIPLE_QUESTION_MARK",
