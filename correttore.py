@@ -53,7 +53,7 @@ from lxml import etree
 from lxml.etree import XMLSyntaxError
 from openai import AsyncOpenAI, OpenAI
 from dotenv import load_dotenv
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 
 
 # Carica le variabili d'ambiente dal file .env.local
@@ -69,7 +69,7 @@ from spellfix import spellfix_paragraph
 from grammarcheck import grammarcheck
 from llm_correct import llm_correct, llm_correct_batch
 
-LT_POOL = ThreadPoolExecutor(max_workers=8)
+LT_POOL = ProcessPoolExecutor(max_workers=os.cpu_count() - 1 or 1)
 
 # ───────────────────────── CONFIGURAZIONE ────────────────────────────
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -486,7 +486,13 @@ async def grammarcheck_async(text: str) -> str:
     loop = asyncio.get_running_loop()
     return await loop.run_in_executor(LT_POOL, grammarcheck, text)
 
+def _minor_change(a: str, b: str) -> bool:
+    import unicodedata, re
+    norm = lambda s: re.sub(r"\W+", "", unicodedata.normalize("NFD", s).lower())
+    return norm(a) == norm(b)
+
 # ─────────── Pipeline locale + batch GPT multiparagrafo ───────────
+
 # ─────────────────────────── correct_paragraph_group ──────────────────────────
 async def correct_paragraph_group(
     paragraphs:   list[Paragraph],
@@ -520,18 +526,18 @@ async def correct_paragraph_group(
         step2 = await grammarcheck_async(step1)
 
         if step2 != original:
-            # ✓ Corretto localmente
-            apply_correction_to_paragraph(
-                p, step2, mods,
-                start_par_id + idx,
-                glossary,
-            )
-            logger.debug("✓ Local fix   id=%d  '%s…'", start_par_id + idx, original[:60])
+            if _minor_change(original, step2):
+                # differenza microscopica → lascia che GPT lo riveda
+                pending_idx.append(idx)
+                pending_txt.append(step2)
+            else:
+                apply_correction_to_paragraph(
+                    p, step2, mods, start_par_id + idx, glossary
+                )
         else:
-            # → Da inviare a GPT
+            # nessuna modifica locale → manda al batch GPT
             pending_idx.append(idx)
             pending_txt.append(step2)
-            logger.debug("→ Needs GPT   id=%d  '%s…'", start_par_id + idx, original[:60])
 
     logger.info(
         "Chunk %d: local=%d  GPT=%d",

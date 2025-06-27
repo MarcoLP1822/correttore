@@ -1,6 +1,7 @@
 import re, json, pathlib
 from typing import Set
 from difflib import get_close_matches
+from token_utils import WORD_RE
 
 _WORD_RE = re.compile(r"\w+|\W+")
 
@@ -34,8 +35,28 @@ def _fix_token(tok: str, skip: Set[str]) -> str:
 
     return tok  # Nessuna correzione
 
-def spellfix_paragraph(text: str, glossary: Set[str]) -> str:
-    tokens = _WORD_RE.findall(text)
-    skip = {w.lower() for w in glossary}
-    fixed = [_fix_token(tok, skip) for tok in tokens]
+from rapidfuzz import process, fuzz
+CANONICAL = [l.strip() for l in open("glossario.txt", encoding="utf-8")]
+THRESHOLD = 85  # 0-100
+
+def spellfix_paragraph(text: str, _glossary=None) -> str:
+    tokens = WORD_RE.findall(text)
+    fixed = []
+    for tok in tokens:
+        raw = tok.strip("«»“”()[]{}.,;:!?")
+        if not raw:
+            fixed.append(tok); continue
+        best = process.extractOne(raw, CANONICAL, scorer=fuzz.WRatio)
+        if best:
+            cand, score, _ = best
+
+            # 1) scarta se il candidato contiene spazi
+            # 2) scarta se la similarità è sotto 93
+            if " " in cand or score < 93:
+                fixed.append(tok)
+                continue
+
+            # Se supera i controlli, applica la correzione
+            tok = tok.replace(raw, _match_case(cand, raw))
+        fixed.append(tok)
     return "".join(fixed)

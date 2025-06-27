@@ -1,4 +1,14 @@
-import language_tool_python as lt
-tool = lt.LanguageTool('it', remote_server='http://localhost:8082')
-print([m.ruleId for m in tool.check("quando gli e l'hanno diagnostico")])
-tool.close()
+# test_gc.py
+import asyncio, os
+from openai import AsyncOpenAI
+import llm_correct
+
+
+async def demo():
+    client = AsyncOpenAI(api_key="...")   # 1) client ASYNC
+    txts   = ["famigliaaa", "couming out"]
+    fixed  = await llm_correct.llm_correct_batch(txts, client)  # 2) ok
+    print(fixed)
+
+if __name__ == "__main__":
+    asyncio.run(demo())

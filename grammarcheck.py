@@ -10,44 +10,23 @@ import language_tool_python as lt
 _THREAD_LOCAL = threading.local()
 
 # Regole che vogliamo SEMPRE far girare
-_SAFE_RULES: set[str] = {
-    # Apostrofi / accenti
-    "IT_ACCENTI", "E_APOSTROPHE", "UN_ALTRO", "CHE_E", "E_ACUTE_APOSTROPHE",
-    # Maiuscola a inizio frase
+_SAFE_RULES = {
+    "IT_ACCENTI",              # ò/ó, po’/pò, ecc.
+    "E_APOSTROPHE", "WRONG_APOSTROPHE",
     "UPPERCASE_SENTENCE_START",
-    # Battitura articoli (gli / l…)
-    "PRON_GLI_E_L", "PRON_GLI_E_LA", "PRON_GLI_E_LI", "PRON_GLI_E_LE", "PRON_GLI_E_APOSTROPHE",
-    # D-eufonica, puntini, doppia ! / ?
-    "APOCOPI_VOCALICHE", "DEUFONICA_RIMUOVI_ED",
+    "PRON_GLI_E_L",            # gli/l’
     "MULTIPLE_EXCLAMATION_MARK", "MULTIPLE_QUESTION_MARK",
-    "FOUR_POINTS", "ELLIPSIS_SPACE",
-    # Sigle societarie
-    "ITALIAN_SPA", "ITALIAN_SRL", "ITALIAN_SAS",
-    # a / ha – da / dà – ai / hai
-    "ER_01_001", "ER_01_002", "ER_01_003", "ER_02_005",
-    # Date e numeri impossibili
-    "ANNO20011_2011", "NUMBER_DAYS_MONTH",
-    # Doppia parola (stile)
-    "ST_03_002_DUPLICATE_WORD",
-    # Controllo ortografico (spell-check)
-    "HUNSPELL_RULE", "MORFOLOGIA_IT", "MORFOLOGIK_RULE_IT_IT",
-    "GR_02_001",      # Articoli corretti (sing/plur, m/f)
-    "GR_04_002",      # Elisioni (un’/un, di → d’, ecc.)
-    "GR_10_001",      # Concordanza tempi coordinate
 }
 
 def _get_tool() -> lt.LanguageTool:
-    """Istanza LT per il thread + attivazione regole whitelist."""
     tool = getattr(_THREAD_LOCAL, "tool", None)
     if tool is None:
         tool = lt.LanguageTool(
             "it",
-            remote_server=None,
-            config={"cacheSize": 200_000_000},
+            remote_server="http://localhost:8081"   # ✓ usa il server
+            #  ✗ NON passare 'config=' insieme al remote_server
         )
-        # CORREZIONE: Assegniamo il nostro set di regole come l'UNICO set attivo.
-        # Questo garantisce che vengano eseguite solo le regole della nostra whitelist.
-        tool.enabled_rules = _SAFE_RULES
+        tool.enabled_rules = _SAFE_RULES            # ← resta valido
         _THREAD_LOCAL.tool = tool
     return tool
 
@@ -62,45 +41,56 @@ def _single_words(lst: list[str]) -> bool:
 
 def grammarcheck(text: str) -> str:
     """
-    • Gira LT sul testo originale (senza cambiare gli apostrofi).
-    • Applica solo sostituzioni «sicure» (whitelist, 1 suggerimento o
-      spell-check con soli suggerimenti parola-singola).
-    • Poi converte gli apostrofi dritti in tipografici.
+    Fa girare LanguageTool sul testo e applica soltanto correzioni
+    provenienti da regole presenti in _SAFE_RULES **e** con suggerimenti
+    davvero univoci/semplici.
+
+    Criteri di applicazione:
+    • la regola deve essere whitelisted (_SAFE_RULES)
+    • deve esserci UN solo suggerimento   ──oppure──
+      max 3 suggerimenti composti ognuno da UNA sola parola.
+    Tutto il resto viene ignorato.
     """
     original = text
 
+    # ── 1. Otteniamo i match di LT ──────────────────────────────────
     try:
         matches = _get_tool().check(original)
     except Exception as exc:
         logging.getLogger("LanguageTool").warning(
             "LanguageTool error: %s – testo lasciato invariato", exc
         )
-        return original.replace("'", "’")
+        return original.replace("'", "’")          # fallback: solo apostrofi tipografici
 
-    # Applichiamo le correzioni partendo dalla fine
+    # ── 2. Applichiamo le correzioni partendo dalla fine ────────────
     corrected = original
     for m in reversed(matches):
+
+        # 2a. Scarta se la regola NON è nella whitelist
+        if m.ruleId not in _SAFE_RULES:
+            continue                    # ← nuovo filtro di sicurezza
+
+        # 2b. Se non ci sono suggerimenti, non possiamo correggere
+        if not m.replacements:
+            continue
+
+        # 2c. Decidiamo se accettare il suggerimento
         apply = False
-
-        # Logica semplificata:
-        # Se la regola è nella nostra whitelist, è sicura per definizione.
-        # Questo include lo spell-check.
-        if m.ruleId in _SAFE_RULES:
-            apply = True
-        # Altrimenti, applichiamo solo se c'è un suggerimento unico
-        # o un massimo di 3 suggerimenti composti da parole singole.
-        elif len(m.replacements) == 1:
-            apply = True
-        elif (1 < len(m.replacements) <= 3 and _single_words(m.replacements)):
-            apply = True
-
-        if apply and m.replacements:
+        if len(m.replacements) == 1:
+            apply = True                               # un solo suggerimento → ok
             repl = m.replacements[0]
+        elif len(m.replacements) <= 3 and _single_words(m.replacements):
+            apply = True                               # 2-3 parole singole → ok
+            repl = m.replacements[0]
+        else:
+            apply = False                              # troppi / complessi → lascio stare
+
+        if apply:
             corrected = (
                 corrected[:m.offset] + repl +
-                corrected[m.offset + m.errorLength :]
+                corrected[m.offset + m.errorLength:]
             )
 
-    # Solo adesso normalizziamo l’apostrofo
+    # ── 3. Normalizziamo l’apostrofo tipografico ────────────────────
     return corrected.replace("'", "’")
 # ───────────────────────────────────────────────────────────────────────────────

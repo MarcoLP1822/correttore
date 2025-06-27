@@ -20,8 +20,15 @@ Non fare le seguenti cose:
 
 Se tutto è già corretto, restituisci il testo invariato.
 
-Restituisci solo JSON nel formato:
-{"corretto": "testo corretto"}
+OUTPUT:
+Restituisci **solo** JSON nel formato
+
+{"correzioni":[
+    {"id": 0, "txt": "..."},
+    {"id": 1, "txt": "..."}
+]}
+
+(non aggiungere testo fuori dal JSON)
 """
 
 def _strip_fences(text: str) -> str:
