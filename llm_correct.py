@@ -17,6 +17,7 @@ Non fare le seguenti cose:
 • Non inserire punto e virgola.
 • Non modificare lo stile dell'autore, anche se informale.
 • Non rimuovere o cambiare interiezioni ("no?!?", "eh", "mah").
+• «Non sostituire gli apostrofi tipografici (’) con quelli dritti (').»
 
 Se tutto è già corretto, restituisci il testo invariato.
 

@@ -15,7 +15,7 @@ _SAFE_RULES = {
     "E_APOSTROPHE", "WRONG_APOSTROPHE",
     "UPPERCASE_SENTENCE_START",
     "PRON_GLI_E_L",            # gli/l’
-    "MULTIPLE_EXCLAMATION_MARK", "MULTIPLE_QUESTION_MARK",
+    "MULTIPLE_EXCLAMATION_MARK", "MULTIPLE_QUESTION_MARK", "MORFOLOGIK_RULE_IT_IT"
 }
 
 def _get_tool() -> lt.LanguageTool:
@@ -24,7 +24,6 @@ def _get_tool() -> lt.LanguageTool:
         tool = lt.LanguageTool(
             "it",
             remote_server="http://localhost:8081"   # ✓ usa il server
-            #  ✗ NON passare 'config=' insieme al remote_server
         )
         tool.enabled_rules = _SAFE_RULES            # ← resta valido
         _THREAD_LOCAL.tool = tool
@@ -36,8 +35,8 @@ def _get_tool() -> lt.LanguageTool:
 _WORD_RE = re.compile(r"[\w’]+")
 
 def _single_words(lst: list[str]) -> bool:
-    """True se tutti gli elementi sono singole parole."""
-    return all(_WORD_RE.fullmatch(w) for w in lst)
+    return all(re.fullmatch(r"[\w’]+", w)        # include U+2019
+               for w in lst)
 
 def grammarcheck(text: str) -> str:
     """
@@ -80,8 +79,8 @@ def grammarcheck(text: str) -> str:
             apply = True                               # un solo suggerimento → ok
             repl = m.replacements[0]
         elif len(m.replacements) <= 3 and _single_words(m.replacements):
-            apply = True                               # 2-3 parole singole → ok
-            repl = m.replacements[0]
+            apply = True
+            repl  = m.replacements[0]
         else:
             apply = False                              # troppi / complessi → lascio stare
 
@@ -92,5 +91,7 @@ def grammarcheck(text: str) -> str:
             )
 
     # ── 3. Normalizziamo l’apostrofo tipografico ────────────────────
-    return corrected.replace("'", "’")
+    if "'" in corrected:
+        corrected = corrected.replace("'", "’")
+    return corrected
 # ───────────────────────────────────────────────────────────────────────────────
