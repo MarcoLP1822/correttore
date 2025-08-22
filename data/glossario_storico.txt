@@ -1,0 +1,83 @@
+# Glossario protetto per libri di storia
+# Nomi che NON devono essere modificati dal correttore
+
+# === NOMI PROPRI STORICI ===
+Stefani
+Vinicio
+Silvana
+Dulia
+Julia
+Amore
+Linda
+
+# === NOMI ROMANI CLASSICI ===
+Marcus
+Lucius
+Gaius
+Quintus
+Titus
+Aurelius
+Cicero
+Caesar
+Augustus
+Tiberius
+Claudius
+Nero
+Vespasianus
+Traianus
+Hadrianus
+Antoninus
+Severus
+
+# === NOMI FEMMINILI ROMANI ===
+Livia
+Agrippina
+Messalina
+Faustina
+Plotina
+Sabina
+Lucilla
+
+# === LUOGHI STORICI ===
+Roma
+Gallia
+Britannia
+Hispania
+Germania
+Aegyptus
+Syria
+Dacia
+Pannonia
+Noricum
+
+# === FORME LINGUISTICHE DA PRESERVARE ===
+po'
+nell'
+dell'
+l'
+un'
+all'
+dall'
+
+# === TERMINI STORICI SPECIALISTICI ===
+console
+pretore
+questore
+edile
+censore
+tribuno
+pontifex
+augure
+flamen
+vestale
+lictore
+fasces
+toga
+stola
+palla
+tunica
+
+# === ALTRI TERMINI PROTETTI ===
+coming
+Luke
+Cra

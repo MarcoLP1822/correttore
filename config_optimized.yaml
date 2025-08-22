@@ -1,0 +1,88 @@
+# Configurazione ottimizzata per modalità aggressive
+# Basata sull'analisi dei log di correzione
+
+correction:
+  max_tokens_per_chunk: 2500  # Ridotto per maggiore stabilità
+  max_paragraphs_per_chunk: 4  # Ridotto per processamento più granulare
+  mode: aggressive
+  quality_threshold: 0.78      # Ridotta da 0.85 per evitare troppi rollback
+  safety_threshold: 0.75       # Ridotta proporzionalmente
+  enable_backup: true
+  enable_validation: true
+  cache_enabled: true
+  min_quality_threshold: 0.72  # Soglia minima assoluta
+  batch_size: 30              # Ridotto per maggiore controllo
+  min_success_rate: 0.65      # Più permissiva per modalità aggressive
+  min_paragraph_length: 8     # Ridotta per processare anche testi brevi
+  max_workers: 3              # Ridotto per evitare sovraccarico
+
+openai:
+  model: gpt-4o-mini
+  max_retries: 3              # Ridotto per fallire più velocemente
+  timeout: 45                 # Aumentato per operazioni complesse
+  temperature: 0.3            # Più deterministica per correzioni
+  rate_limit_buffer: 0.7      # Più conservativa
+  max_tokens_per_request: 8000 # Ridotto per maggiore stabilità
+  max_tokens: 3500            # Ridotto per evitare troncamenti
+  retry_delay: 2.0            # Aumentato per evitare rate limiting
+  requests_per_minute: 40     # Ridotto per essere più conservativi
+  max_concurrent_requests: 3  # Ridotto per evitare sovraccarico
+
+languagetool:
+  server_url: http://localhost:8081
+  timeout: 15                 # Aumentato per operazioni complesse
+  enabled_rules:
+    - IT_ACCENTI
+    - E_APOSTROPHE
+    - WRONG_APOSTROPHE
+    - UPPERCASE_SENTENCE_START
+    - PRON_GLI_E_L
+    - MULTIPLE_EXCLAMATION_MARK
+    - MULTIPLE_QUESTION_MARK
+    - MORFOLOGIK_RULE_IT_IT
+    - UNPAIRED_BRACKETS
+    - WHITESPACE_RULE
+  disabled_rules:
+    - COMMA_PARENTHESIS_WHITESPACE  # Può essere troppo restrittiva
+  language: it
+  max_workers: 2              # Ridotto per evitare sovraccarico
+
+validation:
+  max_length_change_percent: 25.0  # Più permissiva per modalità aggressive
+  min_confidence_score: 0.78       # Ridotta in linea con quality_threshold
+  backup_enabled: true
+  backup_retention_days: 30
+  check_duplicates: true
+  check_truncation: true
+
+cache:
+  enabled: true
+  ttl_hours: 48               # Aumentato per maggiore persistenza
+  similarity_threshold: 0.92  # Ridotta per più cache hits
+  quality_threshold: 0.75     # Ridotta in linea con altri parametri
+  auto_cleanup: true
+  max_entries: 15000          # Aumentato per più cache
+  cache_directory: .cache
+
+parallel:
+  enabled: true
+  max_concurrent_workers: 3   # Ridotto per maggiore stabilità
+  rate_limit_per_minute: 40   # Ridotto per evitare rate limiting
+  optimal_worker_estimation: true
+  load_balancing: true
+  timeout_seconds: 180        # Aumentato per operazioni complesse
+
+logging:
+  level: INFO
+  format: "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+  date_format: "%H:%M:%S"
+  file_enabled: true
+  file_path: "logs/correction.log"
+
+# Configurazioni specifiche per modalità aggressive
+aggressive_mode:
+  enable_experimental_features: true
+  allow_risky_corrections: true
+  prioritize_speed_over_safety: false  # Mantieni comunque la sicurezza
+  auto_approve_high_confidence: true   # Auto-approva correzioni con alta confidenza
+  min_auto_approve_confidence: 0.90   # Soglia per auto-approvazione
