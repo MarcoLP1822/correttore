@@ -49,6 +49,15 @@ from tqdm.asyncio import tqdm_asyncio
 from docx import Document  # type: ignore[import]
 from docx.oxml.ns import qn
 
+# ——— Correzione immediata premium ————————————————————————
+try:
+    from instant_fixer import InstantFixer
+    instant_fixer = InstantFixer()
+    logger.info("✅ Sistema di correzione immediata caricato")
+except ImportError:
+    instant_fixer = None
+    logger.warning("⚠️  Sistema di correzione immediata non disponibile")
+
 # ——— Monitoring e Qualità - FASE 4 ————————————————————————————————
 from tools.monitoring import get_monitor
 from src.core.validation import DocumentValidator
@@ -77,7 +86,8 @@ from src.core.grammarcheck import grammarcheck
 from src.core.llm_correct import llm_correct, llm_correct_batch
 
 # ——— New safety and validation modules ————————————————————
-from src.core.validation import DocumentValidator, ValidationResult, create_backup, validate_document
+from src.core.validation import DocumentValidator, ValidationResult, create_backup, validate_document, validate_correction
+from core.formatting_manager import FormattingManager
 from src.core.safe_correction import SafeCorrector, CorrectionResult, QualityScore
 
 LT_POOL = ProcessPoolExecutor(max_workers=max(1, (os.cpu_count() or 1) - 1))
@@ -552,6 +562,7 @@ async def correct_paragraph_group(
         safe_corrector = SafeCorrector(conservative_mode=True, quality_threshold=0.85)
     
     cache = get_cache()
+    formatting_manager = FormattingManager()  # Gestisce preservazione formattazione
 
     # Statistiche del chunk con cache
     chunk_stats = {
@@ -576,11 +587,39 @@ async def correct_paragraph_group(
 
         par_id = start_par_id + idx
         
+        # 🚀 CORREZIONI IMMEDIATE PREMIUM - STEP 0: Correggi errori evidenti PRIMA della cache
+        if instant_fixer and original.strip():
+            fixed_text, instant_corrections = instant_fixer.fix_text_instant(original)
+            if instant_corrections:
+                logger.info(f"🚀 Applicate {len(instant_corrections)} correzioni immediate a paragrafo {par_id}:")
+                for correction in instant_corrections:
+                    logger.info(f"   ✅ {correction}")
+                
+                # Applica le correzioni immediate
+                if fixed_text != original:
+                    try:
+                        # Aggiorna il paragrafo con le correzioni immediate
+                        p.text = fixed_text
+                        
+                        # Registra la modifica
+                        mods.append(Modification(par_id, original, fixed_text))
+                        
+                        # Aggiorna le statistiche
+                        chunk_stats['instant_fixes'] = chunk_stats.get('instant_fixes', 0) + len(instant_corrections)
+                        
+                        # Aggiorna la variabile original per i passi successivi
+                        original = fixed_text
+                        
+                        logger.info(f"✅ Correzioni immediate applicate al paragrafo {par_id}")
+                        
+                    except Exception as e:
+                        logger.warning(f"⚠️  Errore applicando correzioni immediate al paragrafo {par_id}: {e}")
+        
         # ═══ CACHE CHECK PRELIMINARE - FASE 4 ═══
         cached_entry = cache.get_with_similarity(original, threshold=0.98)
         if cached_entry and cached_entry.quality_score >= 0.85:
             # Usa risultato dalla cache
-            p.text = cached_entry.corrected_text
+            formatting_manager.preserve_formatting_in_correction(p, original, cached_entry.corrected_text)
             chunk_stats['cache_hits'] += 1
             
             # Registra la modifica
@@ -622,10 +661,9 @@ async def correct_paragraph_group(
         
         # Validazione manuale della correzione grammaticale
         if grammar_corrected != current_text:
-            from src.core.validation import validate_correction
             if validate_correction(current_text, grammar_corrected):
                 # Applica la correzione grammaticale direttamente se supera la validazione base
-                p.text = grammar_corrected
+                formatting_manager.preserve_formatting_in_correction(p, current_text, grammar_corrected)
                 current_text = grammar_corrected
                 chunk_stats['grammar_applied'] += 1
                 
@@ -679,10 +717,30 @@ async def correct_paragraph_group(
             p = paragraphs[local_i]
             original_para_text = p.text
             
+            # 🚀 CORREZIONI IMMEDIATE PREMIUM - applica prima dell'AI
+            if instant_fixer and original_para_text.strip():
+                fixed_text, instant_corrections = instant_fixer.fix_text_instant(original_para_text)
+                if instant_corrections:
+                    logger.info(f"🚀 Applicate {len(instant_corrections)} correzioni immediate a par {start_par_id + local_i}:")
+                    for correction in instant_corrections:
+                        logger.info(f"   ✅ {correction}")
+                    
+                    # Applica le correzioni immediate al paragrafo
+                    if fixed_text != original_para_text:
+                        par_id = start_par_id + local_i
+                        mods.append(Modification(par_id, original_para_text, fixed_text))
+                        
+                        # Aggiorna il testo del paragrafo per ulteriori processing
+                        try:
+                            p.text = fixed_text
+                            chunk_stats['instant_fixes'] = chunk_stats.get('instant_fixes', 0) + len(instant_corrections)
+                        except Exception as e:
+                            logger.warning(f"⚠️  Errore applicando correzione immediata: {e}")
+            
             if ai_corrected != original_para_text:
                 # Validazione della correzione AI
                 if validate_correction(original_para_text, ai_corrected):
-                    p.text = ai_corrected
+                    formatting_manager.preserve_formatting_in_correction(p, original_para_text, ai_corrected)
                     par_id = start_par_id + local_i
                     
                     # Registra la modifica

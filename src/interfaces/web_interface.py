@@ -6,39 +6,17 @@ Interfaccia web enterprise-grade per upload, processamento e monitoring
 Features:
 - Upload documenti via drag & drop
 - Dashboard real-time processing
-- Preview delif __name__ == '__main__':
-    print("Correttore Web Interface")
-    print("Sistema enterprise-grade per correzione documenti italiani")
-    print("")
-    print("Avvio su: http://localhost:5000")
-    print("Dashboard: http://localhost:5000/dashboard")
-    print("")
-    print("Features:")
-    print("- Upload documenti drag & drop")
-    print("- Processamento real-time")
-    print("- Monitoring integrato")
-    print("- Download risultati")
-    print("")
-    
-    # Avvio automatico LanguageTool
-    print("Inizializzazione servizi...")
-    
-    try:
-        if start_languagetool_simple():
-            print("✓ LanguageTool avviato automaticamente")
-            print("✓ Modalità PRODUCTION attiva (con LanguageTool)")
-        else:
-            print("! LanguageTool non disponibile - modalità limitata")
-            print("! Alcune funzionalità potrebbero essere ridotte")
-    except Exception as e:
-        print(f"! Errore avvio LanguageTool: {e}")
-        print("! Modalità limitata attiva")
-    
-    print("")
-    print("Server web pronto!")
-    app.run(debug=True, host='0.0.0.0', port=5000) Download risultati
+- Preview e download risultati
 - Monitoring integrato
 """
+
+import sys
+import os
+from pathlib import Path
+
+# Aggiungi root del progetto al path
+project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(project_root))
 
 from flask import Flask, render_template, request, jsonify, send_file, redirect, url_for
 from werkzeug.utils import secure_filename
@@ -48,16 +26,45 @@ import time
 import json
 from pathlib import Path
 from datetime import datetime
-from simple_lt_starter import start_languagetool_simple, is_languagetool_running
+
+# Import LanguageTool starter con gestione semplificata
+def load_languagetool_functions():
+    """Carica le funzioni LanguageTool in modo sicuro."""
+    try:
+        # Aggiungi la root al path temporaneamente
+        import sys
+        if str(project_root) not in sys.path:
+            sys.path.insert(0, str(project_root))
+        
+        # Import normale ora che il path è corretto
+        from scripts.languagetool_manager import start_languagetool_simple, is_languagetool_running
+        return start_languagetool_simple, is_languagetool_running
+        
+    except Exception as e:
+        print(f"⚠️  Warning: Could not import LanguageTool starter: {e}")
+        print("💡 Running in demo mode without LanguageTool")
+        
+        def start_languagetool_simple() -> bool:
+            return False
+        def is_languagetool_running() -> bool:
+            return False
+            
+        return start_languagetool_simple, is_languagetool_running
+
+# Carica le funzioni
+start_languagetool_simple, is_languagetool_running = load_languagetool_functions()
+        
 from threading import Thread
 
 # Import moduli correttore
 from src.interfaces.cli import CorrettoreCLI, CLIOptions, CorrectionMode
 
-app = Flask(__name__)
+# Configurazione Flask con template path corretto
+template_dir = project_root / 'templates'
+app = Flask(__name__, template_folder=str(template_dir))
 app.config['SECRET_KEY'] = 'correttore-enterprise-2024'
-app.config['UPLOAD_FOLDER'] = Path('uploads')
-app.config['OUTPUT_FOLDER'] = Path('outputs')
+app.config['UPLOAD_FOLDER'] = project_root / 'uploads'
+app.config['OUTPUT_FOLDER'] = project_root / 'outputs'
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max file size
 
 # Crea directory se non esistono
@@ -86,7 +93,7 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def process_document_async(job_id: str, input_path: Path, options: CLIOptions):
-    """Processa documento in background"""
+    """Processa documento in background con configurazione italiana ottimizzata"""
     global job_status
     
     try:
@@ -123,6 +130,19 @@ def process_document_async(job_id: str, input_path: Path, options: CLIOptions):
         job_status[job_id]['status'] = 'failed'
         job_status[job_id]['error'] = str(e)
         job_status[job_id]['progress'] = 100
+        print(f"[ERRORE] Errore durante elaborazione: {e}")
+    
+    finally:
+        # Ripristina sempre la configurazione normale
+        from pathlib import Path
+        
+        config_dir = Path(".")
+        current_config = config_dir / "config.yaml"
+        backup_config = config_dir / "config_web_backup.yaml"
+        
+        if backup_config.exists():
+            shutil.copy(backup_config, current_config)
+            print(f"🔄 Configurazione normale ripristinata")
 
 @app.route('/')
 def index():
@@ -170,22 +190,35 @@ def upload_file():
     job_counter += 1
     job_id = f"job_{job_counter}"
     
-    # Opzioni da form
-    selected_mode = request.form.get('mode', 'balanced')
+    # Opzioni semplificate - usa sempre configurazione ottimizzata per italiano
+    language_check = request.form.get('language_check', 'true').lower() == 'true'
+    ai_enhancement = request.form.get('ai_enhancement', 'true').lower() == 'true'
     
-    # Per modalità historical, usa parametri fissi e glossario storico
-    if selected_mode == 'historical':
-        quality_threshold = 0.90  # Fisso per modalità storica
-        print(f"🏛️ Modalità STORICA attivata - soglia fissa al 90%")
-        
-        # Carica automaticamente il glossario storico
-        if os.path.exists("glossario_storico.txt"):
-            shutil.copy("glossario_storico.txt", "glossario.txt")
-            print(f"📚 Glossario storico caricato automaticamente")
-        else:
-            print(f"⚠️  Glossario storico non trovato, usando quello standard")
-    else:
-        quality_threshold = float(request.form.get('quality_threshold', 0.85))
+    # Carica configurazione ottimizzata per italiano
+    from pathlib import Path
+    import shutil
+    
+    config_dir = Path(".")
+    italian_config = config_dir / "config_italiano_ottimizzato.yaml"
+    current_config = config_dir / "config.yaml"
+    backup_config = config_dir / "config_web_backup.yaml"
+    
+    if italian_config.exists():
+        # Backup della config attuale
+        if current_config.exists():
+            shutil.copy(current_config, backup_config)
+        # Applica config italiana ottimizzata
+        shutil.copy(italian_config, current_config)
+        print(f"🇮🇹 Configurazione italiana ottimizzata applicata")
+    
+    # Modalità fissa ottimizzata per italiano
+    selected_mode = "aggressive"  # Usa sempre modalità aggressiva con config ottimizzata
+    quality_threshold = 0.75      # Soglia fissa ottimizzata
+    
+    print(f"🇮🇹 Correzione italiana professionale attivata")
+    print(f"📝 LanguageTool: {'✅ Abilitato' if language_check else '❌ Disabilitato'}")
+    print(f"🤖 Miglioramento AI: {'✅ Abilitato' if ai_enhancement else '❌ Disabilitato'}")
+    print(f"🎯 Soglia qualità: {quality_threshold*100:.0f}% (ottimizzata)")
     
     options = CLIOptions(
         input_files=[file_path],
@@ -308,7 +341,8 @@ def api_stats():
         'success_rate': (completed_jobs / total_jobs * 100) if total_jobs > 0 else 0
     })
 
-if __name__ == '__main__':
+def main():
+    """Avvia l'interfaccia web."""
     print("""
 🌐 Correttore Web Interface
 📚 Sistema enterprise-grade per correzione documenti italiani
@@ -322,7 +356,10 @@ Features:
 - Monitoring integrato  
 - Download risultati
 
-� Modalità PRODUCTION attiva (con LanguageTool)
+💡 Modalità PRODUCTION attiva (con LanguageTool)
 """)
     
     app.run(debug=True, host='0.0.0.0', port=5000)
+
+if __name__ == '__main__':
+    main()

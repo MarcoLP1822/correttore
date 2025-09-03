@@ -1,0 +1,112 @@
+# Configurazione per PRECISIONE MASSIMA
+# Cattura tutti gli errori possibili inclusi quelli nel tuo screenshot
+
+correction:
+  max_tokens_per_chunk: 1500  # Più piccolo per analisi dettagliata
+  max_paragraphs_per_chunk: 2  # Ancora più granulare
+  mode: aggressive
+  quality_threshold: 0.60      # MOLTO PIÙ BASSA per accettare più correzioni
+  safety_threshold: 0.55       # Più permissiva
+  enable_backup: true
+  enable_validation: true
+  cache_enabled: true
+  min_quality_threshold: 0.50  # Soglia minima molto bassa
+  batch_size: 20              # Più piccolo per controllo dettagliato
+  min_success_rate: 0.40      # Molto permissiva
+  min_paragraph_length: 5     # Processa anche frasi molto brevi
+  max_workers: 2              # Meno parallelo = più preciso
+  conservative_mode: false    # DISABILITA modalità conservativa
+
+openai:
+  model: gpt-4o-mini
+  max_retries: 5              # Più tentativi
+  timeout: 60                 # Più tempo per analisi accurata
+  temperature: 0.1            # MOLTO deterministica per precisione
+  rate_limit_buffer: 0.8      
+  max_tokens_per_request: 6000
+  max_tokens: 2500            
+  retry_delay: 3.0            
+  requests_per_minute: 30     # Più lento ma più preciso
+  max_concurrent_requests: 2
+
+languagetool:
+  server_url: http://localhost:8081
+  timeout: 25                 # Più tempo per controlli approfonditi
+  enabled_rules:
+    # REGOLE SPECIFICHE per errori nel tuo screenshot
+    - IT_ACCENTI                    # c'erano/c'eran invece di c'erano
+    - E_APOSTROPHE                  # po' invece di pò
+    - WRONG_APOSTROPHE              # apostrofi sbagliati
+    - UPPERCASE_SENTENCE_START      # maiuscole dopo punti
+    - PRON_GLI_E_L                 # gli/le
+    - MULTIPLE_EXCLAMATION_MARK
+    - MULTIPLE_QUESTION_MARK
+    - MORFOLOGIK_RULE_IT_IT        # ortografia generale
+    - UNPAIRED_BRACKETS
+    - WHITESPACE_RULE              # spazi doppi/mancanti
+    - COMMA_WHITESPACE             # spazi dopo virgole
+    - PERIOD_WHITESPACE            # spazi dopo punti
+    - COLON_WHITESPACE             # spazi dopo due punti
+    - SEMICOLON_WHITESPACE         # spazi dopo punto e virgola
+    - WORD_CONTAINS_UNDERSCORE     # caratteri strani
+    - REPEATED_WORDS               # parole ripetute
+    - ITALIAN_SPELLCHECK           # controllo ortografico completo
+    - TYPOGRAPHY                   # controlli tipografici
+  disabled_rules: []            # NON disabilitare nulla
+  language: it
+  max_workers: 2
+
+validation:
+  max_length_change_percent: 40.0  # Permetti cambiamenti più grandi
+  min_confidence_score: 0.50       # Più permissiva
+  backup_enabled: true
+  backup_retention_days: 30
+  check_duplicates: true
+  check_truncation: true
+  allow_aggressive_changes: true   # Permetti cambiamenti aggressivi
+
+cache:
+  enabled: false              # DISABILITA cache per analisi sempre fresca
+  ttl_hours: 24
+  similarity_threshold: 0.99  # Cache solo per identici
+  quality_threshold: 0.95
+  auto_cleanup: true
+  max_entries: 5000
+  cache_directory: .cache
+
+parallel:
+  enabled: false              # DISABILITA parallelismo per massima precisione
+  max_concurrent_workers: 1   # Solo un worker alla volta
+  rate_limit_per_minute: 20   # Più lento ma più accurato
+  optimal_worker_estimation: false
+  load_balancing: false
+  timeout_seconds: 300        # 5 minuti per operazioni complesse
+
+logging:
+  level: DEBUG                # Log dettagliato per capire cosa fa
+  format: "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+  date_format: "%H:%M:%S"
+  file_enabled: true
+  file_path: "logs/precision_correction.log"
+
+# Configurazioni per PRECISIONE MASSIMA
+precision_mode:
+  enable_all_checks: true
+  double_check_corrections: true
+  manual_review_suggested: false
+  apply_micro_corrections: true     # Applica anche correzioni minuscole
+  strict_grammar_enforcement: true
+  fix_spacing_issues: true          # Corregge problemi di spaziatura
+  fix_punctuation_spacing: true     # Spazi dopo punteggiatura
+  fix_apostrophes: true             # Apostrofi corretti
+  fix_capitalization: true          # Maiuscole/minuscole
+  fix_word_repetitions: true        # Ripetizioni
+  fix_typography: true              # Aspetti tipografici
+  
+# Prompts specifici per errori nel tuo documento
+correction_prompts:
+  apostrophes: "Correggi TUTTI gli apostrofi: 'pò' diventa 'po'', 'un pò' diventa 'un po''"
+  spacing: "Aggiungi spazio dopo OGNI segno di punteggiatura: punto, virgola, due punti"
+  capitalization: "Metti la maiuscola dopo OGNI punto"
+  repetitions: "Elimina TUTTE le ripetizioni di parole consecutive"
+  typography: "Correggi TUTTI gli errori tipografici e di formattazione"

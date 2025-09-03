@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from config.settings import get_languagetool_config
-from services.cache_service import get_cache
+from services.intelligent_cache import get_cache
 
 logger = logging.getLogger(__name__)
 

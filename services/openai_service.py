@@ -15,8 +15,8 @@ import openai
 from openai import AsyncOpenAI
 
 from config.settings import get_openai_config
-from utils.token_utils import count_tokens, estimate_tokens
-from services.cache_service import get_cache
+from src.utils.token_utils import count_tokens
+from services.intelligent_cache import get_cache
 
 logger = logging.getLogger(__name__)
 
@@ -156,7 +156,7 @@ class OpenAIService:
                     original_text=request.text,
                     corrected_text=corrected_text,
                     success=True,
-                    tokens_used=estimate_tokens(request.text + corrected_text),
+                    tokens_used=count_tokens(request.text + corrected_text),
                     response_time=time.time() - start_time
                 )
                 

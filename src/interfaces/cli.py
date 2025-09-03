@@ -69,7 +69,7 @@ class CorrettoreCLI:
         try:
             # Tenta di avviare LanguageTool automaticamente
             try:
-                from languagetool_launcher import ensure_languagetool_running
+                from scripts.languagetool_manager import ensure_languagetool_running
                 if not ensure_languagetool_running():
                     logging.warning("⚠️  LanguageTool non disponibile, alcune funzionalità potrebbero essere limitate")
             except ImportError:
@@ -186,6 +186,23 @@ class CorrettoreCLI:
             if options.backup and self.validator:
                 backup_path = self.validator.backup_document(input_path)
                 logging.info(f"💾 Backup creato: {backup_path.name}")
+            
+            # Carica configurazione italiana ottimizzata prima del processamento
+            config_dir = Path(".")
+            italian_config = config_dir / "config_italiano_ottimizzato.yaml"
+            current_config = config_dir / "config.yaml"
+            backup_config = config_dir / "config_backup_cli.yaml"
+            
+            if italian_config.exists():
+                # Backup della config attuale se esiste
+                if current_config.exists():
+                    import shutil
+                    shutil.copy(current_config, backup_config)
+                    logging.info(f"💾 Config backup: {backup_config.name}")
+                # Applica config italiana ottimizzata
+                import shutil
+                shutil.copy(italian_config, current_config)
+                logging.info(f"🇮🇹 Configurazione italiana ottimizzata caricata")
             
             # Processamento effettivo
             logging.info(f"🚀 Elaborazione: {input_path.name} → {output_path.name}")

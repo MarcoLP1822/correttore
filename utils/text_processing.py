@@ -6,7 +6,7 @@ Funzioni pure senza side effects per massima testabilità e riusabilità.
 
 import re
 import logging
-from typing import List, Tuple, Dict, Any, Optional, Iterator
+from typing import List, Tuple, Dict, Any, Optional, Iterator, overload
 from dataclasses import dataclass
 from enum import Enum
 
@@ -27,7 +27,7 @@ class TextChunk:
     end_offset: int
     chunk_index: int
     strategy: ChunkStrategy
-    metadata: Dict[str, Any] = None
+    metadata: Optional[Dict[str, Any]] = None
     
     def __post_init__(self):
         if self.metadata is None:
@@ -85,6 +85,14 @@ class TextProcessor:
                 result.append(sentence)
         
         return result
+    
+    @staticmethod
+    @overload
+    def split_into_words(text: str, include_positions: bool = False) -> List[str]: ...
+    
+    @staticmethod
+    @overload
+    def split_into_words(text: str, include_positions: bool = True) -> List[Tuple[str, int, int]]: ...
     
     @staticmethod
     def split_into_words(text: str, include_positions: bool = False) -> List[str] | List[Tuple[str, int, int]]:
@@ -215,7 +223,7 @@ class TextProcessor:
         
         # Conteggi base
         char_count = len(text)
-        words = TextProcessor.split_into_words(text)
+        words = TextProcessor.split_into_words(text, include_positions=False)
         word_count = len(words)
         sentences = TextProcessor.split_into_sentences(text)
         sentence_count = len(sentences)

@@ -1,0 +1,182 @@
+# CONFIGURAZIONE PREMIUM OTTIMIZZATA
+# Sistema multi-livello per correzioni di alta qualità
+
+correction:
+  mode: premium_italian              # Modalità premium specializzata
+  quality_threshold: 0.80           # Soglia alta per qualità premium
+  safety_threshold: 0.85            # Sicurezza alta
+  
+  # Processamento ottimizzato per premium
+  max_tokens_per_chunk: 1500        # Chunk più piccoli per maggiore precisione
+  max_paragraphs_per_chunk: 2       # Max 2 paragrafi per volta
+  batch_size: 15                    # Batch più piccoli
+  min_paragraph_length: 5           # Processa anche paragrafi molto corti
+  
+  # Abilita tutte le funzionalità premium
+  enable_backup: true
+  enable_validation: true
+  cache_enabled: true
+  conservative_mode: false           # Non conservativo per maggiori correzioni
+  enable_premium_system: true       # NUOVO: abilita sistema premium
+  
+  max_workers: 1                    # Un solo worker per stabilità massima
+
+openai:
+  model: gpt-4o-mini
+  temperature: 0.3                  # Leggermente più creativo per refusi
+  max_tokens: 2500                  # Meno token per risposte più precise
+  timeout: 90                       # Timeout più lungo per elaborazione premium
+  max_retries: 5                    # Più tentativi
+  retry_delay: 3.0                  # Pausa più lunga tra tentativi
+  
+  # Rate limiting più conservativo per qualità
+  requests_per_minute: 30
+  max_concurrent_requests: 1
+
+languagetool:
+  server_url: http://localhost:8081
+  timeout: 30                       # Timeout più lungo
+  language: it
+  
+  # REGOLE PREMIUM ESPANSE
+  enabled_rules:
+    # Ortografia italiana PRIORITARIA
+    - MORFOLOGIK_RULE_IT_IT         # Dizionario morfologico - CRITICO
+    - ITALIAN_SPELLCHECK             # Controllo ortografico - CRITICO
+    - HUNSPELL_RULE_IT_IT           # Hunspell dizionario - CRITICO
+    
+    # Spazi e punteggiatura - CRITICI per "U giorno"
+    - WHITESPACE_RULE               # Spazi errati - PRIORITARIO
+    - COMMA_WHITESPACE              # Spazi virgole
+    - PERIOD_WHITESPACE             # Spazi punti
+    - COLON_WHITESPACE              # Spazi due punti
+    - SEMICOLON_WHITESPACE          # Spazi punto e virgola
+    
+    # Apostrofi e accenti
+    - WRONG_APOSTROPHE              # po' vs pò
+    - E_APOSTROPHE                  # Apostrofi corretti
+    - IT_ACCENTI                    # Accenti corretti
+    
+    # Maiuscole e grammatica
+    - UPPERCASE_SENTENCE_START      # Maiuscole dopo punti
+    - PRON_GLI_E_L                 # Pronomi gli/le
+    - IT_AGREEMENT                 # Concordanze
+    - ITALIAN_WORD_COHERENCY       # Coerenza lessicale
+    
+    # Errori comuni
+    - WORD_REPEAT_RULE             # Parole duplicate
+    - REPEATED_WORDS               # Ripetizioni
+    - MULTIPLE_EXCLAMATION_MARK    # !!! → !
+    - MULTIPLE_QUESTION_MARK       # ??? → ?
+    - DOUBLE_PUNCTUATION           # Punteggiatura doppia
+    - UNPAIRED_BRACKETS            # Parentesi non chiuse
+    
+  # Regole disabilitate (problematiche)
+  disabled_rules:
+    - COMMA_PARENTHESIS_WHITESPACE
+    - TYPOGRAPHY
+    - SENTENCE_FRAGMENT            # Troppo restrittiva
+    
+  max_workers: 1                   # Un worker per stabilità
+
+# CONFIGURAZIONE PREMIUM
+premium_system:
+  enabled: true
+  
+  # Dizionario italiano espanso
+  dictionary_corrections:
+    enabled: true
+    confidence: 0.95
+    
+  # Correzioni spazi specifiche
+  space_corrections:
+    enabled: true
+    confidence: 0.90
+    patterns:
+      - pattern: 'U\s+([aeiouAEIOU])'
+        replacement: 'Un \1'
+        description: "U giorno → Un giorno"
+      - pattern: '\s{2,}'
+        replacement: " "
+        description: "Spazi multipli"
+        
+  # LanguageTool integrato
+  languagetool_integration:
+    enabled: true
+    confidence: 0.85
+    threshold: 0.80
+    
+  # AI per casi complessi
+  ai_corrections:
+    enabled: true
+    confidence: 0.75
+    temperature: 0.3
+    max_attempts: 3
+
+validation:
+  max_length_change_percent: 25.0  # Permetti più cambiamenti
+  min_confidence_score: 0.80       # Confidenza premium
+  backup_enabled: true
+  check_duplicates: true
+  check_truncation: true
+  premium_validation: true         # Validazione premium
+
+cache:
+  enabled: true
+  ttl_hours: 48                    # Cache più lunga per premium
+  similarity_threshold: 0.95       # Similarità più alta
+  quality_threshold: 0.80          # Soglia qualità premium
+  auto_cleanup: true
+  max_entries: 15000               # Cache più ampia
+
+parallel:
+  enabled: false                   # Disabilita parallelismo per stabilità
+  max_concurrent_workers: 1
+  rate_limit_per_minute: 30
+  timeout_seconds: 180
+
+logging:
+  level: INFO
+  format: "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+  date_format: "%H:%M:%S"
+  file_enabled: true
+  file_path: "logs/correzione_premium.log"
+
+# Prompts ottimizzati per il sistema premium
+premium_prompts:
+  main_instruction: |
+    Sei un correttore di bozze ESPERTO per l'italiano con focus su PRECISIONE ASSOLUTA.
+    
+    PRIORITÀ ASSOLUTE:
+    1. ORTOGRAFIA: bottaga→bottega (NON bottaia), ansiano→anziano, vlta→volta
+    2. SPAZI: "U giorno"→"Un giorno", spazi doppi→spazio singolo
+    3. GRAMMATICA: accordi verbi/articoli, h nel verbo avere
+    4. PUNTEGGIATURA: spazi dopo punti/virgole
+    5. APOSTROFI: po'→po' (NON pò), qual è (NON qual'è)
+    
+    METODO:
+    - Correggi SOLO errori evidenti e certi
+    - NON modificare stile o registro
+    - NON riformulare frasi
+    - Mantieni significato originale
+    
+    Se non sei sicuro al 100%, NON correggere.
+    
+  dictionary_focus: |
+    Focus assoluto su errori ortografici da dizionario italiano:
+    - bottaga DEVE diventare bottega
+    - ansiano DEVE diventare anziano 
+    - vlta DEVE diventare volta
+    
+  space_focus: |
+    Focus assoluto su errori di spazio:
+    - "U giorno" DEVE diventare "Un giorno"
+    - "U uomo" DEVE diventare "Un uomo"
+    - Spazi doppi DEVONO diventare spazi singoli
+    
+  quality_assurance: |
+    Ogni correzione DEVE essere:
+    1. Grammaticalmente perfetta
+    2. Ortograficamente corretta secondo dizionario italiano
+    3. Appropriata al contesto
+    4. Necessaria (non stilistica)

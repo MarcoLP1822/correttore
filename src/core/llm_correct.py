@@ -1,23 +1,30 @@
 import os, json, re, logging
 from openai import AsyncOpenAI
-from config.settings import OPENAI_MODEL
+from config.settings import OPENAI_MODEL, load_yaml_config
 from src.services.cache_llm import get_cached, set_cached
 from typing import List, Dict
 
+# Carica configurazione temperatura
+_config = load_yaml_config()
+_temperature = _config.get('openai', {}).get('temperature', 0.2)
+
 _SYSTEM_MSG = """
-Sei un correttore di bozze madrelingua italiano con anni di esperienza editoriale.
+Sei un correttore di bozze ESPERTO madrelingua italiano con focus su PRECISIONE ASSOLUTA.
 
-Correggi solo:
-• refusi
-• accordi grammaticali (verbi, articoli, preposizioni)
-• punteggiatura ambigua o mancante, senza alterare lo stile originale
+CORREZIONI PRIORITARIE (errori evidenti):
+• ORTOGRAFIA: bottaga→bottega (NON bottaia!), ansiano→anziano, vlta→volta, fallegname→falegname
+• SPAZI: "U giorno"→"Un giorno", "U uomo"→"Un uomo", spazi doppi→spazio singolo  
+• GRAMMATICA H: "o fatto"→"ho fatto", "a detto"→"ha detto"
+• ACCORDI: "la cane"→"il cane", "un'uomo"→"un uomo"
+• APOSTROFI: pò→po', qual'è→qual è
+• PUNTEGGIATURA: spazi dopo punti/virgole quando mancanti
 
-Non fare le seguenti cose:
-• Non spezzare o riformulare frasi.
-• Non inserire punto e virgola.
-• Non modificare lo stile dell'autore, anche se informale.
-• Non rimuovere o cambiare interiezioni ("no?!?", "eh", "mah").
-• «Non sostituire gli apostrofi tipografici (') con quelli dritti (').»
+METODO:
+• Correggi SOLO errori evidenti e certi al 100%
+• USA il dizionario italiano standard (bottega NON bottaia)
+• Mantieni significato e stile originale
+• NON riformulare o cambiare struttura frasi
+• Se dubiti anche minimamente, NON correggere
 
 Se tutto è già corretto, restituisci il testo invariato.
 
@@ -25,6 +32,34 @@ OUTPUT:
 Restituisci **solo** JSON nel formato
 
 {"corretto":"TESTO_CORRETTO_QUI"}
+
+(non aggiungere testo fuori dal JSON)
+"""
+
+_BATCH_SYSTEM_MSG = """
+Sei un correttore di bozze ESPERTO madrelingua italiano con focus su PRECISIONE ASSOLUTA.
+
+CORREZIONI PRIORITARIE (errori evidenti):
+• ORTOGRAFIA: bottaga→bottega (NON bottaia!), ansiano→anziano, vlta→volta, fallegname→falegname  
+• SPAZI: "U giorno"→"Un giorno", "U uomo"→"Un uomo", spazi doppi→spazio singolo
+• GRAMMATICA H: "o fatto"→"ho fatto", "a detto"→"ha detto"
+• ACCORDI: "la cane"→"il cane", "un'uomo"→"un uomo"  
+• APOSTROFI: pò→po', qual'è→qual è
+• PUNTEGGIATURA: spazi dopo punti/virgole quando mancanti
+
+METODO:
+• Correggi SOLO errori evidenti e certi al 100%
+• USA il dizionario italiano standard (bottega NON bottaia)
+• Mantieni significato e stile originale
+• NON riformulare o cambiare struttura frasi
+• Se dubiti anche minimamente, NON correggere
+
+Se tutto è già corretto, restituisci il testo invariato.
+
+Riceverai un JSON con array "richieste" contenente oggetti con "id" e "txt".
+Restituisci **solo** JSON nel formato:
+
+{"correzioni":[{"id":0,"txt":"TESTO_CORRETTO_QUI"},{"id":1,"txt":"ALTRO_TESTO_CORRETTO"}]}
 
 (non aggiungere testo fuori dal JSON)
 """
@@ -46,7 +81,7 @@ async def llm_correct(text: str, client: AsyncOpenAI) -> str:
     try:
         resp = await client.chat.completions.create(
             model=OPENAI_MODEL,
-            temperature=1.0,  # Usa default per compatibilità con gpt-4o-mini
+            temperature=_temperature,
             messages=messages,  # type: ignore  # OpenAI types are complex
             response_format={"type": "json_object"},
         )
@@ -97,9 +132,9 @@ async def llm_correct_batch(texts: List[str], client: AsyncOpenAI) -> List[str]:
     try:
         resp = await client.chat.completions.create(
             model=OPENAI_MODEL,
-            temperature=1.0,  # Usa default per compatibilità con gpt-4o-mini
+            temperature=_temperature,
             messages=[
-                {"role": "system", "content": _SYSTEM_MSG},
+                {"role": "system", "content": _BATCH_SYSTEM_MSG},
                 {"role": "user", "content": user_json},
             ],  # type: ignore  # OpenAI types are complex
             response_format={"type": "json_object"},
@@ -112,9 +147,20 @@ async def llm_correct_batch(texts: List[str], client: AsyncOpenAI) -> List[str]:
             logger.warning("Risposta GPT vuota per batch")
             return texts
             
+        logger.debug(f"Risposta GPT batch: {content[:200]}...")
         raw = _strip_fences(content)
-        data = json.loads(raw)
+        
+        try:
+            data = json.loads(raw)
+        except json.JSONDecodeError as e:
+            logger.error(f"Errore JSON parsing batch GPT: {e}, raw: {raw[:500]}")
+            # Fallback: restituisci testi originali
+            for i, txt in uncached:
+                out[i] = txt
+            return [out[i] for i in range(len(texts))]
+            
         correzioni = data.get("correzioni", [])
+        logger.debug(f"Trovate {len(correzioni)} correzioni nel batch")
         
         # Applica correzioni
         for corr in correzioni:
@@ -125,6 +171,9 @@ async def llm_correct_batch(texts: List[str], client: AsyncOpenAI) -> List[str]:
                 out[original_idx] = txt_corretto
                 # Cache il risultato
                 set_cached(original_txt, txt_corretto)
+                logger.debug(f"Correzione applicata id={idx}: '{original_txt[:30]}...' -> '{txt_corretto[:30]}...'")
+            else:
+                logger.warning(f"ID correzione invalido: {idx}, max={len(uncached)}")
     
     except Exception as e:
         logger.error("Errore parsing batch GPT: %s", e)

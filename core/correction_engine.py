@@ -15,7 +15,7 @@ from docx.text.paragraph import Paragraph
 from core.document_handler import DocumentHandler, DocumentInfo
 from services.openai_service import OpenAIService
 from services.languagetool_service import LanguageToolService
-from services.cache_service import get_cache
+from services.intelligent_cache import get_cache
 from src.core.safe_correction import SafeCorrector, QualityScore, CorrectionConfidence
 from config.settings import get_correction_config
 

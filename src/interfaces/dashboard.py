@@ -667,7 +667,7 @@ class MonitoringDashboard:
         """
 
 
-def generate_dashboard(output_path: Path = None) -> None:
+def generate_dashboard(output_path: Optional[Path] = None) -> None:
     """Genera dashboard HTML."""
     if output_path is None:
         output_path = Path("monitoring_dashboard.html")

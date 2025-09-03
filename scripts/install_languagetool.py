@@ -52,103 +52,18 @@ def install_languagetool():
         if not extracted_dir:
             raise Exception("Directory LanguageTool non trovata dopo estrazione")
         
-        # Crea script di avvio
-        create_launcher_script(extracted_dir)
-        
         # Pulisci file zip
         zip_file.unlink()
         
         print("✅ LanguageTool installato con successo!")
         print(f"📁 Directory: {extracted_dir}")
-        print("🚀 Per avviare: python start_languagetool.py")
+        print("🚀 Per avviare LanguageTool usa l'interfaccia web o CLI del correttore")
         
         return True
         
     except Exception as e:
         print(f"❌ Errore durante installazione: {e}")
         return False
-
-def create_launcher_script(lt_dir):
-    """Crea script per avviare LanguageTool"""
-    
-    launcher_content = f'''#!/usr/bin/env python3
-"""
-Script per avviare LanguageTool server
-"""
-
-import subprocess
-import sys
-from pathlib import Path
-import time
-import requests
-
-def start_languagetool():
-    """Avvia LanguageTool server"""
-    
-    lt_dir = Path(r"{lt_dir}")
-    jar_file = lt_dir / "languagetool-server.jar"
-    
-    if not jar_file.exists():
-        print(f"❌ File JAR non trovato: {{jar_file}}")
-        return False
-    
-    print("🚀 Avvio LanguageTool server...")
-    print("   Porta: 8081")
-    print("   URL: http://localhost:8081")
-    print("   Premi Ctrl+C per fermare")
-    
-    try:
-        # Avvia il server
-        cmd = [
-            "java", "-cp", str(jar_file),
-            "org.languagetool.server.HTTPServer",
-            "--port", "8081",
-            "--allow-origin", "*",
-            "--languageModel", str(lt_dir / "org")
-        ]
-        
-        process = subprocess.Popen(
-            cmd,
-            cwd=str(lt_dir),
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
-        
-        # Attendi avvio
-        time.sleep(3)
-        
-        # Test connessione
-        try:
-            response = requests.get("http://localhost:8081/v2/check", timeout=5)
-            print("✅ LanguageTool server avviato correttamente!")
-        except:
-            print("⚠️  Server avviato, in attesa di essere pronto...")
-        
-        # Mantieni il server in esecuzione
-        try:
-            process.wait()
-        except KeyboardInterrupt:
-            print("\\n🛑 Arresto LanguageTool server...")
-            process.terminate()
-            process.wait()
-            print("✅ Server arrestato")
-            
-    except Exception as e:
-        print(f"❌ Errore avvio server: {{e}}")
-        return False
-    
-    return True
-
-if __name__ == "__main__":
-    start_languagetool()
-'''
-    
-    script_path = Path("start_languagetool.py")
-    with open(script_path, "w", encoding="utf-8") as f:
-        f.write(launcher_content)
-    
-    print(f"📝 Script di avvio creato: {script_path}")
 
 def check_java():
     """Verifica se Java è installato"""
@@ -178,8 +93,8 @@ def main():
     if install_languagetool():
         print("\\n🎉 Installazione completata!")
         print("\\nProssimi passi:")
-        print("1. Avvia LanguageTool: python start_languagetool.py")
-        print("2. In un altro terminale, avvia il correttore: python web_interface.py")
+        print("1. Avvia il correttore con: python main.py")
+        print("2. LanguageTool verrà avviato automaticamente quando necessario")
     else:
         print("❌ Installazione fallita")
         sys.exit(1)

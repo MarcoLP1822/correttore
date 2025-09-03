@@ -24,7 +24,7 @@ class ReportSection:
     title: str
     content: str
     level: int = 2  # Livello heading (1-6)
-    metadata: Dict[str, Any] = None
+    metadata: Optional[Dict[str, Any]] = None
 
 @dataclass
 class CorrectionStats:
