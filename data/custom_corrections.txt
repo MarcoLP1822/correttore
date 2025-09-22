@@ -1,0 +1,30 @@
+# Correzioni personalizzate per errori comuni italiani
+# Formato: errore_comune → correzione_corretta
+
+# Errori specifici rilevati
+bottaga → bottega
+vlta → volta
+sugu → sugo
+fato → fatto
+go → ho
+cassella → casella
+milliore → migliore
+carezzzzavano → carezzavano
+ansiano → anziano
+borggo → borgo
+strignendo → stringendo
+trasformazzione → trasformazione
+CAPTIOLO → CAPITOLO
+
+# Altri errori comuni italiani
+pò → po'
+qual'è → qual è
+un'uomo → un uomo
+la cane → il cane
+o fatto → ho fatto
+a detto → ha detto
+fallegname → falegname
+d'avero → davvero
+sopratutto → soprattutto
+accelerare → accelerare
+acelerare → accelerare

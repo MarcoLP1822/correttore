@@ -1,0 +1,126 @@
+# CONFIGURAZIONE PRECISIONE MASSIMA - ERRORI ZERO
+# Sistema ottimizzato per evitare errori come bottaga→bottaia
+
+correction:
+  mode: precision_max
+  quality_threshold: 0.90          # Threshold alto per precisione
+  safety_threshold: 0.85           # Sicurezza elevata
+  
+  # Processamento più conservativo per evitare errori
+  max_tokens_per_chunk: 1500       # Chunk più piccoli per controllo migliore
+  max_paragraphs_per_chunk: 2      # Solo 2 paragrafi per volta
+  batch_size: 15                   # Batch più piccoli
+  min_paragraph_length: 10
+  
+  enable_backup: true
+  enable_validation: true
+  cache_enabled: true
+  conservative_mode: true          # Modalità conservativa attiva
+  
+  max_workers: 1                   # Un solo worker per controllo massimo
+
+openai:
+  model: gpt-5-mini-2025-08-07     # Modello più recente per precisione
+  temperature: 0.05                # Temperatura minima per determinismo
+  max_tokens: 2500
+  timeout: 90                      # Più tempo per elaborazione accurata
+  max_retries: 5                   # Più tentativi
+  retry_delay: 3.0
+  
+  requests_per_minute: 30          # Rate limiting più conservativo
+  max_concurrent_requests: 1       # Una richiesta alla volta
+
+languagetool:
+  server_url: http://localhost:8081
+  timeout: 30                      # Più tempo per analisi completa
+  language: it
+  
+  # Solo regole essenziali e sicure
+  enabled_rules:
+    - MORFOLOGIK_RULE_IT_IT
+    - ITALIAN_SPELLCHECK
+    - WRONG_APOSTROPHE
+    - E_APOSTROPHE
+    - UPPERCASE_SENTENCE_START
+    - WHITESPACE_RULE
+    - COMMA_WHITESPACE
+    - PERIOD_WHITESPACE
+    
+  disabled_rules:
+    - COMMA_PARENTHESIS_WHITESPACE
+    - TYPOGRAPHY
+    
+  max_workers: 1
+
+validation:
+  max_length_change_percent: 10.0  # Massimo 10% di cambio
+  min_confidence_score: 0.90       # Confidence alta
+  backup_enabled: true
+  check_duplicates: true
+  check_truncation: true
+
+cache:
+  enabled: true
+  ttl_hours: 48                    # Cache più persistente
+  similarity_threshold: 0.95       # Soglia molto alta
+  quality_threshold: 0.90
+  auto_cleanup: true
+  max_entries: 5000
+
+parallel:
+  enabled: false                   # Disattivato per controllo sequenziale
+  max_concurrent_workers: 1
+  rate_limit_per_minute: 30
+  timeout_seconds: 180
+
+logging:
+  level: DEBUG                     # Log dettagliato per debug
+  format: "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+  date_format: "%H:%M:%S"
+  file_enabled: true
+  file_path: "logs/precisione_massima.log"
+
+# Prompts ultra-specifici per evitare errori
+precision_prompts:
+  main_instruction: |
+    Sei un correttore di bozze ESPERTO madrelingua italiano con PRECISIONE ASSOLUTA.
+    
+    CORREZIONI SPECIFICHE OBBLIGATORIE:
+    • bottaga → bottega (MAI bottaia!)
+    • vlta → volta (per "C'era una volta")
+    • sugu → sugo (MAI suga!)
+    • ansiano → anziano
+    • fato → fatto
+    • go → ho (verbo avere)
+    • cassella → casella
+    • milliore → migliore
+    • carezzzzavano → carezzavano
+    • borggo → borgo
+    • strignendo → stringendo
+    • trasformazzione → trasformazione
+    • CAPTIOLO → CAPITOLO
+    
+    REGOLE FERREE:
+    1. USA SEMPRE il dizionario italiano standard
+    2. "bottega" è una bottega artigiana, NON "bottaia"
+    3. "volta" in "C'era una volta", NON "alta"
+    4. "sugo" è il condimento, NON "suga"
+    5. Se hai il minimo dubbio, NON correggere
+    
+    METODO:
+    • Correggi SOLO errori evidenti di ortografia/grammatica
+    • NON modificare stile o registro
+    • Mantieni significato originale
+    • Zero tolleranza per errori di correzione
+
+  context_preservation: |
+    ATTENZIONE MASSIMA: ogni correzione deve essere al 100% corretta.
+    Preferisci NON correggere piuttosto che correggere male.
+    
+  quality_check: |
+    Verifica TRIPLA di ogni correzione:
+    1. È grammaticalmente corretta?
+    2. È semanticamente appropriata?
+    3. È nel dizionario italiano standard?
+    
+    Se anche una sola risposta è "no", non fare la correzione.

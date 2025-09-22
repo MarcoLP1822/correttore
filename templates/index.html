@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Correttore Enterprise - Sistema di Correzione Italiana</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .drop-zone {
+            border: 3px dashed #007bff;
+            border-radius: 10px;
+            padding: 50px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .drop-zone:hover {
+            border-color: #0056b3;
+            background-color: #f8f9fa;
+        }
+        .drop-zone.dragover {
+            border-color: #28a745;
+            background-color: #d4edda;
+        }
+        .progress-container {
+            display: none;
+            margin-top: 20px;
+        }
+        .job-card {
+            border-left: 4px solid #007bff;
+            margin-bottom: 10px;
+        }
+        .job-card.completed {
+            border-left-color: #28a745;
+        }
+        .job-card.failed {
+            border-left-color: #dc3545;
+        }
+        .job-card.processing {
+            border-left-color: #ffc107;
+        }
+        .enterprise-header {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        .feature-icon {
+            font-size: 2rem;
+            color: #007bff;
+            margin-bottom: 1rem;
+        }
+        .info-icon {
+            cursor: help;
+            transition: color 0.2s ease;
+        }
+        .info-icon:hover {
+            color: #007bff !important;
+        }
+        .tooltip {
+            font-size: 0.875rem;
+        }
+        .tooltip-inner {
+            max-width: 300px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="enterprise-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="mb-2"><i class="fas fa-spell-check"></i> Correttore Enterprise</h1>
+                    <p class="lead mb-0">Sistema enterprise-grade per la correzione automatica di documenti italiani</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <a href="/dashboard" class="btn btn-light btn-lg">
+                        <i class="fas fa-chart-dashboard"></i> Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Features Row -->
+        <div class="row mb-5">
+            <div class="col-md-3 text-center">
+                <div class="feature-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h5>100% Sicuro</h5>
+                <p class="text-muted">Backup automatico e rollback intelligente</p>
+            </div>
+            <div class="col-md-3 text-center">
+                <div class="feature-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <h5>AI Avanzata</h5>
+                <p class="text-muted">GPT-4 + LanguageTool per qualità enterprise</p>
+            </div>
+            <div class="col-md-3 text-center">
+                <div class="feature-icon">
+                    <i class="fas fa-tachometer-alt"></i>
+                </div>
+                <h5>Performance</h5>
+                <p class="text-muted">Cache intelligente e processamento parallelo</p>
+            </div>
+            <div class="col-md-3 text-center">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h5>Monitoring</h5>
+                <p class="text-muted">Metriche real-time e quality assurance</p>
+            </div>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0"><i class="fas fa-upload"></i> Carica Documento</h4>
+                    </div>
+                    <div class="card-body">
+                        <form id="uploadForm" enctype="multipart/form-data">
+                            <!-- Drop Zone -->
+                            <div class="drop-zone" id="dropZone">
+                                <i class="fas fa-cloud-upload-alt fa-3x mb-3 text-primary"></i>
+                                <h5>Trascina qui il tuo documento</h5>
+                                <p class="text-muted">oppure clicca per selezionare</p>
+                                <p class="small text-muted">Supportato: .docx, .doc, .odt (max 50MB)</p>
+                                <input type="file" id="fileInput" name="file" accept=".docx,.doc,.odt" style="display: none;">
+                            </div>
+
+                            <!-- Opzioni Semplificate -->
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <div class="card border-success">
+                                        <div class="card-body text-center">
+                                            <h5 class="card-title">🇮🇹 Correzione Italiana Professionale</h5>
+                                            <p class="card-text">Sistema ottimizzato specificamente per la lingua italiana</p>
+                                            <div class="form-check form-switch d-flex justify-content-center">
+                                                <input class="form-check-input" type="checkbox" id="language_check" name="language_check" checked>
+                                                <label class="form-check-label ms-2" for="language_check">
+                                                    LanguageTool avanzato per grammatica italiana
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card border-info">
+                                        <div class="card-body text-center">
+                                            <h5 class="card-title">🤖 Miglioramento AI</h5>
+                                            <p class="card-text">Oltre agli errori, migliora stile e fluidità</p>
+                                            <div class="form-check form-switch d-flex justify-content-center">
+                                                <input class="form-check-input" type="checkbox" id="ai_enhancement" name="ai_enhancement" checked>
+                                                <label class="form-check-label ms-2" for="ai_enhancement">
+                                                    Abilita miglioramenti stilistici AI
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Opzioni aggiuntive -->
+                            <div class="row mt-3">
+                                <div class="col-md-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="backup" name="backup" checked>
+                                        <label class="form-check-label" for="backup">
+                                            💾 Crea backup automatico del documento originale (raccomandato)
+                                        </label>
+                                    </div>
+                                    <small class="text-muted">Protegge il documento originale</small>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-lg mt-3" id="submitBtn">
+                                <i class="fas fa-magic"></i> Inizia Correzione
+                            </button>
+                        </form>
+
+                        <!-- Progress -->
+                        <div class="progress-container" id="progressContainer">
+                            <div class="alert alert-info" id="statusAlert">
+                                <i class="fas fa-spinner fa-spin"></i> Processo il file...
+                            </div>
+                            <div class="progress mb-3">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                     id="progressBar" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <div id="jobDetails"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Panel -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-chart-pie"></i> Statistiche Sistema</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="systemStats">
+                            <div class="text-center">
+                                <i class="fas fa-spinner fa-spin fa-2x text-muted"></i>
+                                <p class="text-muted mt-2">Caricamento statistiche...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Jobs -->
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="fas fa-history"></i> Job Recenti</h6>
+                    </div>
+                    <div class="card-body p-2" style="max-height: 300px; overflow-y: auto;">
+                        <div id="recentJobs">
+                            <p class="text-muted text-center">Nessun job ancora processato</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-light mt-5 py-4">
+        <div class="container text-center">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Correttore Enterprise v2.0.0</h6>
+                    <p class="text-muted small">Sistema enterprise-grade per correzione documenti italiani</p>
+                </div>
+                <div class="col-md-6">
+                    <p class="text-muted small">
+                        <i class="fas fa-code"></i> Sviluppato con tecnologie enterprise<br>
+                        <i class="fas fa-shield-alt"></i> Sicuro • <i class="fas fa-rocket"></i> Veloce • <i class="fas fa-brain"></i> Intelligente
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Gestione drag & drop
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const uploadForm = document.getElementById('uploadForm');
+        const progressContainer = document.getElementById('progressContainer');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // Click per aprire file dialog
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        // Drag & drop eventi
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                // Crea un nuovo DataTransfer per assegnare i file al input
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(files[0]);
+                fileInput.files = dataTransfer.files;
+                updateDropZoneText(files[0].name);
+            }
+        });
+
+        // Aggiorna testo quando file selezionato
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                updateDropZoneText(e.target.files[0].name);
+            }
+        });
+
+        function updateDropZoneText(filename) {
+            dropZone.innerHTML = `
+                <i class="fas fa-file-word fa-3x mb-3 text-success"></i>
+                <h5 class="text-success">File selezionato</h5>
+                <p class="text-muted">${filename}</p>
+                <small class="text-muted">Clicca per cambiare file</small>
+            `;
+        }
+
+        // Gestione upload
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!fileInput.files.length) {
+                alert('Seleziona un file da caricare');
+                return;
+            }
+
+            // Debug: verifica file
+            console.log('File selezionato:', fileInput.files[0]);
+            console.log('Nome file:', fileInput.files[0].name);
+            console.log('Dimensione file:', fileInput.files[0].size);
+
+            // Crea FormData con configurazione italiana ottimizzata
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('mode', 'italiano_ottimizzato');  // Usa sempre configurazione italiana
+            formData.append('language_check', document.getElementById('language_check').checked ? 'true' : 'false');
+            formData.append('ai_enhancement', document.getElementById('ai_enhancement').checked ? 'true' : 'false');
+            formData.append('backup', document.getElementById('backup').checked ? 'true' : 'false');
+            
+            // Debug: verifica FormData
+            for (let [key, value] of formData.entries()) {
+                console.log(key + ':', value);
+            }
+            
+            // Mostra progress
+            progressContainer.style.display = 'block';
+            submitBtn.disabled = true;
+            
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    // Monitora job
+                    monitorJob(result.job_id);
+                } else {
+                    showError(result.error);
+                }
+            } catch (error) {
+                showError('Errore durante upload: ' + error.message);
+            }
+        });
+
+        // Monitora progresso job
+        async function monitorJob(jobId) {
+            const statusAlert = document.getElementById('statusAlert');
+            const progressBar = document.getElementById('progressBar');
+            const jobDetails = document.getElementById('jobDetails');
+            
+            const checkStatus = async () => {
+                try {
+                    const response = await fetch(`/status/${jobId}`);
+                    const job = await response.json();
+                    
+                    // Aggiorna progress bar
+                    progressBar.style.width = job.progress + '%';
+                    progressBar.textContent = job.progress + '%';
+                    
+                    // Aggiorna status
+                    if (job.status === 'processing') {
+                        statusAlert.innerHTML = `
+                            <i class="fas fa-cogs fa-spin"></i> 
+                            Elaborazione in corso: ${job.filename}
+                        `;
+                        statusAlert.className = 'alert alert-warning';
+                    } else if (job.status === 'completed') {
+                        statusAlert.innerHTML = `
+                            <i class="fas fa-check-circle"></i> 
+                            Elaborazione completata!
+                        `;
+                        statusAlert.className = 'alert alert-success';
+                        
+                        // Mostra link download
+                        jobDetails.innerHTML = `
+                            <div class="d-grid">
+                                <a href="${job.download_url}" class="btn btn-success btn-lg">
+                                    <i class="fas fa-download"></i> Scarica Documento Corretto
+                                </a>
+                            </div>
+                        `;
+                        
+                        submitBtn.disabled = false;
+                        loadStats(); // Aggiorna statistiche
+                        return; // Stop monitoring
+                    } else if (job.status === 'failed') {
+                        statusAlert.innerHTML = `
+                            <i class="fas fa-exclamation-triangle"></i> 
+                            Errore durante elaborazione: ${job.error || 'Errore sconosciuto'}
+                        `;
+                        statusAlert.className = 'alert alert-danger';
+                        submitBtn.disabled = false;
+                        return; // Stop monitoring
+                    }
+                    
+                    // Continua monitoring
+                    setTimeout(checkStatus, 1000);
+                } catch (error) {
+                    showError('Errore monitoraggio job: ' + error.message);
+                }
+            };
+            
+            checkStatus();
+        }
+
+        function showError(message) {
+            const statusAlert = document.getElementById('statusAlert');
+            statusAlert.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
+            statusAlert.className = 'alert alert-danger';
+            submitBtn.disabled = false;
+        }
+
+        // Carica statistiche sistema
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/stats');
+                const stats = await response.json();
+                
+                document.getElementById('systemStats').innerHTML = `
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h3 class="text-primary">${stats.total_jobs}</h3>
+                            <small class="text-muted">Job Totali</small>
+                        </div>
+                        <div class="col-6">
+                            <h3 class="text-success">${stats.success_rate.toFixed(1)}%</h3>
+                            <small class="text-muted">Success Rate</small>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row text-center small">
+                        <div class="col-4">
+                            <div class="text-success">${stats.completed_jobs}</div>
+                            <small class="text-muted">Completati</small>
+                        </div>
+                        <div class="col-4">
+                            <div class="text-warning">${stats.processing_jobs}</div>
+                            <small class="text-muted">In corso</small>
+                        </div>
+                        <div class="col-4">
+                            <div class="text-danger">${stats.failed_jobs}</div>
+                            <small class="text-muted">Falliti</small>
+                        </div>
+                    </div>
+                `;
+                
+                // Carica job recenti
+                loadRecentJobs();
+            } catch (error) {
+                console.error('Errore caricamento statistiche:', error);
+            }
+        }
+
+        // Carica job recenti
+        async function loadRecentJobs() {
+            try {
+                const response = await fetch('/api/jobs');
+                const jobs = await response.json();
+                
+                const jobsList = Object.entries(jobs)
+                    .sort(([,a], [,b]) => new Date(b.created_at) - new Date(a.created_at))
+                    .slice(0, 5);
+                
+                if (jobsList.length === 0) {
+                    document.getElementById('recentJobs').innerHTML = 
+                        '<p class="text-muted text-center">Nessun job ancora processato</p>';
+                    return;
+                }
+                
+                const jobsHtml = jobsList.map(([jobId, job]) => {
+                    const statusClass = job.status === 'completed' ? 'success' : 
+                                       job.status === 'failed' ? 'danger' : 'warning';
+                    const statusIcon = job.status === 'completed' ? 'check-circle' : 
+                                      job.status === 'failed' ? 'times-circle' : 'clock';
+                    
+                    return `
+                        <div class="job-card card card-body p-2 ${job.status}">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <small class="fw-bold">${job.filename}</small><br>
+                                    <small class="text-muted">${job.options.mode}</small>
+                                </div>
+                                <span class="badge bg-${statusClass}">
+                                    <i class="fas fa-${statusIcon}"></i>
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                document.getElementById('recentJobs').innerHTML = jobsHtml;
+            } catch (error) {
+                console.error('Errore caricamento job recenti:', error);
+            }
+        }
+
+        // Carica statistiche all'avvio
+        loadStats();
+
+        // Aggiorna statistiche ogni 10 secondi
+        setInterval(loadStats, 10000);
+
+        // Inizializza tooltip Bootstrap
+        document.addEventListener('DOMContentLoaded', function() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl, {
+                    delay: { "show": 100, "hide": 300 },
+                    html: true
+                });
+            });
+            
+            // Gestione modalità historical
+            const modeSelect = document.getElementById('mode');
+            const qualityThreshold = document.getElementById('quality_threshold');
+            const qualityContainer = qualityThreshold.closest('.col-md-4');
+            
+            function toggleHistoricalMode() {
+                if (modeSelect.value === 'historical') {
+                    qualityThreshold.value = '0.90';
+                    qualityThreshold.disabled = true;
+                    qualityContainer.style.opacity = '0.6';
+                    // Aggiungi tooltip per spiegare che è fisso
+                    qualityThreshold.title = 'Soglia fissa al 90% per modalità storica';
+                } else {
+                    qualityThreshold.disabled = false;
+                    qualityContainer.style.opacity = '1';
+                    qualityThreshold.title = '';
+                }
+            }
+            
+            // Applica subito e ascolta cambiamenti
+            toggleHistoricalMode();
+            modeSelect.addEventListener('change', toggleHistoricalMode);
+        });
+    </script>
+</body>
+</html>

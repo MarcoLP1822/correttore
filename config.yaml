@@ -7,6 +7,11 @@ correction:
   quality_threshold: 0.75          # Bilanciato: non troppo severo, non troppo permissivo
   safety_threshold: 0.70           # Sicurezza adeguata
   
+  # NUOVA PIPELINE INVERTITA (AI → LanguageTool)
+  pipeline_order: ai_first          # ai_first | languagetool_first (per rollback)
+  languagetool_mode: quality_check  # primary | quality_check
+  anti_regression: true             # Previene regressioni semantiche
+  
   # Processamento ottimizzato
   max_tokens_per_chunk: 2000       # Chunk medi per buon bilanciamento
   max_paragraphs_per_chunk: 3      # 3 paragrafi per volta
@@ -24,8 +29,8 @@ correction:
 
 openai:
   # Configurazione AI ottimizzata per italiano
-  model: gpt-4o-mini
-  temperature: 0.2                 # Deterministica ma non rigida
+  model: gpt-5-mini-2025-08-07     # Modello più recente per maggiore precisione
+  temperature: 0.1                 # Più deterministica per ridurre errori
   max_tokens: 3000                 # Adeguato per chunks medi
   timeout: 60                      # Tempo ragionevole
   max_retries: 3
@@ -36,38 +41,42 @@ openai:
   max_concurrent_requests: 2
 
 languagetool:
-  # LanguageTool configurato SPECIFICAMENTE per italiano
+  # LanguageTool configurato come QUALITY CHECKER (nuova pipeline)
   server_url: http://localhost:8081
   timeout: 20
   language: it
   
-  # REGOLE SPECIFICHE PER ITALIANO - solo quelle che funzionano bene
+  # Modalità quality check: più conservativa e meno aggressiva
+  quality_check_mode: true
+  aggressive_corrections: false
+  
+  # REGOLE SPECIFICHE PER QUALITY CHECK - solo errori evidenti
   enabled_rules:
-    # Errori fondamentali italiani
-    - MORFOLOGIK_RULE_IT_IT         # Ortografia italiana
-    - ITALIAN_SPELLCHECK             # Controllo ortografico
+    # Solo errori ortografici evidenti
+    - MORFOLOGIK_RULE_IT_IT         # Ortografia italiana (solo errori chiari)
     - WRONG_APOSTROPHE               # po' vs pò 
-    - E_APOSTROPHE                   # Apostrofi corretti
+    
+    # Punteggiatura essenziale
     - UPPERCASE_SENTENCE_START       # Maiuscole dopo punti
-    
-    # Punteggiatura e spazi
-    - WHITESPACE_RULE               # Spazi doppi/mancanti
-    - COMMA_WHITESPACE              # Spazi dopo virgole
-    - PERIOD_WHITESPACE             # Spazi dopo punti
     - UNPAIRED_BRACKETS             # Parentesi non chiuse
-    
-    # Errori comuni italiani  
-    - PRON_GLI_E_L                  # gli/le
     - MULTIPLE_EXCLAMATION_MARK     # !!! → !
     - MULTIPLE_QUESTION_MARK        # ??? → ?
     - REPEATED_WORDS                # parole parole duplicate
     
-  # NON abilitare regole problematiche
+  # DISABILITA regole che possono creare regressioni semantiche
   disabled_rules:
+    - ITALIAN_SPELLCHECK             # Troppo aggressivo, può correggere male
+    - E_APOSTROPHE                   # Può interferire con correzioni AI
+    - WHITESPACE_RULE               # AI gestisce meglio gli spazi
+    - COMMA_WHITESPACE              # AI gestisce meglio la punteggiatura
+    - PERIOD_WHITESPACE             # AI gestisce meglio la punteggiatura
+    - PRON_GLI_E_L                  # AI gestisce meglio la grammatica
     - COMMA_PARENTHESIS_WHITESPACE  # Troppo rigida
     - TYPOGRAPHY                    # Può creare problemi
     
-  max_workers: 2
+  # Parametri conservativi per quality check
+  max_workers: 1                   # Single thread per evitare interferenze
+  confidence_threshold: 0.9        # Solo correzioni molto sicure
 
 validation:
   # Validazione bilanciata
@@ -130,3 +139,27 @@ italian_prompts:
     - Grammaticalmente corretta in italiano
     - Appropriata al contesto
     - Necessaria (non solo stilistica)
+
+# Configurazione pipeline invertita (AI → LanguageTool)
+pipeline_config:
+  description: "Pipeline invertita per migliorare correzioni semantiche"
+  
+  ai_first_stage:
+    description: "AI agisce per prima per correzioni semantiche intelligenti"
+    focus:
+      - "Correzioni semantiche (vlta → volta, bottaga → bottega)"
+      - "Comprensione contestuale (C'era una volta)"
+      - "Errori evidenti (U giorno → Un giorno)"
+      - "Maiuscole (alfredo → Alfredo)"
+    
+  languagetool_quality_check:
+    description: "LanguageTool come controllo qualità finale"
+    focus:
+      - "Solo errori ortografici evidenti non corretti dall'AI"
+      - "Punteggiatura mancante"
+      - "Parentesi non chiuse"
+      - "Maiuscole dopo punti"
+    anti_regression:
+      - "Non correggere se introduce errori semantici"
+      - "Non modificare correzioni già fatte dall'AI"
+      - "Mantenere il contesto semantico preservato dall'AI"

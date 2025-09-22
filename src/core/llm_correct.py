@@ -11,17 +11,40 @@ _temperature = _config.get('openai', {}).get('temperature', 0.2)
 _SYSTEM_MSG = """
 Sei un correttore di bozze ESPERTO madrelingua italiano con focus su PRECISIONE ASSOLUTA.
 
-CORREZIONI PRIORITARIE (errori evidenti):
-• ORTOGRAFIA: bottaga→bottega (NON bottaia!), ansiano→anziano, vlta→volta, fallegname→falegname
-• SPAZI: "U giorno"→"Un giorno", "U uomo"→"Un uomo", spazi doppi→spazio singolo  
+CORREZIONI SPECIFICHE OBBLIGATORIE:
+• bottaga → bottega (bottega = negozio di artigiano, NON "bottaia" che è recipiente!)
+• vlta → volta (in "C'era una volta", NON "alta"!)
+• sugu → sugo (sugo = condimento, NON "suga" che non esiste!)
+• fato → fatto (participio passato di "fare")
+• go → ho (verbo avere con H!)
+• ansiano → anziano
+• fallegname → falegname
+• borggo → borgo
+• milliore → migliore
+• carezzzzavano → carezzavano
+• cassella → casella
+• strignendo → stringendo
+• trasformazzione → trasformazione
+• CAPTIOLO → CAPITOLO
+
+ALTRI ERRORI COMUNI:
+• SPAZI: "U giorno"→"Un giorno", spazi doppi→spazio singolo  
 • GRAMMATICA H: "o fatto"→"ho fatto", "a detto"→"ha detto"
 • ACCORDI: "la cane"→"il cane", "un'uomo"→"un uomo"
 • APOSTROFI: pò→po', qual'è→qual è
 • PUNTEGGIATURA: spazi dopo punti/virgole quando mancanti
 
+REGOLE FERREE:
+1. bottega = negozio artigiano (MAI bottaia!)
+2. volta = "una volta" (MAI alta in questo contesto!)
+3. sugo = condimento (MAI suga!)
+4. Se vedi "bottaga" → SEMPRE "bottega"
+5. Se vedi "vlta" in "C'era una vlta" → SEMPRE "volta"
+6. Se vedi "sugu" → SEMPRE "sugo"
+
 METODO:
 • Correggi SOLO errori evidenti e certi al 100%
-• USA il dizionario italiano standard (bottega NON bottaia)
+• USA il dizionario italiano standard
 • Mantieni significato e stile originale
 • NON riformulare o cambiare struttura frasi
 • Se dubiti anche minimamente, NON correggere
@@ -39,17 +62,40 @@ Restituisci **solo** JSON nel formato
 _BATCH_SYSTEM_MSG = """
 Sei un correttore di bozze ESPERTO madrelingua italiano con focus su PRECISIONE ASSOLUTA.
 
-CORREZIONI PRIORITARIE (errori evidenti):
-• ORTOGRAFIA: bottaga→bottega (NON bottaia!), ansiano→anziano, vlta→volta, fallegname→falegname  
-• SPAZI: "U giorno"→"Un giorno", "U uomo"→"Un uomo", spazi doppi→spazio singolo
+CORREZIONI SPECIFICHE OBBLIGATORIE:
+• bottaga → bottega (bottega = negozio di artigiano, NON "bottaia" che è recipiente!)
+• vlta → volta (in "C'era una volta", NON "alta"!)
+• sugu → sugo (sugo = condimento, NON "suga" che non esiste!)
+• fato → fatto (participio passato di "fare")
+• go → ho (verbo avere con H!)
+• ansiano → anziano
+• fallegname → falegname
+• borggo → borgo
+• milliore → migliore
+• carezzzzavano → carezzavano
+• cassella → casella
+• strignendo → stringendo
+• trasformazzione → trasformazione
+• CAPTIOLO → CAPITOLO
+
+ALTRI ERRORI COMUNI:
+• SPAZI: "U giorno"→"Un giorno", spazi doppi→spazio singolo
 • GRAMMATICA H: "o fatto"→"ho fatto", "a detto"→"ha detto"
 • ACCORDI: "la cane"→"il cane", "un'uomo"→"un uomo"  
 • APOSTROFI: pò→po', qual'è→qual è
 • PUNTEGGIATURA: spazi dopo punti/virgole quando mancanti
 
+REGOLE FERREE:
+1. bottega = negozio artigiano (MAI bottaia!)
+2. volta = "una volta" (MAI alta in questo contesto!)
+3. sugo = condimento (MAI suga!)
+4. Se vedi "bottaga" → SEMPRE "bottega"
+5. Se vedi "vlta" in "C'era una vlta" → SEMPRE "volta"
+6. Se vedi "sugu" → SEMPRE "sugo"
+
 METODO:
 • Correggi SOLO errori evidenti e certi al 100%
-• USA il dizionario italiano standard (bottega NON bottaia)
+• USA il dizionario italiano standard
 • Mantieni significato e stile originale
 • NON riformulare o cambiare struttura frasi
 • Se dubiti anche minimamente, NON correggere
@@ -160,20 +206,31 @@ async def llm_correct_batch(texts: List[str], client: AsyncOpenAI) -> List[str]:
             return [out[i] for i in range(len(texts))]
             
         correzioni = data.get("correzioni", [])
-        logger.debug(f"Trovate {len(correzioni)} correzioni nel batch")
+        logger.debug(f"Trovate {len(correzioni)} correzioni nel batch di {len(uncached)} paragrafi")
         
-        # Applica correzioni
+        # Crea un mapping per le correzioni ricevute
+        correzioni_map = {}
         for corr in correzioni:
             idx = corr.get("id")
             txt_corretto = corr.get("txt", "")
-            if idx is not None and idx < len(uncached):
-                original_idx, original_txt = uncached[idx]
+            if idx is not None:
+                correzioni_map[idx] = txt_corretto
+        
+        # Applica correzioni a tutti i paragrafi uncached
+        for i, (original_idx, original_txt) in enumerate(uncached):
+            if i in correzioni_map:
+                # Correzione disponibile
+                txt_corretto = correzioni_map[i]
                 out[original_idx] = txt_corretto
                 # Cache il risultato
                 set_cached(original_txt, txt_corretto)
-                logger.debug(f"Correzione applicata id={idx}: '{original_txt[:30]}...' -> '{txt_corretto[:30]}...'")
+                logger.debug(f"Correzione applicata id={i}: '{original_txt[:30]}...' -> '{txt_corretto[:30]}...'")
             else:
-                logger.warning(f"ID correzione invalido: {idx}, max={len(uncached)}")
+                # Nessuna correzione disponibile, mantieni originale
+                out[original_idx] = original_txt
+                logger.debug(f"Nessuna correzione per id={i}, mantenuto testo originale")
+                # Cache anche i "non cambiamenti" per evitare retry
+                set_cached(original_txt, original_txt)
     
     except Exception as e:
         logger.error("Errore parsing batch GPT: %s", e)

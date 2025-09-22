@@ -1,16 +1,142 @@
-/backup
-/correttore files
-/nuovi file buoni
-/__pycache__
+# === PYTHON ===
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# === ENVIRONMENT VARIABLES ===
 .env.local
+.env.*.local
+
+# === PROJECT SPECIFIC ===
+# Input/Output directories that contain processed files
+uploads/
+outputs/
+backups/
+test_output/
+
+# Folders with spaces (problematic for git)
+correttore files/
+nuovi file buoni/
+
+# Cache directories
+.cache/
+storage/cache/
+.test_cache/
+.llm_cache.pkl
+
+# Large language model tools/binaries
+languagetool/
+
+# === DOCUMENTS & MEDIA ===
+# Processed documents (keep only sample/test files in specific directories if needed)
 *.docx
 *.doc
 *.pdf
-*.csv
-*.md
-*.xml
-*.html
-*.css
-*.js
 *.odt
-/.venv
+
+# Data files that are generated or contain sensitive content
+file_corretto.xml
+file_originale.xml
+
+# === BACKUP CONFIGS ===
+# Backup configuration files (keep main config.yaml)
+config_backup_*.yaml
+config_*_backup.yaml
+
+# === IDE & EDITORS ===
+# VSCode settings (keep if you want to share)
+.vscode/settings.json
+.vscode/launch.json
+
+# === SYSTEM FILES ===
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Linux
+*~
+
+# === LOGS ===
+*.log
+logs/
+
+# === TEMPORARY FILES ===
+*.tmp
+*.temp
+*.swp
+*.swo
+*~

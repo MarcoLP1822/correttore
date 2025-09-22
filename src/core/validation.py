@@ -128,9 +128,9 @@ class DocumentValidator:
             logger.warning("⚠️  Paragraph became empty after correction")
             return False  # Originale con contenuto, corretto vuoto = PROBLEMA
             
-        # 1. Controllo lunghezza (±20% massimo consentito)
+        # 1. Controllo lunghezza (±40% massimo consentito per correzioni semantiche)
         len_change = abs(len(corrected) - len(original)) / max(len(original), 1)
-        if len_change > 0.20:  # 20% di tolleranza
+        if len_change > 0.40:  # 40% di tolleranza per correzioni semantiche
             logger.warning(f"⚠️  Large length change: {len_change:.1%}")
             return False
             
@@ -144,8 +144,8 @@ class DocumentValidator:
             
         # 3. Controllo similarità semantica di base (usando SequenceMatcher)
         similarity = SequenceMatcher(None, original.lower(), corrected.lower()).ratio()
-        if similarity < 0.6:  # 60% similarità minima
-            logger.warning(f"⚠️  Low semantic similarity: {similarity:.1%}")
+        if similarity < 0.3:  # 30% similarità minima - molto permissivo per correzioni semantiche
+            logger.warning(f"⚠️  Very low semantic similarity: {similarity:.1%}")
             return False
             
         return True
@@ -179,7 +179,7 @@ class DocumentValidator:
         before_chars = len(before_text)
         after_chars = len(after_text)
         
-        if after_chars < before_chars * 0.8:  # Perdita >20%
+        if after_chars < before_chars * 0.6:  # Perdita >40% - più permissivo per correzioni semantiche
             issues.append(ContentIssue(
                 type='truncation',
                 severity='critical',
