@@ -8,6 +8,8 @@ import logging
 from typing import List, Dict, Any, Optional, Tuple
 from dataclasses import dataclass, field
 from concurrent.futures import as_completed, ThreadPoolExecutor
+from matplotlib import text
+from utils.text_normalize import prenormalize
 
 from docx import Document as DocxDocument  # Renamed to avoid type confusion
 from docx.text.paragraph import Paragraph
@@ -313,8 +315,9 @@ class CorrectionEngine:
         success_rate = context.corrections_applied / context.total_processed if context.total_processed > 0 else 0
         
         if success_rate < self.config.min_success_rate:
-            logger.error(f"❌ Success rate too low: {success_rate:.2%} < {self.config.min_success_rate:.2%}")
-            return False
+            # ✅ Non abortire: conserva comunque le correzioni applicate
+            logger.warning(f"⚠️ Success rate basso: {success_rate:.2%} < {self.config.min_success_rate:.2%}")
+            # prosegui senza return False
         
         logger.info(f"✅ Correction process completed with {success_rate:.2%} success rate")
         return True
@@ -358,14 +361,11 @@ class CorrectionEngine:
             )
     
     def _apply_text_preserving_format(self, paragraph: Paragraph, new_text: str):
-        """Applica il nuovo testo preservando la formattazione esistente"""
-        # Questa è una versione semplificata
-        # Una versione più sofisticata dovrebbe preservare run specifici
+        """Applica il nuovo testo evitando clobbering dei run."""
         if paragraph.runs:
-            paragraph.runs[0].text = new_text
-            # Rimuovi run extra
-            for run in paragraph.runs[1:]:
-                run.text = ""
+            for run in paragraph.runs:
+                run.text = ""  # svuota i run esistenti
+            paragraph.add_run(new_text)    # un singolo run pulito
         else:
             paragraph.text = new_text
     
@@ -380,9 +380,12 @@ class CorrectionEngine:
         if self._has_math_content(paragraph):
             return False
         
-        # Evita paragrafi troppo corti (probabilmente titoli/labels)
+        # Evita paragrafi troppo corti, MA consenti frasi/dialoghi veri
         if len(text) < self.config.min_paragraph_length:
-            return False
+            if text.endswith(('.', '!', '?')) or text.startswith(('«', '–', '—', '- ')):
+                pass  # consenti dialoghi/titoli
+            else:
+                return False
         
         # Evita paragrafi con pattern speciali (codici, date, numeri)
         if self._is_special_content(text):
@@ -418,12 +421,14 @@ class CorrectionEngine:
         import re
         
         error_indicators = [
-            r'( {2,})',                     # spazi multipli
-            r'([,;:.!?]\S)',               # punteggiatura senza spazio
-            r'(\S[,;:.!?])',               # nessuno spazio prima punteggiatura
-            r'\b(pò)\b',                   # "pò" sbagliato
-            r'\b(qual è)\b',               # possibile "qual'è"
-            r'(«\s)|(\s»)',                # virgolette con spazi errati
+            r'( {2,})',                       # spazi multipli
+            r'([,;:.!?]\S)',                  # punteggiatura senza spazio dopo
+            r'(\S[,;:.!?])',                  # nessuno spazio prima di punteggiatura finale
+            r"\bqual['’]\s?è\b",              # qual’è / qual’ è
+            r"\bun\s+p[òò]\b",                # un pò
+            r"\bp[òò]\b",                     # pò isolato
+            r"\b(a|e)\'\s",                   # apostrofo dritto seguito da spazio
+            r'(«\s)|(\s»)',                   # virgolette caporali con spazi errati
         ]
         
         for pattern in error_indicators:

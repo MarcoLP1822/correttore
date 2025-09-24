@@ -73,14 +73,15 @@ class LanguageToolService:
             return []
         
         # Check cache
+        cached_errors = None  # evita UnboundLocalError e salti di flusso
         if use_cache:
             cache_key = self._generate_cache_key(text)
             cached_entry = self.cache_service.get_with_similarity(text)
             if cached_entry and cached_entry.correction_type == 'languagetool':
                 cached_errors = eval(cached_entry.corrected_text)  # Deserializza errori
-            if cached_errors is not None:
-                logger.debug("💾 Cache hit for LanguageTool check")
-                return cached_errors
+        if cached_errors is not None:
+            logger.debug("💾 Cache hit for LanguageTool check")
+            return cached_errors
         
         # Esegui controllo
         result = self._run_languagetool_check(text)
