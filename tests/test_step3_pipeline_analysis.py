@@ -9,9 +9,9 @@ import os
 sys.path.append('.')
 
 # Import delle funzioni principali
-from src.core.precheck import has_errors
-from src.core.spellfix import spellfix_paragraph
-from src.core.safe_correction import SafeCorrector
+from correttore.core.precheck import has_errors
+from correttore.core.spellfix import spellfix_paragraph
+from correttore.core.safe_correction import SafeCorrector
 
 # Setup logging
 logging.basicConfig(level=logging.DEBUG)

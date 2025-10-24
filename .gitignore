@@ -77,22 +77,46 @@ dmypy.json
 # === PROJECT SPECIFIC ===
 # Input/Output directories that contain processed files
 uploads/
+uploads/*.docx
 outputs/
+outputs/*.docx
+outputs/*.md
 backups/
+backups/*.backup.json
 test_output/
+test_output/*.txt
 
-# Folders with spaces (problematic for git)
+# Folders with spaces (problematic for git) - DEPRECATED after migration
 correttore files/
 nuovi file buoni/
 
 # Cache directories
 .cache/
 storage/cache/
+storage/cache/*.pkl
+storage/cache/*.json
 .test_cache/
 .llm_cache.pkl
 
 # Large language model tools/binaries
 languagetool/
+languagetool/LanguageTool-*/
+
+# Migration backups
+_migration_backup_*/
+
+# Examples - keep folder structure, ignore actual files
+examples/*.docx
+examples/*.pdf
+!examples/.gitkeep
+
+# Old structure (after migration to Clean Architecture)
+# Uncomment these after verifying new structure works:
+# /core/
+# /services/
+# /utils/
+# /config/
+# /tools/
 
 # === DOCUMENTS & MEDIA ===
 # Processed documents (keep only sample/test files in specific directories if needed)
@@ -133,6 +157,7 @@ $RECYCLE.BIN/
 # === LOGS ===
 *.log
 logs/
+migration.log
 
 # === TEMPORARY FILES ===
 *.tmp
@@ -140,3 +165,79 @@ logs/
 *.swp
 *.swo
 *~
+
+# === BUILD & DISTRIBUTION ===
+# Python package builds
+*.whl
+pip-wheel-metadata/
+
+# === DOCUMENTATION ===
+# Generated documentation
+docs/_build/
+docs/_static/
+docs/_templates/
+site/
+
+# Backup documentation
+docs/*_OLD.md
+docs/*_backup.md
+
+# === TESTING ===
+# Test artifacts
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.tox/
+
+# Test data (keep test fixtures)
+tests/fixtures/*.docx
+tests/corpus/*.docx
+!tests/corpus/sample*.txt
+
+# === DEVELOPMENT ===
+# Development databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints/
+
+# Python virtual environments
+.Python
+python/
+
+# === SECRETS & CONFIG ===
+# Never commit these!
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+secrets.yaml
+secrets.json
+
+# API keys
+*_api_key.txt
+*-api-key.txt
+
+# === MISC ===
+# Editor backup files
+*.bak
+*.backup
+*~
+
+# Compressed files (unless explicitly needed)
+*.zip
+*.tar.gz
+*.rar
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

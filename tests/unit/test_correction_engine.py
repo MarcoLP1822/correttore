@@ -16,10 +16,10 @@ from docx.text.paragraph import Paragraph
 # Aggiungi il path del progetto
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from core.correction_engine import CorrectionEngine, CorrectionResult, CorrectionContext
-from core.document_handler import DocumentInfo
-from src.core.safe_correction import QualityScore, CorrectionConfidence
-from config.settings import Settings
+from correttore.core.correction_engine import CorrectionEngine, CorrectionResult, CorrectionContext
+from correttore.core.document_handler import DocumentInfo
+from correttore.core.safe_correction import QualityScore, CorrectionConfidence
+from correttore.config.settings import Settings
 
 
 class TestCorrectionEngine(unittest.TestCase):

@@ -7,8 +7,8 @@ import logging
 import sys
 sys.path.append('.')
 
-from src.core.safe_correction import SafeCorrector
-from src.core.spellfix import spellfix_paragraph
+from correttore.core.safe_correction import SafeCorrector
+from correttore.core.spellfix import spellfix_paragraph
 
 # Setup logging più dettagliato
 logging.basicConfig(level=logging.DEBUG, format='%(name)s - %(levelname)s - %(message)s')

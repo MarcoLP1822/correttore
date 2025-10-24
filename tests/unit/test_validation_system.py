@@ -11,8 +11,8 @@ import logging
 # Setup logging per vedere i risultati
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 
-from src.core.validation import DocumentValidator, ValidationResult, create_backup, validate_document, validate_correction
-from src.core.safe_correction import SafeCorrector, CorrectionResult, QualityScore
+from correttore.core.validation import DocumentValidator, ValidationResult, create_backup, validate_document, validate_correction
+from correttore.core.safe_correction import SafeCorrector, CorrectionResult, QualityScore
 
 def test_validation_system():
     """Test del sistema di validazione"""

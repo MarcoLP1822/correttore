@@ -13,8 +13,8 @@ from unittest.mock import Mock, patch, MagicMock
 # Aggiungi il path del progetto
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from core.document_handler import DocumentHandler, DocumentLoadError, DocumentSaveError, DocumentInfo
-from config.settings import Settings
+from correttore.core.document_handler import DocumentHandler, DocumentLoadError, DocumentSaveError, DocumentInfo
+from correttore.config.settings import Settings
 
 
 class TestDocumentHandler(unittest.TestCase):

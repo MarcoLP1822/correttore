@@ -19,8 +19,8 @@ from unittest.mock import Mock, patch, MagicMock
 import sys
 sys.modules['language_tool_python'] = MagicMock()
 
-from services.intelligent_cache import IntelligentCache, CacheEntry, get_cache, clear_global_cache
-from services.parallel_processor import ParallelCorrector, ProcessingTask, WorkerPool, get_parallel_corrector
+from correttore.services.intelligent_cache import IntelligentCache, CacheEntry, get_cache, clear_global_cache
+from correttore.services.parallel_processor import ParallelCorrector, ProcessingTask, WorkerPool, get_parallel_corrector
 
 # Mock safe_correction e docx dependencies 
 sys.modules['safe_correction'] = MagicMock()

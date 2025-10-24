@@ -12,9 +12,9 @@ from unittest.mock import Mock, patch
 # Aggiungi il path del progetto
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from services.openai_service import OpenAIService
-from core.error_handling import APITimeoutError, RateLimitError
-from config.settings import Settings
+from correttore.services.openai_service import OpenAIService
+from correttore.core.error_handling import APITimeoutError, RateLimitError
+from correttore.config.settings import Settings
 
 
 class TestOpenAIIntegration(unittest.TestCase):

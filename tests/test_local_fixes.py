@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from src.core.safe_correction import SafeCorrector, CorrectionResult
+from correttore.core.safe_correction import SafeCorrector, CorrectionResult
 from difflib import SequenceMatcher
 
 def test_safe_corrector_fixes():
@@ -102,7 +102,7 @@ def test_regression_prevention():
     """Test che _introduces_regression funzioni correttamente."""
     print("\n🧪 Testing regression prevention...")
     
-    from src.core.correttore import _introduces_regression
+    from correttore.core.correttore import _introduces_regression
     
     test_cases = [
         # (original, ai_corrected, grammar_checked, expected_regression)

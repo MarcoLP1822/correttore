@@ -7,8 +7,8 @@ import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'src'))
 
-from core.validation import validate_correction, DocumentValidator
-from core.safe_correction import SafeCorrector
+from correttore.core.validation import validate_correction, DocumentValidator
+from correttore.core.safe_correction import SafeCorrector
 
 def test_semantic_corrections():
     """Test correzioni semantiche che prima fallivano"""

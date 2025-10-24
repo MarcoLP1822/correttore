@@ -41,7 +41,7 @@ class PremiumCorrectionEngine:
         self.enhanced_system = EnhancedCorrectionSystem()
         self.languagetool = EnhancedLanguageTool(languagetool_url)
         self.italian_corrector = ItalianSpecificCorrector()
-        self.safe_corrector = SafeCorrector(conservative_mode=False, quality_threshold=0.75)
+        self.safe_corrector = SafeCorrector(conservative_mode=False, quality_threshold=0.55)
         
     async def correct_paragraph_premium(self, paragraph: Any, par_id: int) -> PremiumCorrectionResult:
         """Correzione premium di un paragrafo"""
@@ -106,27 +106,27 @@ class PremiumCorrectionEngine:
     
     def _should_apply_premium_correction(self, quality_score: QualityScore, original: str, corrected: str) -> bool:
         """Decide se applicare la correzione premium"""
-        # Criteri più severi per il sistema premium
+        # Criteri abbassati per permettere più correzioni ortografiche
         
-        # 1. Qualità minima richiesta
-        if quality_score.overall_score < 0.75:
+        # 1. Qualità minima richiesta (abbassata da 0.75 a 0.55)
+        if quality_score.overall_score < 0.55:
             return False
         
-        # 2. Sicurezza minima richiesta  
-        if quality_score.safety_score < 0.85:
+        # 2. Sicurezza minima richiesta (abbassata da 0.85 a 0.70)
+        if quality_score.safety_score < 0.70:
             return False
         
-        # 3. Preservazione contenuto minima
-        if quality_score.content_preservation < 0.80:
+        # 3. Preservazione contenuto minima (abbassata da 0.80 a 0.60)
+        if quality_score.content_preservation < 0.60:
             return False
         
         # 4. Non applicare se il testo è sostanzialmente uguale
         if original.strip() == corrected.strip():
             return False
         
-        # 5. Non applicare cambiamenti troppo drastici
+        # 5. Non applicare cambiamenti troppo drastici (più tollerante: 0.5-1.5 invece di 0.7-1.3)
         length_ratio = len(corrected) / max(len(original), 1)
-        if length_ratio < 0.7 or length_ratio > 1.3:
+        if length_ratio < 0.5 or length_ratio > 1.5:
             return False
         
         return True

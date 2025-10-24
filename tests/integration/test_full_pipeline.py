@@ -14,14 +14,14 @@ from unittest.mock import Mock, patch
 # Aggiungi il path del progetto
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from core.correction_engine import CorrectionEngine
-from core.document_handler import DocumentHandler
-from core.quality_assurance import QualityAssurance
-from core.formatting_manager import FormattingManager
-from core.error_handling import ErrorHandler
-from services.openai_service import OpenAIService
-from services.languagetool_service import LanguageToolService
-from config.settings import Settings
+from correttore.core.correction_engine import CorrectionEngine
+from correttore.core.document_handler import DocumentHandler
+from correttore.core.quality_assurance import QualityAssurance
+from correttore.core.formatting_manager import FormattingManager
+from correttore.core.error_handling import ErrorHandler
+from correttore.services.openai_service import OpenAIService
+from correttore.services.languagetool_service import LanguageToolService
+from correttore.config.settings import Settings
 
 
 class TestFullPipeline(unittest.TestCase):

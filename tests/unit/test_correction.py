@@ -4,7 +4,7 @@ Test del sistema di correzione
 """
 
 from pathlib import Path
-from src.core.correttore import process_doc
+from correttore.core.correttore import process_doc
 
 def test_correction():
     input_file = Path('test_input.docx')

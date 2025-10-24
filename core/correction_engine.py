@@ -20,6 +20,7 @@ from services.languagetool_service import LanguageToolService
 from services.intelligent_cache import get_cache
 from src.core.safe_correction import SafeCorrector, QualityScore, CorrectionConfidence
 from config.settings import get_correction_config
+from src.utils.readability import ReadabilityAnalyzer
 
 logger = logging.getLogger(__name__)
 
@@ -55,6 +56,7 @@ class CorrectionEngine:
         self.languagetool_service = LanguageToolService()
         self.cache_service = get_cache()
         self.safe_corrector = SafeCorrector()
+        self.readability_analyzer = ReadabilityAnalyzer()
         
         self.config = get_correction_config()
         # self.app_config = get_app_config()  # Commentato fino a quando non sarà implementato
@@ -438,8 +440,12 @@ class CorrectionEngine:
         return False
     
     def _log_correction_summary(self, context: CorrectionContext, output_path):
-        """Registra un riassunto della sessione di correzione"""
+        """Registra un riassunto della sessione di correzione con statistiche di leggibilità"""
         success_rate = context.corrections_applied / context.total_processed if context.total_processed > 0 else 0
+        
+        # Estrai tutto il testo dal documento per analisi di leggibilità
+        full_text = "\n".join([p.text for p in context.source_document.paragraphs if p.text.strip()])
+        readability_stats = self.readability_analyzer.analyze(full_text)
         
         logger.info("=" * 60)
         logger.info("📊 CORRECTION SUMMARY")
@@ -451,6 +457,31 @@ class CorrectionEngine:
         logger.info(f"✅ Corrections applied: {context.corrections_applied}")
         logger.info(f"⚠️  Corrections rejected: {context.corrections_rejected}")
         logger.info(f"📈 Success rate: {success_rate:.2%}")
+        logger.info("")
+        logger.info("📖 READABILITY ANALYSIS (GULPEASE)")
+        logger.info("-" * 60)
+        
+        if readability_stats['gulpease'] is not None:
+            logger.info(f"📊 Indice Gulpease: {readability_stats['gulpease']:.2f}/100")
+            logger.info(f"🔤 Parole: {readability_stats['words']:,}")
+            logger.info(f"📝 Frasi: {readability_stats['sentences']:,}")
+            logger.info(f"📏 Lunghezza media parola: {readability_stats['avg_word_length']:.2f} lettere")
+            logger.info(f"📐 Lunghezza media frase: {readability_stats['avg_sentence_length']:.2f} parole")
+            logger.info("")
+            logger.info("👥 Difficoltà per livello di scolarizzazione:")
+            
+            difficulty_labels = {
+                'licenza_elementare': '   📚 Licenza elementare',
+                'licenza_media': '   🎓 Licenza media',
+                'diploma_superiore': '   🎯 Diploma superiore'
+            }
+            
+            for level, label in difficulty_labels.items():
+                difficulty = readability_stats['difficulty'].get(level, 'N/A')
+                logger.info(f"{label}: {difficulty}")
+        else:
+            logger.info("⚠️  Testo non analizzabile per leggibilità")
+        
         logger.info("=" * 60)
     
     def _get_timestamp(self) -> str:

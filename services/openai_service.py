@@ -302,17 +302,21 @@ class OpenAIService:
     def _build_correction_prompt(self, request: CorrectionRequest) -> str:
         """Costruisce il prompt per la correzione"""
         
-        base_prompt = f"""Correggi il seguente testo in italiano, mantenendo il significato originale e il tono:
+        base_prompt = f"""Correggi il seguente testo in italiano, correggendo TUTTI gli errori:
 
 TESTO DA CORREGGERE:
 {request.text}
 
 ISTRUZIONI:
-1. Correggi errori di ortografia, grammatica e punteggiatura
-2. Mantieni la formattazione esistente (maiuscole, corsivi, etc.)
-3. Non modificare nomi propri, luoghi o citazioni
-4. Preserva lo stile e il tono originale
-5. Se non ci sono errori, restituisci il testo identico
+1. Correggi TUTTI gli errori di ortografia, grammatica e punteggiatura
+2. Presta particolare attenzione a:
+   - Errori di battitura (lettere ripetute, lettere sbagliate)
+   - Articoli errati (il/la, un/una)
+   - Apostrofi mancanti
+   - Parole incomplete o errate
+3. Mantieni la formattazione esistente (maiuscole, corsivi, etc.)
+4. Non modificare nomi propri, luoghi o citazioni già corretti
+5. Preserva lo stile e il tono originale
 
 TESTO CORRETTO:"""
 
@@ -326,11 +330,18 @@ TESTO CORRETTO:"""
     def _get_system_prompt(self) -> str:
         """Ritorna il prompt di sistema per OpenAI"""
         return """Sei un correttore di bozze esperto in lingua italiana. 
-Il tuo compito è correggere errori di ortografia, grammatica e punteggiatura mantenendo:
+Il tuo compito è correggere TUTTI gli errori di ortografia, grammatica e punteggiatura mantenendo:
 - Il significato originale del testo
 - Lo stile e il tono dell'autore
 - La formattazione esistente
 - I nomi propri e le citazioni
+
+CORREZIONI PRIORITARIE:
+- Errori ortografici evidenti (vlta→volta, borggo→borgo, duee→due, Qvesta→Questa, ecc.)
+- Errori di battitura (carezzzzavano→carezzavano, Acondroplasiaaa→Acondroplasia)
+- Articoli sbagliati (La cane→Il cane)
+- Apostrofi mancanti (c erano→c'erano)
+- Forme verbali errate (go→ho, fato→fatto)
 
 Rispondi SOLO con il testo corretto, senza spiegazioni o commenti aggiuntivi."""
     

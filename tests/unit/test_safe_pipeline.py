@@ -14,9 +14,9 @@ from docx.text.paragraph import Paragraph
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(name)s: %(message)s')
 
 # Importa i moduli del sistema
-from src.core.safe_correction import SafeCorrector
-from src.core.validation import DocumentValidator
-from src.core.correttore import Modification, NAME_RE, GLOSSARY_STOP
+from correttore.core.safe_correction import SafeCorrector
+from correttore.core.validation import DocumentValidator
+from correttore.core.correttore import Modification, NAME_RE, GLOSSARY_STOP
 
 def create_test_document():
     """Crea un documento di test con vari tipi di errori"""
@@ -117,7 +117,7 @@ async def test_safe_pipeline():
         
         # Validazione manuale (come nel sistema reale)
         if corrected != original:
-            from src.core.validation import validate_correction
+            from correttore.core.validation import validate_correction
             if validate_correction(original, corrected):
                 para.text = corrected
                 grammar_applied += 1
@@ -170,7 +170,7 @@ async def test_safe_pipeline():
         para_idx += 1
         
         if ai_corrected != original:
-            from src.core.validation import validate_correction
+            from correttore.core.validation import validate_correction
             if validate_correction(original, ai_corrected):
                 para.text = ai_corrected
                 ai_applied += 1

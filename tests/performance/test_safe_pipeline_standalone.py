@@ -13,8 +13,8 @@ import re
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(name)s: %(message)s')
 
 # Importa i moduli del sistema
-from src.core.safe_correction import SafeCorrector, CorrectionResult, QualityScore
-from src.core.validation import DocumentValidator
+from correttore.core.safe_correction import SafeCorrector, CorrectionResult, QualityScore
+from correttore.core.validation import DocumentValidator
 from dataclasses import dataclass
 
 # Definizione locale di Modification per il test
@@ -128,7 +128,7 @@ async def test_safe_pipeline():
         
         # Validazione manuale (come nel sistema reale)
         if corrected != original:
-            from src.core.validation import validate_correction
+            from correttore.core.validation import validate_correction
             if validate_correction(original, corrected):
                 para.text = corrected
                 grammar_applied += 1
@@ -182,7 +182,7 @@ async def test_safe_pipeline():
         original = para.text
         
         if ai_corrected != original:
-            from src.core.validation import validate_correction
+            from correttore.core.validation import validate_correction
             if validate_correction(original, ai_corrected):
                 para.text = ai_corrected
                 ai_applied += 1

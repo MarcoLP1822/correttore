@@ -10,8 +10,8 @@ from pathlib import Path
 # Aggiungi il path del progetto
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from core.quality_assurance import QualityAssurance, QualityReport, QualityMetric
-from config.settings import Settings
+from correttore.core.quality_assurance import QualityAssurance, QualityReport, QualityMetric
+from correttore.config.settings import Settings
 
 
 class TestQualityAssurance(unittest.TestCase):

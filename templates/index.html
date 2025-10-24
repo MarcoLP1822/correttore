@@ -3,264 +3,351 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Correttore Enterprise - Sistema di Correzione Italiana</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>Correttore Italiano</title>
     <style>
-        .drop-zone {
-            border: 3px dashed #007bff;
-            border-radius: 10px;
-            padding: 50px;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            width: 100%;
+        }
+        .header {
             text-align: center;
-            transition: all 0.3s ease;
+            margin-bottom: 40px;
+        }
+        h1 {
+            font-size: 28px;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .drop-zone {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 60px 20px;
+            text-align: center;
             cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 24px;
         }
         .drop-zone:hover {
-            border-color: #0056b3;
-            background-color: #f8f9fa;
+            border-color: #007bff;
+            background: #f8f9fa;
         }
         .drop-zone.dragover {
             border-color: #28a745;
-            background-color: #d4edda;
+            background: #d4edda;
+        }
+        .drop-zone svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 16px;
+            opacity: 0.4;
+        }
+        .drop-zone h3 {
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        .drop-zone p {
+            color: #999;
+            font-size: 13px;
+        }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
         }
         .progress-container {
             display: none;
+            margin-top: 24px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e9ecef;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #007bff;
+            transition: width 0.3s;
+        }
+        .status-text {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+        .download-btn {
+            display: none;
+            margin-top: 16px;
+        }
+        .error {
+            color: #dc3545;
+            text-align: center;
+            margin-top: 16px;
+            font-size: 14px;
+        }
+        input[type="file"] {
+            display: none;
+        }
+        .file-selected {
+            color: #28a745;
+        }
+        .btn-secondary {
+            background: #6c757d;
+            margin-top: 12px;
+        }
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        .readability-box {
+            display: none;
             margin-top: 20px;
-        }
-        .job-card {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
             border-left: 4px solid #007bff;
-            margin-bottom: 10px;
         }
-        .job-card.completed {
-            border-left-color: #28a745;
+        .readability-box.show {
+            display: block;
+            animation: slideDown 0.3s ease-out;
         }
-        .job-card.failed {
-            border-left-color: #dc3545;
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        .job-card.processing {
-            border-left-color: #ffc107;
+        .readability-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
         }
-        .enterprise-header {
-            background: linear-gradient(135deg, #007bff, #0056b3);
-            color: white;
-            padding: 2rem 0;
-            margin-bottom: 2rem;
+        .readability-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
         }
-        .feature-icon {
-            font-size: 2rem;
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #999;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .close-btn:hover {
+            background: #e9ecef;
+            color: #333;
+        }
+        .gulpease-score {
+            font-size: 48px;
+            font-weight: 700;
             color: #007bff;
-            margin-bottom: 1rem;
+            text-align: center;
+            margin: 20px 0;
         }
-        .info-icon {
-            cursor: help;
-            transition: color 0.2s ease;
+        .gulpease-score small {
+            font-size: 18px;
+            color: #666;
+            font-weight: 400;
         }
-        .info-icon:hover {
-            color: #007bff !important;
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
         }
-        .tooltip {
-            font-size: 0.875rem;
+        .stat-item {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
         }
-        .tooltip-inner {
-            max-width: 300px;
-            text-align: left;
+        .stat-item .label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+        .stat-item .value {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+        .difficulty-levels {
+            background: white;
+            padding: 16px;
+            border-radius: 6px;
+        }
+        .difficulty-levels h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+        }
+        .difficulty-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .difficulty-item:last-child {
+            border-bottom: none;
+        }
+        .difficulty-item .level {
+            font-size: 13px;
+            color: #666;
+        }
+        .difficulty-item .badge {
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .badge-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <div class="enterprise-header">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <h1 class="mb-2"><i class="fas fa-spell-check"></i> Correttore Enterprise</h1>
-                    <p class="lead mb-0">Sistema enterprise-grade per la correzione automatica di documenti italiani</p>
-                </div>
-                <div class="col-md-4 text-end">
-                    <a href="/dashboard" class="btn btn-light btn-lg">
-                        <i class="fas fa-chart-dashboard"></i> Dashboard
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div class="container">
-        <!-- Features Row -->
-        <div class="row mb-5">
-            <div class="col-md-3 text-center">
-                <div class="feature-icon">
-                    <i class="fas fa-shield-alt"></i>
-                </div>
-                <h5>100% Sicuro</h5>
-                <p class="text-muted">Backup automatico e rollback intelligente</p>
-            </div>
-            <div class="col-md-3 text-center">
-                <div class="feature-icon">
-                    <i class="fas fa-brain"></i>
-                </div>
-                <h5>AI Avanzata</h5>
-                <p class="text-muted">GPT-4 + LanguageTool per qualità enterprise</p>
-            </div>
-            <div class="col-md-3 text-center">
-                <div class="feature-icon">
-                    <i class="fas fa-tachometer-alt"></i>
-                </div>
-                <h5>Performance</h5>
-                <p class="text-muted">Cache intelligente e processamento parallelo</p>
-            </div>
-            <div class="col-md-3 text-center">
-                <div class="feature-icon">
-                    <i class="fas fa-chart-line"></i>
-                </div>
-                <h5>Monitoring</h5>
-                <p class="text-muted">Metriche real-time e quality assurance</p>
-            </div>
+        <div class="header">
+            <h1>Correttore Italiano</h1>
+            <p class="subtitle">Correzione automatica documenti</p>
         </div>
 
-        <!-- Upload Section -->
-        <div class="row">
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header">
-                        <h4 class="mb-0"><i class="fas fa-upload"></i> Carica Documento</h4>
-                    </div>
-                    <div class="card-body">
-                        <form id="uploadForm" enctype="multipart/form-data">
-                            <!-- Drop Zone -->
-                            <div class="drop-zone" id="dropZone">
-                                <i class="fas fa-cloud-upload-alt fa-3x mb-3 text-primary"></i>
-                                <h5>Trascina qui il tuo documento</h5>
-                                <p class="text-muted">oppure clicca per selezionare</p>
-                                <p class="small text-muted">Supportato: .docx, .doc, .odt (max 50MB)</p>
-                                <input type="file" id="fileInput" name="file" accept=".docx,.doc,.odt" style="display: none;">
-                            </div>
-
-                            <!-- Opzioni Semplificate -->
-                            <div class="row mt-4">
-                                <div class="col-md-6">
-                                    <div class="card border-success">
-                                        <div class="card-body text-center">
-                                            <h5 class="card-title">🇮🇹 Correzione Italiana Professionale</h5>
-                                            <p class="card-text">Sistema ottimizzato specificamente per la lingua italiana</p>
-                                            <div class="form-check form-switch d-flex justify-content-center">
-                                                <input class="form-check-input" type="checkbox" id="language_check" name="language_check" checked>
-                                                <label class="form-check-label ms-2" for="language_check">
-                                                    LanguageTool avanzato per grammatica italiana
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="card border-info">
-                                        <div class="card-body text-center">
-                                            <h5 class="card-title">🤖 Miglioramento AI</h5>
-                                            <p class="card-text">Oltre agli errori, migliora stile e fluidità</p>
-                                            <div class="form-check form-switch d-flex justify-content-center">
-                                                <input class="form-check-input" type="checkbox" id="ai_enhancement" name="ai_enhancement" checked>
-                                                <label class="form-check-label ms-2" for="ai_enhancement">
-                                                    Abilita miglioramenti stilistici AI
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Opzioni aggiuntive -->
-                            <div class="row mt-3">
-                                <div class="col-md-12">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="backup" name="backup" checked>
-                                        <label class="form-check-label" for="backup">
-                                            💾 Crea backup automatico del documento originale (raccomandato)
-                                        </label>
-                                    </div>
-                                    <small class="text-muted">Protegge il documento originale</small>
-                                </div>
-                            </div>
-
-                            <button type="submit" class="btn btn-primary btn-lg mt-3" id="submitBtn">
-                                <i class="fas fa-magic"></i> Inizia Correzione
-                            </button>
-                        </form>
-
-                        <!-- Progress -->
-                        <div class="progress-container" id="progressContainer">
-                            <div class="alert alert-info" id="statusAlert">
-                                <i class="fas fa-spinner fa-spin"></i> Processo il file...
-                            </div>
-                            <div class="progress mb-3">
-                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
-                                     id="progressBar" role="progressbar" style="width: 0%"></div>
-                            </div>
-                            <div id="jobDetails"></div>
-                        </div>
-                    </div>
+        <div class="card">
+            <form id="uploadForm" enctype="multipart/form-data">
+                <div class="drop-zone" id="dropZone">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    <h3>Carica documento</h3>
+                    <p>Trascina o clicca per selezionare (.docx)</p>
                 </div>
-            </div>
-
-            <!-- Stats Panel -->
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="fas fa-chart-pie"></i> Statistiche Sistema</h5>
+                <input type="file" id="fileInput" name="file" accept=".docx,.doc">
+                
+                <button type="submit" class="btn" id="submitBtn">Correggi documento</button>
+                <button type="button" class="btn btn-secondary" id="readabilityBtn">📊 Analizza Leggibilità</button>
+                
+                <div class="progress-container" id="progressContainer">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
                     </div>
-                    <div class="card-body">
-                        <div id="systemStats">
-                            <div class="text-center">
-                                <i class="fas fa-spinner fa-spin fa-2x text-muted"></i>
-                                <p class="text-muted mt-2">Caricamento statistiche...</p>
-                            </div>
-                        </div>
-                    </div>
+                    <p class="status-text" id="statusText">Elaborazione in corso...</p>
                 </div>
 
-                <!-- Recent Jobs -->
-                <div class="card mt-3">
-                    <div class="card-header">
-                        <h6 class="mb-0"><i class="fas fa-history"></i> Job Recenti</h6>
-                    </div>
-                    <div class="card-body p-2" style="max-height: 300px; overflow-y: auto;">
-                        <div id="recentJobs">
-                            <p class="text-muted text-center">Nessun job ancora processato</p>
-                        </div>
-                    </div>
+                <a href="#" class="btn download-btn" id="downloadBtn">Scarica documento corretto</a>
+                <p class="error" id="errorText"></p>
+            </form>
+
+            <!-- Box Risultati Leggibilità -->
+            <div class="readability-box" id="readabilityBox">
+                <div class="readability-header">
+                    <h3>📖 Analisi Leggibilità - Indice Gulpease</h3>
+                    <button class="close-btn" id="closeReadability">&times;</button>
                 </div>
+                <div id="readabilityContent"></div>
             </div>
         </div>
     </div>
 
-    <footer class="bg-light mt-5 py-4">
-        <div class="container text-center">
-            <div class="row">
-                <div class="col-md-6">
-                    <h6>Correttore Enterprise v2.0.0</h6>
-                    <p class="text-muted small">Sistema enterprise-grade per correzione documenti italiani</p>
-                </div>
-                <div class="col-md-6">
-                    <p class="text-muted small">
-                        <i class="fas fa-code"></i> Sviluppato con tecnologie enterprise<br>
-                        <i class="fas fa-shield-alt"></i> Sicuro • <i class="fas fa-rocket"></i> Veloce • <i class="fas fa-brain"></i> Intelligente
-                    </p>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Gestione drag & drop
         const dropZone = document.getElementById('dropZone');
         const fileInput = document.getElementById('fileInput');
         const uploadForm = document.getElementById('uploadForm');
-        const progressContainer = document.getElementById('progressContainer');
         const submitBtn = document.getElementById('submitBtn');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressFill = document.getElementById('progressFill');
+        const statusText = document.getElementById('statusText');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const errorText = document.getElementById('errorText');
+        const readabilityBtn = document.getElementById('readabilityBtn');
+        const readabilityBox = document.getElementById('readabilityBox');
+        const readabilityContent = document.getElementById('readabilityContent');
+        const closeReadability = document.getElementById('closeReadability');
 
-        // Click per aprire file dialog
         dropZone.addEventListener('click', () => fileInput.click());
 
-        // Drag & drop eventi
         dropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
             dropZone.classList.add('dragover');
@@ -273,63 +360,46 @@
         dropZone.addEventListener('drop', (e) => {
             e.preventDefault();
             dropZone.classList.remove('dragover');
-            
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                // Crea un nuovo DataTransfer per assegnare i file al input
-                const dataTransfer = new DataTransfer();
-                dataTransfer.items.add(files[0]);
-                fileInput.files = dataTransfer.files;
-                updateDropZoneText(files[0].name);
+            if (e.dataTransfer.files.length > 0) {
+                const dt = new DataTransfer();
+                dt.items.add(e.dataTransfer.files[0]);
+                fileInput.files = dt.files;
+                updateDropZone(e.dataTransfer.files[0].name);
             }
         });
 
-        // Aggiorna testo quando file selezionato
         fileInput.addEventListener('change', (e) => {
             if (e.target.files.length > 0) {
-                updateDropZoneText(e.target.files[0].name);
+                updateDropZone(e.target.files[0].name);
             }
         });
 
-        function updateDropZoneText(filename) {
+        function updateDropZone(filename) {
             dropZone.innerHTML = `
-                <i class="fas fa-file-word fa-3x mb-3 text-success"></i>
-                <h5 class="text-success">File selezionato</h5>
-                <p class="text-muted">${filename}</p>
-                <small class="text-muted">Clicca per cambiare file</small>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="color: #28a745">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <h3 class="file-selected">${filename}</h3>
+                <p>Clicca per cambiare file</p>
             `;
         }
 
-        // Gestione upload
         uploadForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
             if (!fileInput.files.length) {
-                alert('Seleziona un file da caricare');
+                showError('Seleziona un file');
                 return;
             }
 
-            // Debug: verifica file
-            console.log('File selezionato:', fileInput.files[0]);
-            console.log('Nome file:', fileInput.files[0].name);
-            console.log('Dimensione file:', fileInput.files[0].size);
-
-            // Crea FormData con configurazione italiana ottimizzata
-            const formData = new FormData();
-            formData.append('file', fileInput.files[0]);
-            formData.append('mode', 'italiano_ottimizzato');  // Usa sempre configurazione italiana
-            formData.append('language_check', document.getElementById('language_check').checked ? 'true' : 'false');
-            formData.append('ai_enhancement', document.getElementById('ai_enhancement').checked ? 'true' : 'false');
-            formData.append('backup', document.getElementById('backup').checked ? 'true' : 'false');
-            
-            // Debug: verifica FormData
-            for (let [key, value] of formData.entries()) {
-                console.log(key + ':', value);
-            }
-            
-            // Mostra progress
+            errorText.textContent = '';
+            downloadBtn.style.display = 'none';
             progressContainer.style.display = 'block';
             submitBtn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('backup', 'true');
             
             try {
                 const response = await fetch('/upload', {
@@ -340,207 +410,163 @@
                 const result = await response.json();
                 
                 if (response.ok) {
-                    // Monitora job
                     monitorJob(result.job_id);
                 } else {
-                    showError(result.error);
+                    showError(result.error || 'Errore durante il caricamento');
                 }
             } catch (error) {
-                showError('Errore durante upload: ' + error.message);
+                showError('Errore: ' + error.message);
             }
         });
 
-        // Monitora progresso job
         async function monitorJob(jobId) {
-            const statusAlert = document.getElementById('statusAlert');
-            const progressBar = document.getElementById('progressBar');
-            const jobDetails = document.getElementById('jobDetails');
-            
-            const checkStatus = async () => {
+            const check = async () => {
                 try {
                     const response = await fetch(`/status/${jobId}`);
                     const job = await response.json();
                     
-                    // Aggiorna progress bar
-                    progressBar.style.width = job.progress + '%';
-                    progressBar.textContent = job.progress + '%';
+                    progressFill.style.width = job.progress + '%';
                     
-                    // Aggiorna status
-                    if (job.status === 'processing') {
-                        statusAlert.innerHTML = `
-                            <i class="fas fa-cogs fa-spin"></i> 
-                            Elaborazione in corso: ${job.filename}
-                        `;
-                        statusAlert.className = 'alert alert-warning';
-                    } else if (job.status === 'completed') {
-                        statusAlert.innerHTML = `
-                            <i class="fas fa-check-circle"></i> 
-                            Elaborazione completata!
-                        `;
-                        statusAlert.className = 'alert alert-success';
-                        
-                        // Mostra link download
-                        jobDetails.innerHTML = `
-                            <div class="d-grid">
-                                <a href="${job.download_url}" class="btn btn-success btn-lg">
-                                    <i class="fas fa-download"></i> Scarica Documento Corretto
-                                </a>
-                            </div>
-                        `;
-                        
+                    if (job.status === 'completed') {
+                        statusText.textContent = 'Completato!';
+                        statusText.style.color = '#28a745';
+                        downloadBtn.href = job.download_url;
+                        downloadBtn.style.display = 'block';
                         submitBtn.disabled = false;
-                        loadStats(); // Aggiorna statistiche
-                        return; // Stop monitoring
                     } else if (job.status === 'failed') {
-                        statusAlert.innerHTML = `
-                            <i class="fas fa-exclamation-triangle"></i> 
-                            Errore durante elaborazione: ${job.error || 'Errore sconosciuto'}
-                        `;
-                        statusAlert.className = 'alert alert-danger';
-                        submitBtn.disabled = false;
-                        return; // Stop monitoring
+                        showError(job.error || 'Errore durante elaborazione');
+                    } else {
+                        setTimeout(check, 1000);
                     }
-                    
-                    // Continua monitoring
-                    setTimeout(checkStatus, 1000);
                 } catch (error) {
-                    showError('Errore monitoraggio job: ' + error.message);
+                    showError('Errore: ' + error.message);
                 }
             };
-            
-            checkStatus();
+            check();
         }
 
         function showError(message) {
-            const statusAlert = document.getElementById('statusAlert');
-            statusAlert.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
-            statusAlert.className = 'alert alert-danger';
+            errorText.textContent = message;
+            progressContainer.style.display = 'none';
             submitBtn.disabled = false;
         }
 
-        // Carica statistiche sistema
-        async function loadStats() {
-            try {
-                const response = await fetch('/api/stats');
-                const stats = await response.json();
-                
-                document.getElementById('systemStats').innerHTML = `
-                    <div class="row text-center">
-                        <div class="col-6">
-                            <h3 class="text-primary">${stats.total_jobs}</h3>
-                            <small class="text-muted">Job Totali</small>
-                        </div>
-                        <div class="col-6">
-                            <h3 class="text-success">${stats.success_rate.toFixed(1)}%</h3>
-                            <small class="text-muted">Success Rate</small>
-                        </div>
-                    </div>
-                    <hr>
-                    <div class="row text-center small">
-                        <div class="col-4">
-                            <div class="text-success">${stats.completed_jobs}</div>
-                            <small class="text-muted">Completati</small>
-                        </div>
-                        <div class="col-4">
-                            <div class="text-warning">${stats.processing_jobs}</div>
-                            <small class="text-muted">In corso</small>
-                        </div>
-                        <div class="col-4">
-                            <div class="text-danger">${stats.failed_jobs}</div>
-                            <small class="text-muted">Falliti</small>
-                        </div>
-                    </div>
-                `;
-                
-                // Carica job recenti
-                loadRecentJobs();
-            } catch (error) {
-                console.error('Errore caricamento statistiche:', error);
+        // ============= GESTIONE ANALISI LEGGIBILITÀ =============
+        
+        readabilityBtn.addEventListener('click', async () => {
+            if (!fileInput.files.length) {
+                showError('Seleziona prima un file');
+                return;
             }
-        }
 
-        // Carica job recenti
-        async function loadRecentJobs() {
+            // Nascondi errori precedenti
+            errorText.textContent = '';
+            
+            // Disabilita pulsante e mostra loading
+            readabilityBtn.disabled = true;
+            readabilityBtn.innerHTML = '<span class="loading-spinner"></span> Analisi in corso...';
+            
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            
             try {
-                const response = await fetch('/api/jobs');
-                const jobs = await response.json();
-                
-                const jobsList = Object.entries(jobs)
-                    .sort(([,a], [,b]) => new Date(b.created_at) - new Date(a.created_at))
-                    .slice(0, 5);
-                
-                if (jobsList.length === 0) {
-                    document.getElementById('recentJobs').innerHTML = 
-                        '<p class="text-muted text-center">Nessun job ancora processato</p>';
-                    return;
-                }
-                
-                const jobsHtml = jobsList.map(([jobId, job]) => {
-                    const statusClass = job.status === 'completed' ? 'success' : 
-                                       job.status === 'failed' ? 'danger' : 'warning';
-                    const statusIcon = job.status === 'completed' ? 'check-circle' : 
-                                      job.status === 'failed' ? 'times-circle' : 'clock';
-                    
-                    return `
-                        <div class="job-card card card-body p-2 ${job.status}">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <small class="fw-bold">${job.filename}</small><br>
-                                    <small class="text-muted">${job.options.mode}</small>
-                                </div>
-                                <span class="badge bg-${statusClass}">
-                                    <i class="fas fa-${statusIcon}"></i>
-                                </span>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-                
-                document.getElementById('recentJobs').innerHTML = jobsHtml;
-            } catch (error) {
-                console.error('Errore caricamento job recenti:', error);
-            }
-        }
-
-        // Carica statistiche all'avvio
-        loadStats();
-
-        // Aggiorna statistiche ogni 10 secondi
-        setInterval(loadStats, 10000);
-
-        // Inizializza tooltip Bootstrap
-        document.addEventListener('DOMContentLoaded', function() {
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl, {
-                    delay: { "show": 100, "hide": 300 },
-                    html: true
+                const response = await fetch('/api/readability', {
+                    method: 'POST',
+                    body: formData
                 });
-            });
-            
-            // Gestione modalità historical
-            const modeSelect = document.getElementById('mode');
-            const qualityThreshold = document.getElementById('quality_threshold');
-            const qualityContainer = qualityThreshold.closest('.col-md-4');
-            
-            function toggleHistoricalMode() {
-                if (modeSelect.value === 'historical') {
-                    qualityThreshold.value = '0.90';
-                    qualityThreshold.disabled = true;
-                    qualityContainer.style.opacity = '0.6';
-                    // Aggiungi tooltip per spiegare che è fisso
-                    qualityThreshold.title = 'Soglia fissa al 90% per modalità storica';
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayReadabilityResults(result);
                 } else {
-                    qualityThreshold.disabled = false;
-                    qualityContainer.style.opacity = '1';
-                    qualityThreshold.title = '';
+                    showError(result.error || 'Errore durante l\'analisi');
                 }
+            } catch (error) {
+                showError('Errore: ' + error.message);
+            } finally {
+                readabilityBtn.disabled = false;
+                readabilityBtn.innerHTML = '📊 Analizza Leggibilità';
             }
-            
-            // Applica subito e ascolta cambiamenti
-            toggleHistoricalMode();
-            modeSelect.addEventListener('change', toggleHistoricalMode);
         });
+
+        closeReadability.addEventListener('click', () => {
+            readabilityBox.classList.remove('show');
+        });
+
+        function displayReadabilityResults(result) {
+            const stats = result.readability;
+            
+            if (!stats.gulpease) {
+                readabilityContent.innerHTML = '<p style="text-align: center; color: #666;">Testo non analizzabile (troppo breve o vuoto)</p>';
+                readabilityBox.classList.add('show');
+                return;
+            }
+
+            // Determina colore basato sul punteggio
+            let scoreColor = '#dc3545'; // rosso (difficile)
+            if (stats.gulpease >= 80) scoreColor = '#28a745'; // verde (facile)
+            else if (stats.gulpease >= 60) scoreColor = '#ffc107'; // giallo (medio)
+            else if (stats.gulpease >= 40) scoreColor = '#fd7e14'; // arancione (medio-difficile)
+
+            // Genera HTML dei risultati
+            readabilityContent.innerHTML = `
+                <div class="gulpease-score" style="color: ${scoreColor}">
+                    ${stats.gulpease.toFixed(2)}
+                    <small>/100</small>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="label">📝 Parole</div>
+                        <div class="value">${stats.words.toLocaleString()}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="label">🔤 Frasi</div>
+                        <div class="value">${stats.sentences.toLocaleString()}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="label">📏 Lungh. Parola</div>
+                        <div class="value">${stats.avg_word_length.toFixed(1)}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="label">📐 Lungh. Frase</div>
+                        <div class="value">${stats.avg_sentence_length.toFixed(1)}</div>
+                    </div>
+                </div>
+
+                <div class="difficulty-levels">
+                    <h4>👥 Difficoltà per Livello di Scolarizzazione</h4>
+                    ${getDifficultyItem('📚 Licenza elementare', stats.difficulty.licenza_elementare)}
+                    ${getDifficultyItem('🎓 Licenza media', stats.difficulty.licenza_media)}
+                    ${getDifficultyItem('🎯 Diploma superiore', stats.difficulty.diploma_superiore)}
+                </div>
+            `;
+
+            readabilityBox.classList.add('show');
+            
+            // Scroll smooth al box
+            setTimeout(() => {
+                readabilityBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+        }
+
+        function getDifficultyItem(level, difficulty) {
+            const badgeClass = getBadgeClass(difficulty);
+            return `
+                <div class="difficulty-item">
+                    <span class="level">${level}</span>
+                    <span class="badge ${badgeClass}">${difficulty}</span>
+                </div>
+            `;
+        }
+
+        function getBadgeClass(difficulty) {
+            const lower = difficulty.toLowerCase();
+            if (lower.includes('molto facile') || lower.includes('facile')) return 'badge-success';
+            if (lower.includes('difficile')) return 'badge-danger';
+            return 'badge-warning';
+        }
     </script>
 </body>
 </html>
