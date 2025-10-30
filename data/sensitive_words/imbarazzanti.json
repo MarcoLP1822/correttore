@@ -1,0 +1,135 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "date": "2025-10-27",
+    "description": "Dizionario parole potenzialmente imbarazzanti o sensibili",
+    "disclaimer": "Questo dizionario ha scopo puramente linguistico e informativo. Non implica alcun giudizio morale o censura. Serve per informare l'utente della presenza di tali termini in testi destinati a pubblicazione formale o professionale.",
+    "usage": "Rilevamento automatico per tab 'Imbarazzanti' nel report. Può essere disabilitato nelle opzioni."
+  },
+  
+  "anatomia": {
+    "description": "Termini anatomici che potrebbero risultare fuori contesto",
+    "words": [
+      "sedere", "culo", "chiappe", "natiche", "glutei",
+      "petto", "seno", "mammella", "capezzolo",
+      "pancia", "pancione", "pancia gonfia",
+      "coscia", "cosce", "gambe", "polpaccio"
+    ]
+  },
+  
+  "funzioni_corporali": {
+    "description": "Termini relativi a funzioni corporali",
+    "words": [
+      "cacca", "popò", "pupù", "feci", "sterco", "escrementi",
+      "pipì", "pisciare", "orinare", "urina",
+      "vomito", "vomitare", "rigurgito",
+      "scoreggia", "peto", "flatulenza",
+      "rutto", "eruttazione",
+      "muco", "catarro", "moccio", "caccola",
+      "sudore", "puzza", "puzzare", "fetore", "lezzo"
+    ]
+  },
+  
+  "insulti_leggeri": {
+    "description": "Insulti di uso comune ma inappropriati in contesti formali",
+    "words": [
+      "stupido", "idiota", "cretino", "imbecille", "scemo", "deficiente",
+      "bastardo", "stronzo", "coglione", "rompicoglioni",
+      "puttana", "troia", "zoccola", "baldracca",
+      "frocio", "finocchio", "ricchione",
+      "strega", "megera", "befana",
+      "grasso", "ciccione", "obeso",
+      "brutto", "cesso", "mostro"
+    ]
+  },
+  
+  "parolacce": {
+    "description": "Parolacce comuni",
+    "words": [
+      "cazzo", "minchia", "cavolo", "accidenti",
+      "merda", "madonna", "porca", "porco",
+      "dio", "cristo", "ostia", "sacramento",
+      "dannazione", "diavolo", "inferno",
+      "maledetto", "maledizione"
+    ]
+  },
+  
+  "sessualità": {
+    "description": "Termini sessuali espliciti",
+    "words": [
+      "scopare", "chiavare", "trombare", "fottere",
+      "sesso", "fare sesso", "fare l'amore",
+      "orgasmo", "eccitazione", "eccitato",
+      "erezione", "eretto",
+      "penetrazione", "penetrare",
+      "masturbazione", "masturbare",
+      "pompino", "bocchino", "fellatio",
+      "organo", "genitale", "genitali",
+      "pene", "fallo", "uccello", "pisello",
+      "vagina", "fica", "passera", "figa",
+      "testicoli", "palle", "coglioni",
+      "prostituta", "prostituzione", "meretrice"
+    ]
+  },
+  
+  "violenza": {
+    "description": "Termini violenti che potrebbero risultare disturbanti",
+    "words": [
+      "ammazzare", "uccidere", "assassinare", "massacrare",
+      "accoltellare", "pugnalare", "sparare",
+      "picchiare", "pestare", "malmenare", "bastonare",
+      "torturare", "tortura", "supplizio",
+      "mutilare", "smembrare", "squartare",
+      "sangue", "sanguinare", "sanguinoso",
+      "cadavere", "morto", "corpo", "deceduto",
+      "violenza", "violentare", "stupro", "stuprare"
+    ]
+  },
+  
+  "discriminazione": {
+    "description": "Termini potenzialmente discriminatori",
+    "words": [
+      "negro", "negretto", "moro",
+      "terrone", "polentone", "crucco", "crucchi",
+      "zingaro", "zingaraccia",
+      "handicappato", "storpio", "minorato",
+      "pazzo", "matto", "folle", "demente",
+      "vecchio", "vecchietto", "rimbambito",
+      "nanetto", "nano"
+    ]
+  },
+  
+  "volgare": {
+    "description": "Espressioni volgari generiche",
+    "words": [
+      "schifoso", "schifezza", "schifo", "disgustoso",
+      "lurido", "lercio", "sudicio", "sporco",
+      "vaffanculo", "fanculo", "affanculo",
+      "testa di cazzo", "pezzo di merda",
+      "rompipalle", "rompicojoni",
+      "mignotta", "puttaniere",
+      "cazzi tuoi", "cazzi suoi",
+      "coglionata", "stronzata", "minchiata"
+    ]
+  },
+  
+  "doppi_sensi": {
+    "description": "Parole comuni con possibili doppi sensi imbarazzanti",
+    "words": [
+      "figa", "fica", "gnocca", "topa",
+      "canna", "cannare", "fatto", "fatta",
+      "botta", "botte", "dare botte",
+      "drogato", "tossico", "fatto",
+      "ubriaco", "sbronzo", "ciucco",
+      "bordello", "casino", "puttanaio"
+    ]
+  },
+  
+  "note": [
+    "Questo dizionario NON implica censura o giudizio morale.",
+    "Serve solo a informare l'autore della presenza di questi termini.",
+    "Utile per testi destinati a contesti formali, educativi o professionali.",
+    "Può essere completamente disabilitato nelle impostazioni.",
+    "Alcuni termini sono corretti e legittimi in contesti appropriati (es. testi medici, legali)."
+  ]
+}

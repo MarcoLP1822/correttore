@@ -17,6 +17,11 @@ from openai import AsyncOpenAI
 from correttore.config.settings import get_openai_config
 from correttore.utils.token_utils import count_tokens
 from correttore.services.intelligent_cache import get_cache
+from correttore.models import (
+    CorrectionRecord,
+    CorrectionCategory,
+    CorrectionSource,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -390,6 +395,95 @@ Rispondi SOLO con il testo corretto, senza spiegazioni o commenti aggiuntivi."""
             wait_time = min_interval - time_since_last
             logger.debug(f"⏱️  Rate limiting: waiting {wait_time:.2f}s")
             await asyncio.sleep(wait_time)
+    
+    def create_correction_record_from_response(
+        self,
+        original_text: str,
+        corrected_text: str,
+        context: Optional[str] = None,
+        position: int = 0
+    ) -> Optional[CorrectionRecord]:
+        """
+        Crea un CorrectionRecord dalle correzioni GPT.
+        
+        Per GPT, confrontiamo il testo originale con quello corretto
+        e creiamo un record generale per le differenze trovate.
+        
+        Args:
+            original_text: Testo originale
+            corrected_text: Testo corretto da GPT
+            context: Contesto opzionale
+            position: Posizione nel documento
+            
+        Returns:
+            CorrectionRecord se ci sono differenze, None altrimenti
+        """
+        # Se identici, nessuna correzione
+        if original_text.strip() == corrected_text.strip():
+            return None
+        
+        # Determina la categoria basandosi sul tipo di correzione
+        # Per GPT, usiamo ERRORI_RICONOSCIUTI come default
+        category = CorrectionCategory.ERRORI_RICONOSCIUTI
+        
+        # Se il testo è molto simile, probabilmente è un miglioramento di stile
+        similarity = self._calculate_similarity(original_text, corrected_text)
+        if similarity > 0.9:
+            category = CorrectionCategory.MIGLIORABILI
+        
+        # Usa il contesto fornito o il testo completo
+        record_context = context or original_text
+        
+        # Calcola indici paragrafo (approssimativo)
+        paragraph_index = original_text.count('\n\n')
+        sentence_index = original_text.count('. ')
+        
+        # Crea il record
+        record = CorrectionRecord(
+            category=category,
+            source=CorrectionSource.OPENAI_GPT,
+            original_text=original_text,
+            corrected_text=corrected_text,
+            context=record_context,
+            position=position,
+            length=len(original_text),
+            paragraph_index=paragraph_index,
+            sentence_index=sentence_index,
+            rule_id="GPT_CORRECTION",
+            rule_description="Correzione AI avanzata",
+            message="Testo migliorato da OpenAI GPT",
+            suggestions=[corrected_text],
+            confidence_score=0.85,  # Alta confidenza per GPT
+            severity="warning",
+            additional_info={
+                'model': self.config.model,
+                'similarity': similarity,
+            }
+        )
+        
+        return record
+    
+    def _calculate_similarity(self, text1: str, text2: str) -> float:
+        """
+        Calcola similarità tra due testi (Jaccard similarity semplificata).
+        
+        Args:
+            text1: Primo testo
+            text2: Secondo testo
+            
+        Returns:
+            Punteggio di similarità (0.0-1.0)
+        """
+        words1 = set(text1.lower().split())
+        words2 = set(text2.lower().split())
+        
+        if not words1 or not words2:
+            return 0.0
+        
+        intersection = words1.intersection(words2)
+        union = words1.union(words2)
+        
+        return len(intersection) / len(union) if union else 0.0
 
 
 # Factory function per uso diretto

@@ -124,7 +124,7 @@ class FormattingManager:
         
         # Font size
         if run.font.size:
-            formatting.font_size = run.font.size.pt
+            formatting.font_size = int(run.font.size.pt)
         
         # Font color
         if run.font.color.rgb:

@@ -7,20 +7,20 @@ Il sistema aveva **soglie di qualità troppo alte** che impedivano l'applicazion
 
 ### 1. ✅ Soglie di Qualità Abbassate
 
-#### File: `config/settings.py`
+#### File: `src/correttore/config/settings.py`
 - `quality_threshold`: 0.85 → **0.55**
 - `min_quality_threshold`: 0.85 → **0.55**
 
-#### File: `src/core/safe_correction.py`
+#### File: `src/correttore/core/safe_correction.py`
 - Soglia inizializzazione: 0.75 → **0.55**
 
-#### File: `src/core/premium_correction_engine.py`
+#### File: `src/correttore/core/premium_correction_engine.py`
 - `overall_score`: 0.75 → **0.55**
 - `safety_score`: 0.85 → **0.70**
 - `content_preservation`: 0.80 → **0.60**
 - `length_ratio`: 0.7-1.3 → **0.5-1.5** (più tollerante)
 
-#### File: `src/interfaces/web_interface.py`
+#### File: `src/correttore/interfaces/web_interface.py`
 - Soglia: 0.75 → **0.55**
 
 ### 2. ✅ Dizionario Correzioni Espanso
@@ -41,7 +41,7 @@ Aggiunti errori specifici:
 
 ### 3. ✅ Sistema di Scoring Migliorato
 
-#### File: `src/core/safe_correction.py`
+#### File: `src/correttore/core/safe_correction.py`
 - Bonus +0.2 per correzioni semantiche riconosciute
 - Lista espansa di correzioni con pattern matching
 - Migliore tolleranza per cambiamenti di lunghezza
@@ -49,7 +49,7 @@ Aggiunti errori specifici:
 
 ### 4. ✅ Prompt OpenAI Migliorati
 
-#### File: `services/openai_service.py`
+#### File: `src/correttore/services/openai_service.py`
 - Enfasi su "TUTTI gli errori"
 - Lista esplicita di errori prioritari
 - Istruzioni più dettagliate per correzioni ortografiche

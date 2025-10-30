@@ -15,7 +15,9 @@ import os
 from pathlib import Path
 
 # Aggiungi root del progetto al path
-project_root = Path(__file__).parent.parent.parent
+# __file__ è in src/correttore/interfaces/web_interface.py
+# Quindi parent.parent.parent ci porta alla root del progetto
+project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from flask import Flask, render_template, request, jsonify, send_file, redirect, url_for
@@ -31,19 +33,21 @@ from datetime import datetime
 def load_languagetool_functions():
     """Carica le funzioni LanguageTool in modo sicuro."""
     try:
-        # Aggiungi la root al path temporaneamente
-        import sys
-        if str(project_root) not in sys.path:
-            sys.path.insert(0, str(project_root))
+        # Import dal percorso corretto nella root del progetto
+        import importlib.util
+        scripts_path = project_root / 'scripts' / 'languagetool_manager.py'
         
-        # Import normale ora che il path è corretto
-        from scripts.languagetool_manager import start_languagetool_simple, is_languagetool_running
-        return start_languagetool_simple, is_languagetool_running
+        if scripts_path.exists():
+            spec = importlib.util.spec_from_file_location("languagetool_manager", scripts_path)
+            if spec and spec.loader:
+                module = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(module)
+                return module.start_languagetool_simple, module.is_languagetool_running
         
-    except Exception as e:
-        print(f"⚠️  Warning: Could not import LanguageTool starter: {e}")
-        print("💡 Running in demo mode without LanguageTool")
+        raise ImportError("LanguageTool manager not found")
         
+    except Exception:
+        # Funzioni dummy per demo mode
         def start_languagetool_simple() -> bool:
             return False
         def is_languagetool_running() -> bool:
@@ -154,19 +158,12 @@ def upload_file():
     """Gestisce upload documenti"""
     global job_counter
     
-    print(f"DEBUG - Files in request: {list(request.files.keys())}")
-    print(f"DEBUG - Form data: {dict(request.form)}")
-    
     if 'file' not in request.files:
-        print("DEBUG - Nessun file nella request")
         return jsonify({'error': 'Nessun file selezionato'}), 400
     
     file = request.files['file']
-    print(f"DEBUG - File object: {file}")
-    print(f"DEBUG - Filename: {file.filename}")
     
     if not file.filename or file.filename == '':
-        print("DEBUG - Filename vuoto")
         return jsonify({'error': 'Nessun file selezionato'}), 400
     
     if not allowed_file(file.filename):

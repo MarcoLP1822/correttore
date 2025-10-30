@@ -1,0 +1,94 @@
+<div id="tab-{{ category_id }}" class="tab-content">
+    <section class="category-section">
+        <div class="category-header">
+            <h2>
+                <span class="category-icon-large">{{ category_icon }}</span>
+                {{ category_name }}
+            </h2>
+            <div class="category-description">
+                {{ category_description }}
+            </div>
+            {% if category_info %}
+            <div class="info-box">
+                <strong>ℹ️ Info:</strong> {{ category_info }}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="category-stats">
+            <div class="stat-item">
+                <span class="stat-label">Parole uniche:</span>
+                <span class="stat-value">{{ unique_words }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Occorrenze totali:</span>
+                <span class="stat-value">{{ total_occurrences }}</span>
+            </div>
+        </div>
+
+        {% if errors_by_type %}
+        <div class="errors-list">
+            {% for error_type in errors_by_type %}
+            <div class="error-group">
+                <div class="error-group-header" onclick="toggleGroup('{{ error_type.id }}')">
+                    <span class="toggle-icon" id="toggle-{{ error_type.id }}">▼</span>
+                    <span class="error-word">{{ error_type.word }}</span>
+                    {% if error_type.suggestion %}
+                    <span class="suggestion-arrow">→</span>
+                    <span class="suggestion">{{ error_type.suggestion }}</span>
+                    {% endif %}
+                    <span class="occurrence-count">({{ error_type.count }} occ.)</span>
+                </div>
+                
+                <div class="error-group-content" id="group-{{ error_type.id }}">
+                    {% if error_type.message %}
+                    <div class="error-message">
+                        {{ error_type.message }}
+                    </div>
+                    {% endif %}
+
+                    {% if error_type.suggestions|length > 1 %}
+                    <div class="suggestions-list">
+                        <strong>Alternative suggerite:</strong>
+                        {% for suggestion in error_type.suggestions %}
+                        <span class="suggestion-chip">{{ suggestion }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="occurrences-list">
+                        {% for occurrence in error_type.occurrences %}
+                        <div class="occurrence-item">
+                            <div class="occurrence-header">
+                                <span class="occurrence-number">#{{ loop.index }}</span>
+                                <span class="occurrence-position">Par. {{ occurrence.paragraph }}, Frase {{ occurrence.sentence }}</span>
+                            </div>
+                            <div class="context-text">
+                                {{ occurrence.context_before }}
+                                <strong class="highlighted-word">{{ occurrence.word }}</strong>
+                                {{ occurrence.context_after }}
+                            </div>
+                            {% if show_feedback_buttons %}
+                            <div class="feedback-buttons">
+                                <button class="btn-feedback btn-correct" data-id="{{ occurrence.id }}">
+                                    ✓ Corretta
+                                </button>
+                                <button class="btn-feedback btn-error" data-id="{{ occurrence.id }}">
+                                    ✗ Errore
+                                </button>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p>✅ Nessuna segnalazione in questa categoria</p>
+        </div>
+        {% endif %}
+    </section>
+</div>

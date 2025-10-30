@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Ortografia - Esempio Integrazione - Report Correzione</title>
+    <style>
+        /* ========================================
+   REPORT CORREZIONE - STILI GLOBALI
+   ======================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* Colori Principali */
+    --color-primary: #2c3e50;
+    --color-secondary: #34495e;
+    --color-accent: #3498db;
+    
+    /* Colori Categorie */
+    --color-error: #e74c3c;
+    --color-error-light: #fadbd8;
+    --color-warning: #f39c12;
+    --color-warning-light: #fdeaa7;
+    --color-success: #27ae60;
+    --color-success-light: #d5f4e6;
+    --color-info: #3498db;
+    --color-info-light: #d6eaf8;
+    --color-neutral: #95a5a6;
+    --color-neutral-light: #ecf0f1;
+    
+    /* Spaziature */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    
+    /* Font */
+    --font-family: &#39;Segoe UI&#39;, Tahoma, Geneva, Verdana, sans-serif;
+    --font-size-base: 16px;
+    --font-size-sm: 0.875rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.5rem;
+    --font-size-xxl: 2rem;
+    
+    /* Ombreggiature */
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+    --shadow-lg: 0 10px 20px rgba(0,0,0,0.15);
+    
+    /* Transizioni */
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.3s ease;
+}
+
+body {
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    line-height: 1.6;
+    color: var(--color-primary);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: var(--spacing-lg);
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+}
+
+/* ========================================
+   HEADER
+   ======================================== */
+
+.report-header {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    color: white;
+    padding: var(--spacing-xl);
+    text-align: center;
+}
+
+.report-header h1 {
+    font-size: var(--font-size-xxl);
+    margin-bottom: var(--spacing-sm);
+    font-weight: 700;
+}
+
+.document-info {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-md);
+    font-size: var(--font-size-sm);
+    opacity: 0.9;
+}
+
+.doc-name {
+    font-weight: 600;
+}
+
+/* ========================================
+   NAVIGAZIONE TABS
+   ======================================== */
+
+.tabs-navigation {
+    background: var(--color-neutral-light);
+    border-bottom: 3px solid var(--color-primary);
+    overflow-x: auto;
+}
+
+.tabs {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    min-width: max-content;
+}
+
+.tab-item {
+    padding: var(--spacing-md) var(--spacing-lg);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    transition: all var(--transition-normal);
+    position: relative;
+    white-space: nowrap;
+}
+
+.tab-item:hover {
+    background: rgba(52, 152, 219, 0.1);
+}
+
+.tab-item.active {
+    background: white;
+    border-bottom-color: var(--color-accent);
+    font-weight: 600;
+}
+
+.tab-icon {
+    font-size: var(--font-size-lg);
+}
+
+.tab-label {
+    font-size: var(--font-size-sm);
+}
+
+.tab-badge {
+    background: var(--color-accent);
+    color: white;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    min-width: 24px;
+    text-align: center;
+}
+
+/* ========================================
+   AREA CONTENUTO
+   ======================================== */
+
+.content-area {
+    padding: var(--spacing-xl);
+    min-height: 500px;
+}
+
+.tab-content {
+    display: none;
+    animation: fadeIn var(--transition-normal);
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========================================
+   PAGINA SINTESI
+   ======================================== */
+
+.summary-section h2 {
+    font-size: var(--font-size-xl);
+    margin-bottom: var(--spacing-lg);
+    color: var(--color-primary);
+    border-bottom: 2px solid var(--color-accent);
+    padding-bottom: var(--spacing-sm);
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+.summary-card {
+    background: var(--color-neutral-light);
+    border-radius: 8px;
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-sm);
+}
+
+.summary-card h3 {
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--spacing-md);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.correction-card {
+    border-left: 4px solid var(--color-error);
+}
+
+.info-card {
+    border-left: 4px solid var(--color-info);
+}
+
+.summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.summary-table th,
+.summary-table td {
+    padding: var(--spacing-sm) var(--spacing-md);
+    text-align: left;
+}
+
+.summary-table thead {
+    background: var(--color-primary);
+    color: white;
+    font-size: var(--font-size-sm);
+}
+
+.summary-table tbody tr {
+    border-bottom: 1px solid var(--color-neutral-light);
+    transition: background var(--transition-fast);
+}
+
+.summary-table tbody tr:hover {
+    background: var(--color-neutral-light);
+}
+
+.category-row td {
+    font-size: var(--font-size-sm);
+}
+
+.category-icon {
+    font-size: var(--font-size-lg);
+    margin-right: var(--spacing-xs);
+}
+
+.count {
+    font-weight: 600;
+    text-align: center;
+    color: var(--color-accent);
+}
+
+.total-row {
+    background: var(--color-neutral-light) !important;
+    font-weight: 700;
+    border-top: 2px solid var(--color-primary);
+}
+
+/* Codifica Colori Categorie nella Sintesi */
+.category-ERRORI_RICONOSCIUTI { background: var(--color-error-light); }
+.category-SCONOSCIUTE { background: var(--color-warning-light); }
+.category-SOSPETTE { background: var(--color-warning-light); }
+.category-MIGLIORABILI { background: var(--color-success-light); }
+.category-PUNTEGGIATURA { background: var(--color-warning-light); }
+.category-IMBARAZZANTI { background: white; }
+.category-VARIANTI { background: var(--color-info-light); }
+.category-NOMI_SIGLE { background: white; }
+.category-LINGUE { background: var(--color-info-light); }
+.category-CON_INFO { background: var(--color-info-light); }
+
+/* ========================================
+   METADATI ELABORAZIONE
+   ======================================== */
+
+.metadata-section {
+    margin-top: var(--spacing-xl);
+}
+
+.metadata-section h3 {
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--spacing-md);
+    color: var(--color-secondary);
+}
+
+.metadata-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-md);
+    background: var(--color-neutral-light);
+    padding: var(--spacing-lg);
+    border-radius: 8px;
+}
+
+.metadata-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.metadata-label {
+    font-size: var(--font-size-sm);
+    color: var(--color-neutral);
+    font-weight: 500;
+}
+
+.metadata-value {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--color-primary);
+}
+
+/* ========================================
+   PAGINA CATEGORIA
+   ======================================== */
+
+.category-section {
+    animation: fadeIn var(--transition-normal);
+}
+
+.category-header {
+    margin-bottom: var(--spacing-xl);
+}
+
+.category-header h2 {
+    font-size: var(--font-size-xxl);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    color: var(--color-primary);
+}
+
+.category-icon-large {
+    font-size: 2.5rem;
+}
+
+.category-description {
+    font-size: var(--font-size-base);
+    color: var(--color-secondary);
+    line-height: 1.8;
+    margin-bottom: var(--spacing-md);
+    padding: var(--spacing-md);
+    background: var(--color-neutral-light);
+    border-left: 4px solid var(--color-accent);
+    border-radius: 4px;
+}
+
+.info-box {
+    background: var(--color-info-light);
+    padding: var(--spacing-md);
+    border-radius: 8px;
+    border-left: 4px solid var(--color-info);
+    margin-top: var(--spacing-md);
+}
+
+.category-stats {
+    display: flex;
+    gap: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+    padding: var(--spacing-md);
+    background: var(--color-neutral-light);
+    border-radius: 8px;
+}
+
+.stat-item {
+    display: flex;
+    gap: var(--spacing-sm);
+    align-items: center;
+}
+
+.stat-label {
+    font-size: var(--font-size-sm);
+    color: var(--color-neutral);
+}
+
+.stat-value {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--color-accent);
+}
+
+/* ========================================
+   LISTA ERRORI
+   ======================================== */
+
+.errors-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.error-group {
+    border: 1px solid var(--color-neutral-light);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow var(--transition-normal);
+}
+
+.error-group:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.error-group-header {
+    background: var(--color-neutral-light);
+    padding: var(--spacing-md);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    transition: background var(--transition-fast);
+    user-select: none;
+}
+
+.error-group-header:hover {
+    background: #dfe6e9;
+}
+
+.toggle-icon {
+    font-size: var(--font-size-lg);
+    transition: transform var(--transition-normal);
+    color: var(--color-accent);
+}
+
+.error-group.collapsed .toggle-icon {
+    transform: rotate(-90deg);
+}
+
+.error-word {
+    font-weight: 700;
+    font-size: var(--font-size-lg);
+    color: var(--color-error);
+}
+
+.suggestion-arrow {
+    color: var(--color-neutral);
+    margin: 0 var(--spacing-xs);
+}
+
+.suggestion {
+    font-weight: 600;
+    color: var(--color-success);
+}
+
+.occurrence-count {
+    margin-left: auto;
+    background: var(--color-accent);
+    color: white;
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: 12px;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+}
+
+.error-group-content {
+    padding: var(--spacing-lg);
+    background: white;
+    max-height: 2000px;
+    transition: max-height var(--transition-normal), padding var(--transition-normal);
+}
+
+.error-group.collapsed .error-group-content {
+    max-height: 0;
+    padding: 0 var(--spacing-lg);
+    overflow: hidden;
+}
+
+.error-message {
+    background: var(--color-warning-light);
+    padding: var(--spacing-md);
+    border-radius: 6px;
+    margin-bottom: var(--spacing-md);
+    border-left: 4px solid var(--color-warning);
+    font-size: var(--font-size-sm);
+}
+
+.suggestions-list {
+    margin-bottom: var(--spacing-md);
+    padding: var(--spacing-md);
+    background: var(--color-success-light);
+    border-radius: 6px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    align-items: center;
+}
+
+.suggestions-list strong {
+    margin-right: var(--spacing-sm);
+    color: var(--color-success);
+}
+
+.suggestion-chip {
+    background: white;
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: 16px;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-success);
+    border: 2px solid var(--color-success);
+}
+
+/* ========================================
+   OCCORRENZE
+   ======================================== */
+
+.occurrences-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.occurrence-item {
+    padding: var(--spacing-md);
+    background: var(--color-neutral-light);
+    border-radius: 6px;
+    border-left: 3px solid var(--color-accent);
+}
+
+.occurrence-header {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+    font-size: var(--font-size-sm);
+    color: var(--color-neutral);
+}
+
+.occurrence-number {
+    font-weight: 700;
+    color: var(--color-accent);
+}
+
+.occurrence-position {
+    font-style: italic;
+}
+
+.context-text {
+    font-size: var(--font-size-base);
+    line-height: 1.8;
+    color: var(--color-secondary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.highlighted-word {
+    background: yellow;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-weight: 700;
+    color: var(--color-error);
+}
+
+/* ========================================
+   PULSANTI FEEDBACK
+   ======================================== */
+
+.feedback-buttons {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-sm);
+}
+
+.btn-feedback {
+    padding: var(--spacing-xs) var(--spacing-md);
+    border: none;
+    border-radius: 4px;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.btn-correct {
+    background: var(--color-success);
+    color: white;
+}
+
+.btn-correct:hover {
+    background: #229954;
+    transform: translateY(-2px);
+}
+
+.btn-error {
+    background: var(--color-error);
+    color: white;
+}
+
+.btn-error:hover {
+    background: #c0392b;
+    transform: translateY(-2px);
+}
+
+/* ========================================
+   STATI VUOTI
+   ======================================== */
+
+.empty-state {
+    text-align: center;
+    padding: var(--spacing-xl);
+    color: var(--color-neutral);
+    font-size: var(--font-size-lg);
+}
+
+.empty-state p {
+    margin: 0;
+}
+
+/* ========================================
+   FOOTER
+   ======================================== */
+
+.report-footer {
+    background: var(--color-neutral-light);
+    padding: var(--spacing-lg);
+    text-align: center;
+    font-size: var(--font-size-sm);
+    color: var(--color-neutral);
+    border-top: 1px solid #ddd;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 768px) {
+    body {
+        padding: var(--spacing-sm);
+    }
+    
+    .report-header h1 {
+        font-size: var(--font-size-xl);
+    }
+    
+    .document-info {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+    
+    .tabs {
+        flex-direction: column;
+    }
+    
+    .tab-item {
+        justify-content: space-between;
+    }
+    
+    .summary-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .metadata-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .category-header h2 {
+        font-size: var(--font-size-xl);
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .category-stats {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+    
+    .error-group-header {
+        flex-wrap: wrap;
+    }
+    
+    .occurrence-count {
+        margin-left: 0;
+    }
+}
+
+/* ========================================
+   PRINT STYLES
+   ======================================== */
+
+@media print {
+    body {
+        background: white;
+        padding: 0;
+    }
+    
+    .container {
+        box-shadow: none;
+    }
+    
+    .tabs-navigation,
+    .feedback-buttons {
+        display: none;
+    }
+    
+    .tab-content {
+        display: block !important;
+    }
+    
+    .error-group-content {
+        max-height: none !important;
+        padding: var(--spacing-lg) !important;
+    }
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="report-header">
+            <h1>📋 Report di Correzione</h1>
+            <div class="document-info">
+                <span class="doc-name">Esempio Integrazione</span>
+                <span class="timestamp">24/10/2025 17:02:24</span>
+            </div>
+        </header>
+
+        <nav class="tabs-navigation">
+            <ul class="tabs">
+                
+                <li class="tab-item active" data-tab="sintesi">
+                    <span class="tab-icon">📊</span>
+                    <span class="tab-label">Sintesi</span>
+                    
+                </li>
+                
+                <li class="tab-item " data-tab="errori">
+                    <span class="tab-icon">❌</span>
+                    <span class="tab-label">Errori Riconosciuti</span>
+                    
+                    <span class="tab-badge">2</span>
+                    
+                </li>
+                
+                <li class="tab-item " data-tab="sconosciute">
+                    <span class="tab-icon">❓</span>
+                    <span class="tab-label">Sconosciute</span>
+                    
+                    <span class="tab-badge">3</span>
+                    
+                </li>
+                
+                <li class="tab-item " data-tab="sospette">
+                    <span class="tab-icon">⚠️</span>
+                    <span class="tab-label">Sospette</span>
+                    
+                    <span class="tab-badge">1</span>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+
+        <main class="content-area">
+            
+        </main>
+
+        <footer class="report-footer">
+            <p>Generato da <strong>Correttore AI</strong> - 24/10/2025 17:02:24</p>
+        </footer>
+    </div>
+
+    <script>
+        // ========================================
+// REPORT CORREZIONE - JAVASCRIPT
+// ========================================
+
+document.addEventListener(&#39;DOMContentLoaded&#39;, function() {
+    initializeTabs();
+    initializeErrorGroups();
+    initializeFeedbackButtons();
+});
+
+// ========================================
+// GESTIONE TABS
+// ========================================
+
+function initializeTabs() {
+    const tabItems = document.querySelectorAll(&#39;.tab-item&#39;);
+    const tabContents = document.querySelectorAll(&#39;.tab-content&#39;);
+    
+    tabItems.forEach(tab =&gt; {
+        tab.addEventListener(&#39;click&#39;, function() {
+            const targetTab = this.getAttribute(&#39;data-tab&#39;);
+            
+            // Rimuovi active da tutti i tabs
+            tabItems.forEach(t =&gt; t.classList.remove(&#39;active&#39;));
+            tabContents.forEach(c =&gt; c.classList.remove(&#39;active&#39;));
+            
+            // Aggiungi active al tab selezionato
+            this.classList.add(&#39;active&#39;);
+            const targetContent = document.getElementById(&#39;tab-&#39; + targetTab);
+            if (targetContent) {
+                targetContent.classList.add(&#39;active&#39;);
+            }
+            
+            // Scroll to top
+            window.scrollTo({
+                top: 0,
+                behavior: &#39;smooth&#39;
+            });
+        });
+    });
+}
+
+// ========================================
+// GRUPPI ERRORI COLLASSABILI
+// ========================================
+
+function initializeErrorGroups() {
+    // Tutti i gruppi iniziano espansi
+    const errorGroups = document.querySelectorAll(&#39;.error-group&#39;);
+    errorGroups.forEach(group =&gt; {
+        group.classList.remove(&#39;collapsed&#39;);
+    });
+}
+
+function toggleGroup(groupId) {
+    const group = document.getElementById(&#39;group-&#39; + groupId).parentElement;
+    const toggleIcon = document.getElementById(&#39;toggle-&#39; + groupId);
+    
+    if (group.classList.contains(&#39;collapsed&#39;)) {
+        group.classList.remove(&#39;collapsed&#39;);
+        toggleIcon.textContent = &#39;▼&#39;;
+    } else {
+        group.classList.add(&#39;collapsed&#39;);
+        toggleIcon.textContent = &#39;▶&#39;;
+    }
+}
+
+// ========================================
+// PULSANTI FEEDBACK (per versioni future)
+// ========================================
+
+function initializeFeedbackButtons() {
+    const feedbackButtons = document.querySelectorAll(&#39;.btn-feedback&#39;);
+    
+    feedbackButtons.forEach(button =&gt; {
+        button.addEventListener(&#39;click&#39;, function() {
+            const correctionId = this.getAttribute(&#39;data-id&#39;);
+            const feedbackType = this.classList.contains(&#39;btn-correct&#39;) ? &#39;corretta&#39; : &#39;errore&#39;;
+            
+            saveFeedback(correctionId, feedbackType, this);
+        });
+    });
+}
+
+function saveFeedback(correctionId, feedbackType, button) {
+    // Disabilita pulsanti
+    const buttons = button.parentElement.querySelectorAll(&#39;.btn-feedback&#39;);
+    buttons.forEach(btn =&gt; btn.disabled = true);
+    
+    // Aggiungi classe feedback per styling
+    button.classList.add(&#39;feedback-sent&#39;);
+    
+    // Mostra messaggio di conferma
+    const confirmMessage = document.createElement(&#39;span&#39;);
+    confirmMessage.textContent = feedbackType === &#39;corretta&#39; ? &#39;✓ Registrato come corretto&#39; : &#39;✗ Registrato come errore&#39;;
+    confirmMessage.style.marginLeft = &#39;10px&#39;;
+    confirmMessage.style.color = feedbackType === &#39;corretta&#39; ? &#39;#27ae60&#39; : &#39;#e74c3c&#39;;
+    confirmMessage.style.fontWeight = &#39;600&#39;;
+    button.parentElement.appendChild(confirmMessage);
+    
+    // In futuro: inviare a backend
+    // fetch(&#39;/api/feedback&#39;, {
+    //     method: &#39;POST&#39;,
+    //     headers: { &#39;Content-Type&#39;: &#39;application/json&#39; },
+    //     body: JSON.stringify({ id: correctionId, feedback: feedbackType })
+    // });
+    
+    console.log(`Feedback salvato: ${correctionId} = ${feedbackType}`);
+}
+
+// ========================================
+// UTILITY FUNCTIONS
+// ========================================
+
+function expandAllGroups() {
+    const errorGroups = document.querySelectorAll(&#39;.error-group&#39;);
+    errorGroups.forEach(group =&gt; {
+        group.classList.remove(&#39;collapsed&#39;);
+        const toggleIcon = group.querySelector(&#39;.toggle-icon&#39;);
+        if (toggleIcon) {
+            toggleIcon.textContent = &#39;▼&#39;;
+        }
+    });
+}
+
+function collapseAllGroups() {
+    const errorGroups = document.querySelectorAll(&#39;.error-group&#39;);
+    errorGroups.forEach(group =&gt; {
+        group.classList.add(&#39;collapsed&#39;);
+        const toggleIcon = group.querySelector(&#39;.toggle-icon&#39;);
+        if (toggleIcon) {
+            toggleIcon.textContent = &#39;▶&#39;;
+        }
+    });
+}
+
+// ========================================
+// ESPORTA FUNZIONI GLOBALI
+// ========================================
+
+window.toggleGroup = toggleGroup;
+window.expandAllGroups = expandAllGroups;
+window.collapseAllGroups = collapseAllGroups;
+
+    </script>
+</body>
+</html>

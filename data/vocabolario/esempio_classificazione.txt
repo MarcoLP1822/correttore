@@ -1,0 +1,52 @@
+# Esempio di classificazione manuale
+# Formato: parola|livello
+# Livelli possibili: fondamentale, alto_uso, alta_disponibilita
+
+# === PAROLE FONDAMENTALI (esempio) ===
+# Sono le parole più comuni, usate quotidianamente
+essere|fondamentale
+avere|fondamentale
+fare|fondamentale
+dire|fondamentale
+andare|fondamentale
+potere|fondamentale
+volere|fondamentale
+sapere|fondamentale
+vedere|fondamentale
+dare|fondamentale
+casa|fondamentale
+giorno|fondamentale
+anno|fondamentale
+tempo|fondamentale
+persona|fondamentale
+uomo|fondamentale
+donna|fondamentale
+vita|fondamentale
+mondo|fondamentale
+paese|fondamentale
+
+# === PAROLE ALTO USO (esempio) ===
+# Parole ancora molto frequenti
+abbastanza|alto_uso
+accettare|alto_uso
+accompagnare|alto_uso
+accordo|alto_uso
+accorgersi|alto_uso
+accurato|alto_uso
+acquisire|alto_uso
+acuto|alto_uso
+adattare|alto_uso
+adeguato|alto_uso
+
+# === PAROLE ALTA DISPONIBILITÀ (esempio) ===
+# Parole comuni nel parlato ma rare nello scritto
+forbice|alta_disponibilita
+abbronzare|alta_disponibilita
+zanzara|alta_disponibilita
+forchetta|alta_disponibilita
+coltello|alta_disponibilita
+cucchiaio|alta_disponibilita
+pentola|alta_disponibilita
+padella|alta_disponibilita
+tovaglia|alta_disponibilita
+strofinaccio|alta_disponibilita

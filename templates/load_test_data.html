@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Setup Test Data</title>
+</head>
+<body>
+    <h1>Caricamento dati di test per Dashboard Feedback...</h1>
+    <p id="status">Inizializzazione...</p>
+    
+    <script>
+        // Dati di test
+        const testData = [
+  {
+    "correctionId": "corr_0",
+    "originalText": "vlta",
+    "correctedText": "volta",
+    "category": "VOCABULARY",
+    "feedback": "errore",
+    "timestamp": "2025-10-03T11:08:40.526602",
+    "documentName": "articolo_blog.docx",
+    "ruleId": "RULE_VOCABULARY_9",
+    "context": "...testo prima vlta testo dopo..."
+  },
+  {
+    "correctionId": "corr_1",
+    "originalText": "daccordo",
+    "correctedText": "d'accordo",
+    "category": "SPELLING",
+    "feedback": "corretta",
+    "timestamp": "2025-10-20T11:08:40.526882",
+    "documentName": "articolo_blog.docx",
+    "ruleId": "RULE_SPELLING_8",
+    "context": "...testo prima daccordo testo dopo..."
+  },
+  {
+    "correctionId": "corr_2",
+    "originalText": "sopratutto",
+    "correctedText": "soprattutto",
+    "category": "VOCABULARY",
+    "feedback": "corretta",
+    "timestamp": "2025-10-07T11:08:40.526899",
+    "documentName": "capitolo1.docx",
+    "ruleId": "RULE_VOCABULARY_5",
+    "context": "...testo prima sopratutto testo dopo..."
+  },
+  {
+    "correctionId": "corr_3",
+    "originalText": "un altro",
+    "correctedText": "un'altro",
+    "category": "SPELLING",
+    "feedback": "corretta",
+    "timestamp": "2025-10-26T11:08:40.526911",
+    "documentName": "documento_test.docx",
+    "ruleId": "RULE_SPELLING_3",
+    "context": "...testo prima un altro testo dopo..."
+  },
+  {
+    "correctionId": "corr_4",
+    "originalText": "vlta",
+    "correctedText": "volta",
+    "category": "SPELLING",
+    "feedback": "errore",
+    "timestamp": "2025-10-10T11:08:40.526921",
+    "documentName": "articolo_blog.docx",
+    "ruleId": "RULE_SPELLING_2",
+    "context": "...testo prima vlta testo dopo..."
+  },
+  {
+    "correctionId": "corr_5",
+    "originalText": "un p\u00f2 di",
+    "correctedText": "un po' di",
+    "category": "VOCABULARY",
+    "feedback": "corretta",
+    "timestamp": "2025-09-30T11:08:40.526930",
+    "documentName": "documento_test.docx",
+    "ruleId": "RULE_VOCABULARY_5",
+    "context": "...testo prima un p\u00f2 di testo dopo..."
+  },
+  {
+    "correctionId": "corr_6",
+    "originalText": "la cane",
+    "correctedText": "il cane",
+    "category": "SPELLING",
+    "feedback": "corretta",
+    "timestamp": "2025-10-02T11:08:40.526939",
+    "documentName": "documento_test.docx",
+    "ruleId": "RULE_SPELLING_10",
+    "context": "...testo prima la cane testo dopo..."
+  },
+  {
+    "correctionId": "corr_7",
+    "originalText": "un altro",
+    "correctedText": "un'altro",
+    "category": "STYLE",
+    "feedback": "corretta",
+    "timestamp": "2025-09-29T11:08:40.526948",
+    "documentName": "racconto_20251027.docx",
+    "ruleId": "RULE_STYLE_4",
+    "context": "...testo prima un altro testo dopo..."
+  },
+  {
+    "correctionId": "corr_8",
+    "originalText": "sopratutto",
+    "correctedText": "soprattutto",
+    "category": "VOCABULARY",
+    "feedback": "corretta",
+    "timestamp": "2025-10-05T11:08:40.526956",
+    "documentName": "articolo_blog.docx",
+    "ruleId": "RULE_VOCABULARY_4",
+    "context": "...testo prima sopratutto testo dopo..."
+  },
+  {
+    "correctionId": "corr_9",
+    "originalText": "un p\u00f2",
+    "correctedText": "un po'",
+    "category": "SPELLING",
+    "feedback": "errore",
+    "timestamp": "2025-10-23T11:08:40.526964",
+    "documentName": "tesi_laurea.docx",
+    "ruleId": "RULE_SPELLING_1",
+    "context": "...testo prima un p\u00f2 testo dopo..."
+  },
+  {
+    "correctionId": "corr_10",
+    "originalText": "sopratutto",
+    "correctedText": "soprattutto",
+    "category": "SPELLING",
+    "feedback": "corretta",
+    "timestamp": "2025-10-16T11:08:40.526971",
+    "documentName": "racconto_20251027.docx",
+    "ruleId": "RULE_SPELLING_9",
+    "context": "...testo prima sopratutto testo dopo..."
+  },
+  {
+    "correctionId": "corr_11",
+    "originalText": "la cane",
+    "correctedText": "il cane",
+    "category": "GRAMMAR",
+    "feedback": "corretta",
+    "timestamp": "2025-10-10T11:08:40.526979",
+    "documentName": "racconto_20251027.docx",
+    "ruleId": "RULE_GRAMMAR_6",
+    "context": "...testo prima la cane testo dopo..."
+  },
+  {
+    "correctionId": "corr_12",
+    "originalText": "perch\u00e8",
+    "correctedText": "perch\u00e9",
+    "category": "VOCABULARY",
+    "feedback": "errore",
+    "timestamp": "2025-10-10T11:08:40.526995",
+    "documentName": "tesi_laurea.docx",
+    "ruleId": "RULE_VOCABULARY_10",
+    "context": "...testo prima perch\u00e8 testo dopo..."
+  },
+  {
+    "correctionId": "corr_13",
+    "originalText": "qual \u00e8",
+    "correctedText": "quale",
+    "category": "STYLE",
+    "feedback": "corretta",
+    "timestamp": "2025-10-08T11:08:40.527004",
+    "documentName": "capitolo1.docx",
+    "ruleId": "RULE_STYLE_7",
+    "context": "...testo prima qual \u00e8 testo dopo..."
+  },
+  {
+    "correctionId": "corr_14",
+    "originalText": "la cane",
+    "correctedText": "il cane",
+    "category": "VOCABULARY",
+    "feedback": "corretta",
+    "timestamp": "2025-10-01T11:08:40.527012",
+    "documentName": "racconto_20251027.docx",
+    "ruleId": "RULE_VOCABULARY_2",
+    "context": "...testo prima la cane testo dopo..."
+  },
+  {
+    "correctionId": "corr_15",
+    "originalText": "la cane",
+    "correctedText": "il cane",
+    "category": "STYLE",
+    "feedback": "errore",
+    "timestamp": "2025-10-27T11:08:40.527019",
+    "documentName": "articolo_blog.docx",
+    "ruleId": "RULE_STYLE_9",
+    "context": "...testo prima la cane testo dopo..."
+  },
+  {
+    "correctionId": "corr_16",
+    "originalText": "un p\u00f2 di",
+    "correctedText": "un po' di",
+    "category": "SPELLING",
+    "feedback": "errore",
+    "timestamp": "2025-10-07T11:08:40.527027",
+    "documentName": "racconto_20251027.docx",
+    "ruleId": "RULE_SPELLING_1",
+    "context": "...testo prima un p\u00f2 di testo dopo..."
+  },
+  {
+    "correctionId": "corr_17",
+    "originalText": "f\u00e0",
+    "correctedText": "fa",
+    "category": "VOCABULARY",
+    "feedback": "errore",
+    "timestamp": "2025-10-07T11:08:40.527035",
+    "documentName": "articolo_blog.docx",
+    "ruleId": "RULE_VOCABULARY_3",
+    "context": "...testo prima f\u00e0 testo dopo..."
+  },
+  {
+    "correctionId": "corr_18",
+    "originalText": "vlta",
+    "correctedText": "volta",
+    "category": "GRAMMAR",
+    "feedback": "corretta",
+    "timestamp": "2025-10-07T11:08:40.527047",
+    "documentName": "tesi_laurea.docx",
+    "ruleId": "RULE_GRAMMAR_6",
+    "context": "...testo prima vlta testo dopo..."
+  },
+  {
+    "correctionId": "corr_19",
+    "originalText": "qsta",
+    "correctedText": "questa",
+    "category": "GRAMMAR",
+    "feedback": "errore",
+    "timestamp": "2025-10-02T11:08:40.527055",
+    "documentName": "racconto_20251027.docx",
+    "ruleId": "RULE_GRAMMAR_9",
+    "context": "...testo prima qsta testo dopo..."
+  },
+  {
+    "correctionId": "corr_20",
+    "originalText": "perch\u00e8",
+    "correctedText": "perch\u00e9",
+    "category": "STYLE",
+    "feedback": "corretta",
+    "timestamp": "2025-10-05T11:08:40.527063",
+    "documentName": "capitolo1.docx",
+    "ruleId": "RULE_STYLE_8",
+    "context": "...testo prima perch\u00e8 testo dopo..."
+  },
+  {
+    "correctionId": "corr_21",
+    "originalText": "la cane",
+    "correctedText": "il cane",
+    "category": "GRAMMAR",
+    "feedback": "errore",
+    "timestamp": "2025-10-18T11:08:40.527070",
+    "documentName": "capitolo1.docx",
+    "ruleId": "RULE_GRAMMAR_3",
+    "context": "...testo prima la cane testo dopo..."
+  },
+  {
+    "correctionId": "corr_22",
+    "originalText": "un p\u00f2 di",
+    "correctedText": "un po' di",
+    "category": "GRAMMAR",
+    "feedback": "corretta",
+    "timestamp": "2025-10-04T11:08:40.527078",
+    "documentName": "capitolo1.docx",
+    "ruleId": "RULE_GRAMMAR_2",
+    "context": "...testo prima un p\u00f2 di testo dopo..."
+  },
+  {
+    "correctionId": "corr_23",
+    "originalText": "tsto",
+    "correctedText": "testo",
+    "category": "VOCABULARY",
+    "feedback": "corretta",
+    "timestamp": "2025-10-06T11:08:40.527085",
+    "documentName": "racconto_20251027.docx",
+    "ruleId": "RULE_VOCABULARY_4",
+    "context": "...testo prima tsto testo dopo..."
+  },
+  {
+    "correctionId": "corr_24",
+    "originalText": "un p\u00f2",
+    "correctedText": "un po'",
+    "category": "GRAMMAR",
+    "feedback": "corretta",
+    "timestamp": "2025-10-01T11:08:40.527093",
+    "documentName": "articolo_blog.docx",
+    "ruleId": "RULE_GRAMMAR_7",
+    "context": "...testo prima un p\u00f2 testo dopo..."
+  },
+  {
+    "correctionId": "corr_25",
+    "originalText": "tsto",
+    "correctedText": "testo",
+    "category": "STYLE",
+    "feedback": "corretta",
+    "timestamp": "2025-10-16T11:08:40.527112",
+    "documentName": "capitolo1.docx",
+    "ruleId": "RULE_STYLE_9",
+    "context": "...testo prima tsto testo dopo..."
+  },
+  {
+    "correctionId": "corr_26",
+    "originalText": "qual \u00e8",
+    "correctedText": "quale",
+    "category": "STYLE",
+    "feedback": "errore",
+    "timestamp": "2025-10-02T11:08:40.527119",
+    "documentName": "tesi_laurea.docx",
+    "ruleId": "RULE_STYLE_8",
+    "context": "...testo prima qual \u00e8 testo dopo..."
+  },
+  {
+    "correctionId": "corr_27",
+    "originalText": "f\u00e0",
+    "correctedText": "fa",
+    "category": "VOCABULARY",
+    "feedback": "corretta",
+    "timestamp": "2025-10-26T11:08:40.527127",
+    "documentName": "articolo_blog.docx",
+    "ruleId": "RULE_VOCABULARY_1",
+    "context": "...testo prima f\u00e0 testo dopo..."
+  },
+  {
+    "correctionId": "corr_28",
+    "originalText": "un altro",
+    "correctedText": "un'altro",
+    "category": "VOCABULARY",
+    "feedback": "corretta",
+    "timestamp": "2025-10-10T11:08:40.527138",
+    "documentName": "capitolo1.docx",
+    "ruleId": "RULE_VOCABULARY_6",
+    "context": "...testo prima un altro testo dopo..."
+  },
+  {
+    "correctionId": "corr_29",
+    "originalText": "tsto",
+    "correctedText": "testo",
+    "category": "VOCABULARY",
+    "feedback": "corretta",
+    "timestamp": "2025-10-25T11:08:40.527147",
+    "documentName": "racconto_20251027.docx",
+    "ruleId": "RULE_VOCABULARY_4",
+    "context": "...testo prima tsto testo dopo..."
+  },
+  {
+    "correctionId": "corr_30",
+    "originalText": "a detto",
+    "correctedText": "ha detto",
+    "category": "VOCABULARY",
+    "feedback": "corretta",
+    "timestamp": "2025-10-06T11:08:40.527155",
+    "documentName": "articolo_blog.docx",
+    "ruleId": "RULE_VOCABULARY_8",
+    "context": "...testo prima a detto testo dopo..."
+  },
+  {
+    "correctionId": "corr_31",
+    "originalText": "qsta",
+    "correctedText": "questa",
+    "category": "VOCABULARY",
+    "feedback": "corretta",
+    "timestamp": "2025-10-04T11:08:40.527162",
+    "documentName": "documento_test.docx",
+    "ruleId": "RULE_VOCABULARY_4",
+    "context": "...testo prima qsta testo dopo..."
+  },
+  {
+    "correctionId": "corr_32",
+    "originalText": "un altro",
+    "correctedText": "un'altro",
+    "category": "GRAMMAR",
+    "feedback": "corretta",
+    "timestamp": "2025-10-07T11:08:40.527169",
+    "documentName": "articolo_blog.docx",
+    "ruleId": "RULE_GRAMMAR_3",
+    "context": "...testo prima un altro testo dopo..."
+  },
+  {
+    "correctionId": "corr_33",
+    "originalText": "qual \u00e8",
+    "correctedText": "quale",
+    "category": "SPELLING",
+    "feedback": "corretta",
+    "timestamp": "2025-10-11T11:08:40.527178",
+    "documentName": "articolo_blog.docx",
+    "ruleId": "RULE_SPELLING_8",
+    "context": "...testo prima qual \u00e8 testo dopo..."
+  },
+  {
+    "correctionId": "corr_34",
+    "originalText": "perch\u00e8",
+    "correctedText": "perch\u00e9",
+    "category": "STYLE",
+    "feedback": "corretta",
+    "timestamp": "2025-10-16T11:08:40.527186",
+    "documentName": "tesi_laurea.docx",
+    "ruleId": "RULE_STYLE_1",
+    "context": "...testo prima perch\u00e8 testo dopo..."
+  },
+  {
+    "correctionId": "corr_35",
+    "originalText": "daccordo",
+    "correctedText": "d'accordo",
+    "category": "VOCABULARY",
+    "feedback": "corretta",
+    "timestamp": "2025-10-09T11:08:40.527194",
+    "documentName": "racconto_20251027.docx",
+    "ruleId": "RULE_VOCABULARY_3",
+    "context": "...testo prima daccordo testo dopo..."
+  },
+  {
+    "correctionId": "corr_36",
+    "originalText": "vlta",
+    "correctedText": "volta",
+    "category": "SPELLING",
+    "feedback": "corretta",
+    "timestamp": "2025-10-07T11:08:40.527201",
+    "documentName": "tesi_laurea.docx",
+    "ruleId": "RULE_SPELLING_10",
+    "context": "...testo prima vlta testo dopo..."
+  },
+  {
+    "correctionId": "corr_37",
+    "originalText": "a detto",
+    "correctedText": "ha detto",
+    "category": "STYLE",
+    "feedback": "corretta",
+    "timestamp": "2025-10-02T11:08:40.527210",
+    "documentName": "capitolo1.docx",
+    "ruleId": "RULE_STYLE_1",
+    "context": "...testo prima a detto testo dopo..."
+  },
+  {
+    "correctionId": "corr_38",
+    "originalText": "propio",
+    "correctedText": "proprio",
+    "category": "GRAMMAR",
+    "feedback": "corretta",
+    "timestamp": "2025-09-28T11:08:40.527218",
+    "documentName": "racconto_20251027.docx",
+    "ruleId": "RULE_GRAMMAR_8",
+    "context": "...testo prima propio testo dopo..."
+  },
+  {
+    "correctionId": "corr_39",
+    "originalText": "un p\u00f2",
+    "correctedText": "un po'",
+    "category": "VOCABULARY",
+    "feedback": "errore",
+    "timestamp": "2025-10-05T11:08:40.527225",
+    "documentName": "capitolo1.docx",
+    "ruleId": "RULE_VOCABULARY_6",
+    "context": "...testo prima un p\u00f2 testo dopo..."
+  },
+  {
+    "correctionId": "corr_40",
+    "originalText": "un altro",
+    "correctedText": "un'altro",
+    "category": "GRAMMAR",
+    "feedback": "corretta",
+    "timestamp": "2025-10-05T11:08:40.527233",
+    "documentName": "capitolo1.docx",
+    "ruleId": "RULE_GRAMMAR_3",
+    "context": "...testo prima un altro testo dopo..."
+  },
+  {
+    "correctionId": "corr_41",
+    "originalText": "un p\u00f2 di",
+    "correctedText": "un po' di",
+    "category": "SPELLING",
+    "feedback": "corretta",
+    "timestamp": "2025-10-14T11:08:40.527240",
+    "documentName": "documento_test.docx",
+    "ruleId": "RULE_SPELLING_10",
+    "context": "...testo prima un p\u00f2 di testo dopo..."
+  },
+  {
+    "correctionId": "corr_42",
+    "originalText": "a detto",
+    "correctedText": "ha detto",
+    "category": "STYLE",
+    "feedback": "errore",
+    "timestamp": "2025-10-16T11:08:40.527248",
+    "documentName": "tesi_laurea.docx",
+    "ruleId": "RULE_STYLE_1",
+    "context": "...testo prima a detto testo dopo..."
+  },
+  {
+    "correctionId": "corr_43",
+    "originalText": "propio",
+    "correctedText": "proprio",
+    "category": "STYLE",
+    "feedback": "corretta",
+    "timestamp": "2025-10-07T11:08:40.527255",
+    "documentName": "capitolo1.docx",
+    "ruleId": "RULE_STYLE_1",
+    "context": "...testo prima propio testo dopo..."
+  },
+  {
+    "correctionId": "corr_44",
+    "originalText": "un altro",
+    "correctedText": "un'altro",
+    "category": "SPELLING",
+    "feedback": "corretta",
+    "timestamp": "2025-10-10T11:08:40.527262",
+    "documentName": "articolo_blog.docx",
+    "ruleId": "RULE_SPELLING_2",
+    "context": "...testo prima un altro testo dopo..."
+  },
+  {
+    "correctionId": "corr_45",
+    "originalText": "daccordo",
+    "correctedText": "d'accordo",
+    "category": "GRAMMAR",
+    "feedback": "corretta",
+    "timestamp": "2025-10-12T11:08:40.527270",
+    "documentName": "racconto_20251027.docx",
+    "ruleId": "RULE_GRAMMAR_3",
+    "context": "...testo prima daccordo testo dopo..."
+  },
+  {
+    "correctionId": "corr_46",
+    "originalText": "errro",
+    "correctedText": "errore",
+    "category": "SPELLING",
+    "feedback": "corretta",
+    "timestamp": "2025-10-06T11:08:40.527277",
+    "documentName": "racconto_20251027.docx",
+    "ruleId": "RULE_SPELLING_5",
+    "context": "...testo prima errro testo dopo..."
+  },
+  {
+    "correctionId": "corr_47",
+    "originalText": "un p\u00f2 di",
+    "correctedText": "un po' di",
+    "category": "GRAMMAR",
+    "feedback": "errore",
+    "timestamp": "2025-10-24T11:08:40.527284",
+    "documentName": "racconto_20251027.docx",
+    "ruleId": "RULE_GRAMMAR_8",
+    "context": "...testo prima un p\u00f2 di testo dopo..."
+  },
+  {
+    "correctionId": "corr_48",
+    "originalText": "f\u00e0",
+    "correctedText": "fa",
+    "category": "GRAMMAR",
+    "feedback": "corretta",
+    "timestamp": "2025-10-18T11:08:40.527291",
+    "documentName": "capitolo1.docx",
+    "ruleId": "RULE_GRAMMAR_8",
+    "context": "...testo prima f\u00e0 testo dopo..."
+  },
+  {
+    "correctionId": "corr_49",
+    "originalText": "vlta",
+    "correctedText": "volta",
+    "category": "STYLE",
+    "feedback": "corretta",
+    "timestamp": "2025-10-10T11:08:40.527298",
+    "documentName": "tesi_laurea.docx",
+    "ruleId": "RULE_STYLE_10",
+    "context": "...testo prima vlta testo dopo..."
+  },
+  {
+    "correctionId": "corr_50",
+    "originalText": "perch\u00e8",
+    "correctedText": "perch\u00e9",
+    "category": "VOCABULARY",
+    "feedback": "corretta",
+    "timestamp": "2025-09-28T11:08:40.527305",
+    "documentName": "tesi_laurea.docx",
+    "ruleId": "RULE_VOCABULARY_4",
+    "context": "...testo prima perch\u00e8 testo dopo..."
+  },
+  {
+    "correctionId": "corr_51",
+    "originalText": "un p\u00f2",
+    "correctedText": "un po'",
+    "category": "GRAMMAR",
+    "feedback": "errore",
+    "timestamp": "2025-10-23T11:08:40.527313",
+    "documentName": "articolo_blog.docx",
+    "ruleId": "RULE_GRAMMAR_2",
+    "context": "...testo prima un p\u00f2 testo dopo..."
+  },
+  {
+    "correctionId": "corr_52",
+    "originalText": "a detto",
+    "correctedText": "ha detto",
+    "category": "SPELLING",
+    "feedback": "corretta",
+    "timestamp": "2025-09-30T11:08:40.527320",
+    "documentName": "racconto_20251027.docx",
+    "ruleId": "RULE_SPELLING_8",
+    "context": "...testo prima a detto testo dopo..."
+  },
+  {
+    "correctionId": "corr_53",
+    "originalText": "un p\u00f2",
+    "correctedText": "un po'",
+    "category": "GRAMMAR",
+    "feedback": "corretta",
+    "timestamp": "2025-10-25T11:08:40.527327",
+    "documentName": "capitolo1.docx",
+    "ruleId": "RULE_GRAMMAR_10",
+    "context": "...testo prima un p\u00f2 testo dopo..."
+  },
+  {
+    "correctionId": "corr_54",
+    "originalText": "un altro",
+    "correctedText": "un'altro",
+    "category": "GRAMMAR",
+    "feedback": "errore",
+    "timestamp": "2025-09-29T11:08:40.527335",
+    "documentName": "documento_test.docx",
+    "ruleId": "RULE_GRAMMAR_5",
+    "context": "...testo prima un altro testo dopo..."
+  },
+  {
+    "correctionId": "corr_55",
+    "originalText": "un p\u00f2",
+    "correctedText": "un po'",
+    "category": "SPELLING",
+    "feedback": "corretta",
+    "timestamp": "2025-10-13T11:08:40.527345",
+    "documentName": "articolo_blog.docx",
+    "ruleId": "RULE_SPELLING_4",
+    "context": "...testo prima un p\u00f2 testo dopo..."
+  },
+  {
+    "correctionId": "corr_56",
+    "originalText": "un p\u00f2 di",
+    "correctedText": "un po' di",
+    "category": "STYLE",
+    "feedback": "corretta",
+    "timestamp": "2025-10-22T11:08:40.527352",
+    "documentName": "tesi_laurea.docx",
+    "ruleId": "RULE_STYLE_2",
+    "context": "...testo prima un p\u00f2 di testo dopo..."
+  },
+  {
+    "correctionId": "corr_57",
+    "originalText": "qsta",
+    "correctedText": "questa",
+    "category": "STYLE",
+    "feedback": "corretta",
+    "timestamp": "2025-10-15T11:08:40.527361",
+    "documentName": "tesi_laurea.docx",
+    "ruleId": "RULE_STYLE_2",
+    "context": "...testo prima qsta testo dopo..."
+  },
+  {
+    "correctionId": "corr_58",
+    "originalText": "un altro",
+    "correctedText": "un'altro",
+    "category": "VOCABULARY",
+    "feedback": "corretta",
+    "timestamp": "2025-10-10T11:08:40.527369",
+    "documentName": "documento_test.docx",
+    "ruleId": "RULE_VOCABULARY_6",
+    "context": "...testo prima un altro testo dopo..."
+  },
+  {
+    "correctionId": "corr_59",
+    "originalText": "vlta",
+    "correctedText": "volta",
+    "category": "VOCABULARY",
+    "feedback": "errore",
+    "timestamp": "2025-10-23T11:08:40.527379",
+    "documentName": "capitolo1.docx",
+    "ruleId": "RULE_VOCABULARY_3",
+    "context": "...testo prima vlta testo dopo..."
+  },
+  {
+    "correctionId": "corr_60",
+    "originalText": "la cane",
+    "correctedText": "il cane",
+    "category": "STYLE",
+    "feedback": "errore",
+    "timestamp": "2025-10-26T11:08:40.527386",
+    "documentName": "tesi_laurea.docx",
+    "ruleId": "RULE_STYLE_9",
+    "context": "...testo prima la cane testo dopo..."
+  },
+  {
+    "correctionId": "corr_61",
+    "originalText": "a detto",
+    "correctedText": "ha detto",
+    "category": "GRAMMAR",
+    "feedback": "corretta",
+    "timestamp": "2025-10-03T11:08:40.527404",
+    "documentName": "documento_test.docx",
+    "ruleId": "RULE_GRAMMAR_3",
+    "context": "...testo prima a detto testo dopo..."
+  },
+  {
+    "correctionId": "corr_62",
+    "originalText": "f\u00e0",
+    "correctedText": "fa",
+    "category": "GRAMMAR",
+    "feedback": "corretta",
+    "timestamp": "2025-10-19T11:08:40.527412",
+    "documentName": "capitolo1.docx",
+    "ruleId": "RULE_GRAMMAR_10",
+    "context": "...testo prima f\u00e0 testo dopo..."
+  },
+  {
+    "correctionId": "corr_63",
+    "originalText": "perch\u00e8",
+    "correctedText": "perch\u00e9",
+    "category": "STYLE",
+    "feedback": "corretta",
+    "timestamp": "2025-10-23T11:08:40.527419",
+    "documentName": "articolo_blog.docx",
+    "ruleId": "RULE_STYLE_4",
+    "context": "...testo prima perch\u00e8 testo dopo..."
+  },
+  {
+    "correctionId": "corr_64",
+    "originalText": "sopratutto",
+    "correctedText": "soprattutto",
+    "category": "VOCABULARY",
+    "feedback": "errore",
+    "timestamp": "2025-09-30T11:08:40.527427",
+    "documentName": "tesi_laurea.docx",
+    "ruleId": "RULE_VOCABULARY_4",
+    "context": "...testo prima sopratutto testo dopo..."
+  },
+  {
+    "correctionId": "corr_65",
+    "originalText": "propio",
+    "correctedText": "proprio",
+    "category": "GRAMMAR",
+    "feedback": "corretta",
+    "timestamp": "2025-10-07T11:08:40.527435",
+    "documentName": "capitolo1.docx",
+    "ruleId": "RULE_GRAMMAR_1",
+    "context": "...testo prima propio testo dopo..."
+  },
+  {
+    "correctionId": "corr_66",
+    "originalText": "un p\u00f2 di",
+    "correctedText": "un po' di",
+    "category": "VOCABULARY",
+    "feedback": "errore",
+    "timestamp": "2025-10-17T11:08:40.527443",
+    "documentName": "documento_test.docx",
+    "ruleId": "RULE_VOCABULARY_9",
+    "context": "...testo prima un p\u00f2 di testo dopo..."
+  },
+  {
+    "correctionId": "corr_67",
+    "originalText": "la cane",
+    "correctedText": "il cane",
+    "category": "VOCABULARY",
+    "feedback": "corretta",
+    "timestamp": "2025-10-10T11:08:40.527450",
+    "documentName": "capitolo1.docx",
+    "ruleId": "RULE_VOCABULARY_6",
+    "context": "...testo prima la cane testo dopo..."
+  },
+  {
+    "correctionId": "corr_68",
+    "originalText": "qsta",
+    "correctedText": "questa",
+    "category": "GRAMMAR",
+    "feedback": "corretta",
+    "timestamp": "2025-09-29T11:08:40.527458",
+    "documentName": "articolo_blog.docx",
+    "ruleId": "RULE_GRAMMAR_2",
+    "context": "...testo prima qsta testo dopo..."
+  },
+  {
+    "correctionId": "corr_69",
+    "originalText": "qual \u00e8",
+    "correctedText": "quale",
+    "category": "GRAMMAR",
+    "feedback": "errore",
+    "timestamp": "2025-10-22T11:08:40.527466",
+    "documentName": "documento_test.docx",
+    "ruleId": "RULE_GRAMMAR_3",
+    "context": "...testo prima qual \u00e8 testo dopo..."
+  },
+  {
+    "correctionId": "corr_70",
+    "originalText": "qsta",
+    "correctedText": "questa",
+    "category": "SPELLING",
+    "feedback": "corretta",
+    "timestamp": "2025-10-04T11:08:40.527473",
+    "documentName": "articolo_blog.docx",
+    "ruleId": "RULE_SPELLING_7",
+    "context": "...testo prima qsta testo dopo..."
+  },
+  {
+    "correctionId": "corr_71",
+    "originalText": "f\u00e0",
+    "correctedText": "fa",
+    "category": "GRAMMAR",
+    "feedback": "corretta",
+    "timestamp": "2025-10-22T11:08:40.527480",
+    "documentName": "tesi_laurea.docx",
+    "ruleId": "RULE_GRAMMAR_1",
+    "context": "...testo prima f\u00e0 testo dopo..."
+  },
+  {
+    "correctionId": "corr_72",
+    "originalText": "a detto",
+    "correctedText": "ha detto",
+    "category": "GRAMMAR",
+    "feedback": "corretta",
+    "timestamp": "2025-10-05T11:08:40.527488",
+    "documentName": "racconto_20251027.docx",
+    "ruleId": "RULE_GRAMMAR_1",
+    "context": "...testo prima a detto testo dopo..."
+  },
+  {
+    "correctionId": "corr_73",
+    "originalText": "qsta",
+    "correctedText": "questa",
+    "category": "VOCABULARY",
+    "feedback": "errore",
+    "timestamp": "2025-10-15T11:08:40.527495",
+    "documentName": "articolo_blog.docx",
+    "ruleId": "RULE_VOCABULARY_5",
+    "context": "...testo prima qsta testo dopo..."
+  },
+  {
+    "correctionId": "corr_74",
+    "originalText": "errro",
+    "correctedText": "errore",
+    "category": "VOCABULARY",
+    "feedback": "errore",
+    "timestamp": "2025-10-02T11:08:40.527502",
+    "documentName": "tesi_laurea.docx",
+    "ruleId": "RULE_VOCABULARY_5",
+    "context": "...testo prima errro testo dopo..."
+  },
+  {
+    "correctionId": "corr_75",
+    "originalText": "vlta",
+    "correctedText": "volta",
+    "category": "VOCABULARY",
+    "feedback": "errore",
+    "timestamp": "2025-10-09T11:08:40.527509",
+    "documentName": "tesi_laurea.docx",
+    "ruleId": "RULE_VOCABULARY_8",
+    "context": "...testo prima vlta testo dopo..."
+  },
+  {
+    "correctionId": "corr_76",
+    "originalText": "propio",
+    "correctedText": "proprio",
+    "category": "VOCABULARY",
+    "feedback": "corretta",
+    "timestamp": "2025-10-05T11:08:40.527524",
+    "documentName": "articolo_blog.docx",
+    "ruleId": "RULE_VOCABULARY_4",
+    "context": "...testo prima propio testo dopo..."
+  },
+  {
+    "correctionId": "corr_77",
+    "originalText": "daccordo",
+    "correctedText": "d'accordo",
+    "category": "GRAMMAR",
+    "feedback": "corretta",
+    "timestamp": "2025-10-12T11:08:40.527534",
+    "documentName": "documento_test.docx",
+    "ruleId": "RULE_GRAMMAR_7",
+    "context": "...testo prima daccordo testo dopo..."
+  },
+  {
+    "correctionId": "corr_78",
+    "originalText": "tsto",
+    "correctedText": "testo",
+    "category": "STYLE",
+    "feedback": "corretta",
+    "timestamp": "2025-10-09T11:08:40.527541",
+    "documentName": "tesi_laurea.docx",
+    "ruleId": "RULE_STYLE_4",
+    "context": "...testo prima tsto testo dopo..."
+  },
+  {
+    "correctionId": "corr_79",
+    "originalText": "un altro",
+    "correctedText": "un'altro",
+    "category": "GRAMMAR",
+    "feedback": "corretta",
+    "timestamp": "2025-10-06T11:08:40.527549",
+    "documentName": "articolo_blog.docx",
+    "ruleId": "RULE_GRAMMAR_8",
+    "context": "...testo prima un altro testo dopo..."
+  },
+  {
+    "correctionId": "corr_80",
+    "originalText": "qual \u00e8",
+    "correctedText": "quale",
+    "category": "SPELLING",
+    "feedback": "corretta",
+    "timestamp": "2025-10-03T11:08:40.527556",
+    "documentName": "tesi_laurea.docx",
+    "ruleId": "RULE_SPELLING_5",
+    "context": "...testo prima qual \u00e8 testo dopo..."
+  },
+  {
+    "correctionId": "corr_81",
+    "originalText": "sopratutto",
+    "correctedText": "soprattutto",
+    "category": "VOCABULARY",
+    "feedback": "corretta",
+    "timestamp": "2025-10-20T11:08:40.527564",
+    "documentName": "tesi_laurea.docx",
+    "ruleId": "RULE_VOCABULARY_7",
+    "context": "...testo prima sopratutto testo dopo..."
+  },
+  {
+    "correctionId": "corr_82",
+    "originalText": "errro",
+    "correctedText": "errore",
+    "category": "GRAMMAR",
+    "feedback": "errore",
+    "timestamp": "2025-10-23T11:08:40.527571",
+    "documentName": "racconto_20251027.docx",
+    "ruleId": "RULE_GRAMMAR_10",
+    "context": "...testo prima errro testo dopo..."
+  },
+  {
+    "correctionId": "corr_83",
+    "originalText": "daccordo",
+    "correctedText": "d'accordo",
+    "category": "SPELLING",
+    "feedback": "corretta",
+    "timestamp": "2025-09-30T11:08:40.527578",
+    "documentName": "documento_test.docx",
+    "ruleId": "RULE_SPELLING_8",
+    "context": "...testo prima daccordo testo dopo..."
+  },
+  {
+    "correctionId": "corr_84",
+    "originalText": "f\u00e0",
+    "correctedText": "fa",
+    "category": "GRAMMAR",
+    "feedback": "corretta",
+    "timestamp": "2025-10-09T11:08:40.527586",
+    "documentName": "tesi_laurea.docx",
+    "ruleId": "RULE_GRAMMAR_4",
+    "context": "...testo prima f\u00e0 testo dopo..."
+  },
+  {
+    "correctionId": "corr_85",
+    "originalText": "errro",
+    "correctedText": "errore",
+    "category": "SPELLING",
+    "feedback": "corretta",
+    "timestamp": "2025-10-11T11:08:40.527593",
+    "documentName": "articolo_blog.docx",
+    "ruleId": "RULE_SPELLING_6",
+    "context": "...testo prima errro testo dopo..."
+  },
+  {
+    "correctionId": "corr_86",
+    "originalText": "perch\u00e8",
+    "correctedText": "perch\u00e9",
+    "category": "SPELLING",
+    "feedback": "errore",
+    "timestamp": "2025-10-24T11:08:40.527600",
+    "documentName": "documento_test.docx",
+    "ruleId": "RULE_SPELLING_3",
+    "context": "...testo prima perch\u00e8 testo dopo..."
+  },
+  {
+    "correctionId": "corr_87",
+    "originalText": "vlta",
+    "correctedText": "volta",
+    "category": "STYLE",
+    "feedback": "corretta",
+    "timestamp": "2025-09-29T11:08:40.527608",
+    "documentName": "articolo_blog.docx",
+    "ruleId": "RULE_STYLE_10",
+    "context": "...testo prima vlta testo dopo..."
+  },
+  {
+    "correctionId": "corr_88",
+    "originalText": "a detto",
+    "correctedText": "ha detto",
+    "category": "SPELLING",
+    "feedback": "corretta",
+    "timestamp": "2025-10-23T11:08:40.527615",
+    "documentName": "documento_test.docx",
+    "ruleId": "RULE_SPELLING_2",
+    "context": "...testo prima a detto testo dopo..."
+  },
+  {
+    "correctionId": "corr_89",
+    "originalText": "perch\u00e8",
+    "correctedText": "perch\u00e9",
+    "category": "GRAMMAR",
+    "feedback": "corretta",
+    "timestamp": "2025-10-22T11:08:40.527624",
+    "documentName": "capitolo1.docx",
+    "ruleId": "RULE_GRAMMAR_6",
+    "context": "...testo prima perch\u00e8 testo dopo..."
+  },
+  {
+    "correctionId": "corr_90",
+    "originalText": "errro",
+    "correctedText": "errore",
+    "category": "VOCABULARY",
+    "feedback": "errore",
+    "timestamp": "2025-10-21T11:08:40.527631",
+    "documentName": "articolo_blog.docx",
+    "ruleId": "RULE_VOCABULARY_10",
+    "context": "...testo prima errro testo dopo..."
+  },
+  {
+    "correctionId": "corr_91",
+    "originalText": "un p\u00f2",
+    "correctedText": "un po'",
+    "category": "GRAMMAR",
+    "feedback": "errore",
+    "timestamp": "2025-10-20T11:08:40.527639",
+    "documentName": "articolo_blog.docx",
+    "ruleId": "RULE_GRAMMAR_10",
+    "context": "...testo prima un p\u00f2 testo dopo..."
+  },
+  {
+    "correctionId": "corr_92",
+    "originalText": "propio",
+    "correctedText": "proprio",
+    "category": "GRAMMAR",
+    "feedback": "corretta",
+    "timestamp": "2025-10-19T11:08:40.527646",
+    "documentName": "racconto_20251027.docx",
+    "ruleId": "RULE_GRAMMAR_5",
+    "context": "...testo prima propio testo dopo..."
+  },
+  {
+    "correctionId": "corr_93",
+    "originalText": "sopratutto",
+    "correctedText": "soprattutto",
+    "category": "SPELLING",
+    "feedback": "corretta",
+    "timestamp": "2025-10-17T11:08:40.527655",
+    "documentName": "articolo_blog.docx",
+    "ruleId": "RULE_SPELLING_1",
+    "context": "...testo prima sopratutto testo dopo..."
+  },
+  {
+    "correctionId": "corr_94",
+    "originalText": "perch\u00e8",
+    "correctedText": "perch\u00e9",
+    "category": "GRAMMAR",
+    "feedback": "corretta",
+    "timestamp": "2025-10-23T11:08:40.527662",
+    "documentName": "capitolo1.docx",
+    "ruleId": "RULE_GRAMMAR_10",
+    "context": "...testo prima perch\u00e8 testo dopo..."
+  },
+  {
+    "correctionId": "corr_95",
+    "originalText": "a detto",
+    "correctedText": "ha detto",
+    "category": "VOCABULARY",
+    "feedback": "corretta",
+    "timestamp": "2025-10-10T11:08:40.527672",
+    "documentName": "capitolo1.docx",
+    "ruleId": "RULE_VOCABULARY_3",
+    "context": "...testo prima a detto testo dopo..."
+  },
+  {
+    "correctionId": "corr_96",
+    "originalText": "qual \u00e8",
+    "correctedText": "quale",
+    "category": "VOCABULARY",
+    "feedback": "corretta",
+    "timestamp": "2025-10-09T11:08:40.527682",
+    "documentName": "articolo_blog.docx",
+    "ruleId": "RULE_VOCABULARY_3",
+    "context": "...testo prima qual \u00e8 testo dopo..."
+  },
+  {
+    "correctionId": "corr_97",
+    "originalText": "f\u00e0",
+    "correctedText": "fa",
+    "category": "VOCABULARY",
+    "feedback": "corretta",
+    "timestamp": "2025-10-27T11:08:40.527689",
+    "documentName": "documento_test.docx",
+    "ruleId": "RULE_VOCABULARY_6",
+    "context": "...testo prima f\u00e0 testo dopo..."
+  },
+  {
+    "correctionId": "corr_98",
+    "originalText": "vlta",
+    "correctedText": "volta",
+    "category": "SPELLING",
+    "feedback": "corretta",
+    "timestamp": "2025-09-30T11:08:40.527696",
+    "documentName": "articolo_blog.docx",
+    "ruleId": "RULE_SPELLING_2",
+    "context": "...testo prima vlta testo dopo..."
+  },
+  {
+    "correctionId": "corr_99",
+    "originalText": "f\u00e0",
+    "correctedText": "fa",
+    "category": "GRAMMAR",
+    "feedback": "errore",
+    "timestamp": "2025-10-03T11:08:40.527704",
+    "documentName": "capitolo1.docx",
+    "ruleId": "RULE_GRAMMAR_10",
+    "context": "...testo prima f\u00e0 testo dopo..."
+  },
+  {
+    "correctionId": "learned_vlta_0",
+    "originalText": "vlta",
+    "correctedText": "volta",
+    "category": "SPELLING",
+    "feedback": "corretta",
+    "timestamp": "2025-10-09T11:08:40.527713",
+    "documentName": "capitolo1.docx",
+    "ruleId": "RULE_SPELLING_AUTO",
+    "context": "...esempio di vlta nel testo..."
+  },
+  {
+    "correctionId": "learned_vlta_1",
+    "originalText": "vlta",
+    "correctedText": "volta",
+    "category": "SPELLING",
+    "feedback": "corretta",
+    "timestamp": "2025-10-14T11:08:40.527721",
+    "documentName": "tesi_laurea.docx",
+    "ruleId": "RULE_SPELLING_AUTO",
+    "context": "...esempio di vlta nel testo..."
+  },
+  {
+    "correctionId": "learned_vlta_2",
+    "originalText": "vlta",
+    "correctedText": "volta",
+    "category": "SPELLING",
+    "feedback": "corretta",
+    "timestamp": "2025-10-10T11:08:40.527727",
+    "documentName": "capitolo1.docx",
+    "ruleId": "RULE_SPELLING_AUTO",
+    "context": "...esempio di vlta nel testo..."
+  },
+  {
+    "correctionId": "learned_vlta_3",
+    "originalText": "vlta",
+    "correctedText": "volta",
+    "category": "SPELLING",
+    "feedback": "corretta",
+    "timestamp": "2025-10-19T11:08:40.527731",
+    "documentName": "capitolo1.docx",
+    "ruleId": "RULE_SPELLING_AUTO",
+    "context": "...esempio di vlta nel testo..."
+  },
+  {
+    "correctionId": "learned_vlta_4",
+    "originalText": "vlta",
+    "correctedText": "volta",
+    "category": "SPELLING",
+    "feedback": "corretta",
+    "timestamp": "2025-10-17T11:08:40.527736",
+    "documentName": "documento_test.docx",
+    "ruleId": "RULE_SPELLING_AUTO",
+    "context": "...esempio di vlta nel testo..."
+  },
+  {
+    "correctionId": "learned_qsta_0",
+    "originalText": "qsta",
+    "correctedText": "questa",
+    "category": "SPELLING",
+    "feedback": "corretta",
+    "timestamp": "2025-10-09T11:08:40.527742",
+    "documentName": "documento_test.docx",
+    "ruleId": "RULE_SPELLING_AUTO",
+    "context": "...esempio di qsta nel testo..."
+  },
+  {
+    "correctionId": "learned_qsta_1",
+    "originalText": "qsta",
+    "correctedText": "questa",
+    "category": "SPELLING",
+    "feedback": "corretta",
+    "timestamp": "2025-10-12T11:08:40.527748",
+    "documentName": "capitolo1.docx",
+    "ruleId": "RULE_SPELLING_AUTO",
+    "context": "...esempio di qsta nel testo..."
+  },
+  {
+    "correctionId": "learned_qsta_2",
+    "originalText": "qsta",
+    "correctedText": "questa",
+    "category": "SPELLING",
+    "feedback": "corretta",
+    "timestamp": "2025-10-18T11:08:40.527753",
+    "documentName": "documento_test.docx",
+    "ruleId": "RULE_SPELLING_AUTO",
+    "context": "...esempio di qsta nel testo..."
+  },
+  {
+    "correctionId": "learned_qsta_3",
+    "originalText": "qsta",
+    "correctedText": "questa",
+    "category": "SPELLING",
+    "feedback": "corretta",
+    "timestamp": "2025-10-11T11:08:40.527757",
+    "documentName": "racconto_20251027.docx",
+    "ruleId": "RULE_SPELLING_AUTO",
+    "context": "...esempio di qsta nel testo..."
+  },
+  {
+    "correctionId": "learned_qsta_4",
+    "originalText": "qsta",
+    "correctedText": "questa",
+    "category": "SPELLING",
+    "feedback": "corretta",
+    "timestamp": "2025-10-07T11:08:40.527763",
+    "documentName": "capitolo1.docx",
+    "ruleId": "RULE_SPELLING_AUTO",
+    "context": "...esempio di qsta nel testo..."
+  },
+  {
+    "correctionId": "learned_errro_0",
+    "originalText": "errro",
+    "correctedText": "errore",
+    "category": "SPELLING",
+    "feedback": "corretta",
+    "timestamp": "2025-10-08T11:08:40.527767",
+    "documentName": "capitolo1.docx",
+    "ruleId": "RULE_SPELLING_AUTO",
+    "context": "...esempio di errro nel testo..."
+  },
+  {
+    "correctionId": "learned_errro_1",
+    "originalText": "errro",
+    "correctedText": "errore",
+    "category": "SPELLING",
+    "feedback": "corretta",
+    "timestamp": "2025-10-09T11:08:40.528204",
+    "documentName": "capitolo1.docx",
+    "ruleId": "RULE_SPELLING_AUTO",
+    "context": "...esempio di errro nel testo..."
+  },
+  {
+    "correctionId": "learned_errro_2",
+    "originalText": "errro",
+    "correctedText": "errore",
+    "category": "SPELLING",
+    "feedback": "corretta",
+    "timestamp": "2025-10-19T11:08:40.528222",
+    "documentName": "documento_test.docx",
+    "ruleId": "RULE_SPELLING_AUTO",
+    "context": "...esempio di errro nel testo..."
+  },
+  {
+    "correctionId": "learned_errro_3",
+    "originalText": "errro",
+    "correctedText": "errore",
+    "category": "SPELLING",
+    "feedback": "corretta",
+    "timestamp": "2025-10-19T11:08:40.528229",
+    "documentName": "racconto_20251027.docx",
+    "ruleId": "RULE_SPELLING_AUTO",
+    "context": "...esempio di errro nel testo..."
+  },
+  {
+    "correctionId": "learned_errro_4",
+    "originalText": "errro",
+    "correctedText": "errore",
+    "category": "SPELLING",
+    "feedback": "corretta",
+    "timestamp": "2025-10-07T11:08:40.528235",
+    "documentName": "documento_test.docx",
+    "ruleId": "RULE_SPELLING_AUTO",
+    "context": "...esempio di errro nel testo..."
+  },
+  {
+    "correctionId": "contested_propio_0",
+    "originalText": "propio",
+    "correctedText": "proprio",
+    "category": "SPELLING",
+    "feedback": "corretta",
+    "timestamp": "2025-10-15T11:08:40.528247",
+    "documentName": "capitolo1.docx",
+    "ruleId": "RULE_SPELLING_CONTESTED",
+    "context": "...testo con propio contestato..."
+  },
+  {
+    "correctionId": "contested_propio_1",
+    "originalText": "propio",
+    "correctedText": "proprio",
+    "category": "SPELLING",
+    "feedback": "corretta",
+    "timestamp": "2025-10-22T11:08:40.528256",
+    "documentName": "articolo_blog.docx",
+    "ruleId": "RULE_SPELLING_CONTESTED",
+    "context": "...testo con propio contestato..."
+  },
+  {
+    "correctionId": "contested_propio_2",
+    "originalText": "propio",
+    "correctedText": "proprio",
+    "category": "SPELLING",
+    "feedback": "corretta",
+    "timestamp": "2025-10-23T11:08:40.528265",
+    "documentName": "tesi_laurea.docx",
+    "ruleId": "RULE_SPELLING_CONTESTED",
+    "context": "...testo con propio contestato..."
+  },
+  {
+    "correctionId": "contested_propio_3",
+    "originalText": "propio",
+    "correctedText": "proprio",
+    "category": "SPELLING",
+    "feedback": "errore",
+    "timestamp": "2025-10-17T11:08:40.528270",
+    "documentName": "documento_test.docx",
+    "ruleId": "RULE_SPELLING_CONTESTED",
+    "context": "...testo con propio contestato..."
+  },
+  {
+    "correctionId": "contested_propio_4",
+    "originalText": "propio",
+    "correctedText": "proprio",
+    "category": "SPELLING",
+    "feedback": "errore",
+    "timestamp": "2025-10-12T11:08:40.528275",
+    "documentName": "documento_test.docx",
+    "ruleId": "RULE_SPELLING_CONTESTED",
+    "context": "...testo con propio contestato..."
+  },
+  {
+    "correctionId": "contested_un altro_0",
+    "originalText": "un altro",
+    "correctedText": "un'altro",
+    "category": "GRAMMAR",
+    "feedback": "corretta",
+    "timestamp": "2025-10-26T11:08:40.528281",
+    "documentName": "tesi_laurea.docx",
+    "ruleId": "RULE_GRAMMAR_CONTESTED",
+    "context": "...testo con un altro contestato..."
+  },
+  {
+    "correctionId": "contested_un altro_1",
+    "originalText": "un altro",
+    "correctedText": "un'altro",
+    "category": "GRAMMAR",
+    "feedback": "corretta",
+    "timestamp": "2025-10-20T11:08:40.528286",
+    "documentName": "documento_test.docx",
+    "ruleId": "RULE_GRAMMAR_CONTESTED",
+    "context": "...testo con un altro contestato..."
+  },
+  {
+    "correctionId": "contested_un altro_2",
+    "originalText": "un altro",
+    "correctedText": "un'altro",
+    "category": "GRAMMAR",
+    "feedback": "corretta",
+    "timestamp": "2025-10-18T11:08:40.528290",
+    "documentName": "capitolo1.docx",
+    "ruleId": "RULE_GRAMMAR_CONTESTED",
+    "context": "...testo con un altro contestato..."
+  },
+  {
+    "correctionId": "contested_un altro_3",
+    "originalText": "un altro",
+    "correctedText": "un'altro",
+    "category": "GRAMMAR",
+    "feedback": "errore",
+    "timestamp": "2025-10-24T11:08:40.528295",
+    "documentName": "capitolo1.docx",
+    "ruleId": "RULE_GRAMMAR_CONTESTED",
+    "context": "...testo con un altro contestato..."
+  },
+  {
+    "correctionId": "contested_un altro_4",
+    "originalText": "un altro",
+    "correctedText": "un'altro",
+    "category": "GRAMMAR",
+    "feedback": "errore",
+    "timestamp": "2025-10-23T11:08:40.528299",
+    "documentName": "articolo_blog.docx",
+    "ruleId": "RULE_GRAMMAR_CONTESTED",
+    "context": "...testo con un altro contestato..."
+  }
+];
+        
+        // Salva in localStorage
+        localStorage.setItem('correction_feedback', JSON.stringify(testData));
+        
+        document.getElementById('status').innerHTML = 
+            '✅ Caricati ' + testData.length + ' feedback di test!<br><br>' +
+            '<a href="dashboard_feedback.html">Apri Dashboard →</a>';
+        
+        console.log('✅ Test data loaded:', testData.length, 'items');
+        
+        // Auto-redirect dopo 2 secondi
+        setTimeout(() => {
+            window.location.href = 'dashboard_feedback.html';
+        }, 2000);
+    </script>
+</body>
+</html>

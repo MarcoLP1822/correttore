@@ -51,7 +51,7 @@ class QualityAssurance:
             "safety_score": 0.15
         }
     
-    def assess_correction(self, original: str, corrected: str, context: Dict[str, Any] = None) -> QualityReport:
+    def assess_correction(self, original: str, corrected: str, context: Optional[Dict[str, Any]] = None) -> QualityReport:
         """
         Valuta la qualità di una correzione con analisi multidimensionale.
         

@@ -72,7 +72,7 @@ class TestDocumentHandler(unittest.TestCase):
             self.assertIsInstance(paragraphs, list)
             self.assertEqual(len(paragraphs), 2)
             
-    @patch('core.document_handler.Document')
+    @patch('correttore.core.document_handler.Document')
     def test_save_document_success(self, mock_doc_class):
         """Test salvataggio documento con successo."""
         mock_doc = Mock()
@@ -175,7 +175,7 @@ class TestDocumentHandler(unittest.TestCase):
         # Il metodo dovrebbe restituire un boolean
         self.assertIsInstance(has_errors, bool)
         
-    @patch('core.document_handler.Document')
+    @patch('correttore.core.document_handler.Document')
     def test_has_math_detection(self, mock_doc_class):
         """Test rilevamento contenuto matematico."""
         mock_paragraph = Mock()
@@ -192,7 +192,7 @@ class TestDocumentHandler(unittest.TestCase):
     def test_integration_load_and_extract(self):
         """Test integrazione caricamento e estrazione."""
         # Questo test richiede un file DOCX reale, quindi lo skippiamo o lo mockiamo
-        with patch('core.document_handler.Document') as mock_doc_class:
+        with patch('correttore.core.document_handler.Document') as mock_doc_class:
             mock_doc = Mock()
             mock_doc.paragraphs = []
             

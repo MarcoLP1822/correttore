@@ -45,15 +45,15 @@ class LanguageToolConfig:
 @dataclass
 class CorrectionConfig:
     """Configurazione per il motore di correzione"""
-    max_concurrent_workers: int = 5
+    max_concurrent_workers: int = 2  # Ridotto da 5 a 2 per evitare rate limiting OpenAI
     target_processing_time_minutes: int = 5
     quality_threshold: float = 0.55  # Abbassata per permettere più correzioni
     cache_enabled: bool = True
     backup_enabled: bool = True
     max_retries: int = 5
     min_quality_threshold: float = 0.55  # Abbassata per permettere più correzioni
-    max_workers: int = 5
-    batch_size: int = 10
+    max_workers: int = 2  # Ridotto da 5 a 2 per evitare rate limiting OpenAI
+    batch_size: int = 20  # Aumentato da 10 a 20 per ridurre numero di batch
     min_success_rate: float = 0.80
     min_paragraph_length: int = 20
 

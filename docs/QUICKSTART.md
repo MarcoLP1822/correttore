@@ -287,9 +287,10 @@ pip show correttore
 ## 📚 Documentazione Completa
 
 - [README.md](../README.md) - Overview completa
-- [docs/COME_AVVIARE.md](../docs/COME_AVVIARE.md) - Guida dettagliata
-- [docs/GUIDA_WEB_LEGGIBILITA.md](../docs/GUIDA_WEB_LEGGIBILITA.md) - Web interface
-- [docs/GULPEASE.md](../docs/GULPEASE.md) - Indice Gulpease
+- [docs/README.md](README.md) - Indice documentazione
+- [docs/COME_AVVIARE.md](COME_AVVIARE.md) - Guida dettagliata
+- [docs/MIGRATION_REPORT.md](MIGRATION_REPORT.md) - Report migrazione v2.0
+- [docs/NVDB_USAGE.md](NVDB_USAGE.md) - Uso vocabolario di base
 - [CHANGELOG.md](../CHANGELOG.md) - Modifiche versione
 
 ## 💡 Tips & Tricks

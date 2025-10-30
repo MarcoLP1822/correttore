@@ -76,15 +76,22 @@ dmypy.json
 
 # === PROJECT SPECIFIC ===
 # Input/Output directories that contain processed files
-uploads/
 uploads/*.docx
-outputs/
+uploads/*.doc
+uploads/archive/
+!uploads/.gitkeep
 outputs/*.docx
+outputs/*.html
 outputs/*.md
-backups/
+outputs/archive/
+!outputs/.gitkeep
 backups/*.backup.json
+backups/archive*/
+backups/*.zip
+!backups/.gitkeep
 test_output/
 test_output/*.txt
+!test_output/.gitkeep
 
 # Folders with spaces (problematic for git) - DEPRECATED after migration
 correttore files/
@@ -118,6 +125,9 @@ examples/*.pdf
 # /config/
 # /tools/
 
+# Legacy code moved to _legacy/ (can be deleted after verification)
+_legacy/
+
 # === DOCUMENTS & MEDIA ===
 # Processed documents (keep only sample/test files in specific directories if needed)
 *.docx
@@ -135,9 +145,30 @@ config_backup_*.yaml
 config_*_backup.yaml
 
 # === IDE & EDITORS ===
-# VSCode settings (keep if you want to share)
-.vscode/settings.json
-.vscode/launch.json
+# VSCode
+.vscode/
+!.vscode/settings.json
+!.vscode/launch.json
+
+# PyCharm / IntelliJ
+.idea/
+*.iml
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
 
 # === SYSTEM FILES ===
 # Windows
@@ -200,6 +231,7 @@ tests/corpus/*.docx
 *.db
 *.sqlite
 *.sqlite3
+data/feedback.db
 
 # Jupyter notebooks checkpoints
 .ipynb_checkpoints/
@@ -207,6 +239,10 @@ tests/corpus/*.docx
 # Python virtual environments
 .Python
 python/
+
+# Spacy models (downloaded separately)
+*.gz
+spacy_models/
 
 # === SECRETS & CONFIG ===
 # Never commit these!

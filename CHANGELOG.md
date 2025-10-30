@@ -5,6 +5,42 @@ Tutte le modifiche importanti al progetto sono documentate in questo file.
 Il formato è basato su [Keep a Changelog](https://keepachangelog.com/it/1.0.0/),
 e il progetto aderisce a [Semantic Versioning](https://semver.org/lang/it/).
 
+## [2.1.0] - 2025-10-27
+
+### 🎉 FASE 7: Categorie Speciali - COMPLETATA
+
+**100% Feature Complete** - Tutte le 7 fasi implementate e testate!
+
+### Aggiunte
+
+- ✨ **SpecialCategoriesService**: Rilevamento categorie speciali
+  - 385 parole straniere in 7 lingue (english, latin, french, german, spanish, japanese, other)
+  - 210 parole sensibili in 9 categorie (anatomia, funzioni_corporali, insulti_leggeri, parolacce, sessualità, violenza, discriminazione, volgare, doppi_sensi)
+  - Integrazione NER per nomi propri automatici (Persona, Luogo, Organizzazione)
+- ✨ Dizionari JSON: `data/foreign_words/common_foreign.json` e `data/sensitive_words/imbarazzanti.json`
+- ✨ Popolamento automatico tabs LINGUE, IMBARAZZANTI, NOMI_SIGLE nel report HTML
+- ✨ Test suite completa: `test_special_categories_phase7.py` (6/6 test passed)
+- ✨ Documentazione completa: `docs/FASE7_COMPLETATA.md`
+
+### Documentazione
+
+- 📚 **PROGETTO_100_COMPLETO.md**: Documento master con riepilogo completo tutte le 7 fasi
+- 🧹 **Pulizia documentazione**: Rimossi 10 documenti obsoleti/duplicati (-38%)
+  - Eliminati: stati intermedi, riepiloghi parziali, analisi obsolete
+  - Mantenuti: solo documenti essenziali e guide tecniche
+-  Aggiornato `docs/README.md` con nuova struttura organizzata
+- 🔄 Aggiornato `README.md` principale con link a PROGETTO_100_COMPLETO.md
+
+### Struttura Finale Documentazione (16 file)
+
+```
+docs/
+├── PROGETTO_100_COMPLETO.md          ⭐ Master document
+├── Fasi: FASE3/5/6/7_COMPLETATA.md
+├── Guide: QUICKSTART, COME_AVVIARE, NVDB_USAGE, etc.
+└── Setup: MIGRATION_REPORT, MODIFICHE_SOGLIE
+```
+
 ## [2.0.0] - 2025-10-24
 
 ### 🎯 Migrazione a Clean Architecture

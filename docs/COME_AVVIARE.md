@@ -2,36 +2,36 @@
 
 ## 📋 Modalità di Avvio
 
-Dopo la ristrutturazione, il **Correttore** può essere avviato in diverse modalità:
+Dopo la migrazione a Clean Architecture (v2.0), il **Correttore** può essere avviato in diverse modalità:
 
 ### 1. 🖥️ **Interfaccia a Linea di Comando (CLI)**
 
 ```bash
 # Correzione documento singolo
-python main.py documento.docx
+python -m correttore documento.docx
+# oppure
+correttore documento.docx
 
 # Con opzioni avanzate  
-python main.py documento.docx --mode balanced --quality-threshold 0.9 --backup
+correttore documento.docx --mode balanced --quality-threshold 0.9 --backup
 
 # Preview senza modifiche
-python main.py documento.docx --preview --dry-run
+correttore documento.docx --preview --dry-run
 
 # Modalità batch per più documenti
-python main.py *.docx --batch
+correttore *.docx --batch
 
 # Aiuto completo
-python main.py --help
+correttore --help
 ```
 
 ### 2. 🌐 **Interfaccia Web (Raccomandato per uso interattivo)**
 
 ```bash
 # Avvia server web
-python main.py --web
+python -m correttore
 # oppure
-python main.py web
-# oppure
-python main.py server
+python -m correttore --web
 
 # Accesso: http://localhost:5000
 ```
@@ -58,73 +58,78 @@ Una volta avviata l'interfaccia web, accedi a:
 | `aggressive` | Correzioni più estese | Bozze, testi informali |
 | `historical` | Ottimizzato per libri storici | Testi storici, narrativa |
 
-## 📁 Struttura Post-Ristrutturazione
+## 📁 Struttura Post-Migrazione (v2.0)
 
 ```
 Correttore/
-├── main.py                    # 🚀 Entry point principale
-├── src/
+├── src/correttore/            # 🚀 Package principale
 │   ├── core/                  # Logica business
 │   ├── services/              # Servizi esterni
 │   ├── utils/                 # Utilità
-│   └── interfaces/            # UI (CLI + Web)
+│   ├── interfaces/            # UI (CLI + Web)
+│   ├── models/                # Data models
+│   └── config/                # Configurazione
 ├── tests/                     # Suite test completa
-├── config/                    # Configurazione
 ├── data/                      # Glossari
 ├── scripts/                   # Script setup
-└── tools/                     # Tool sviluppo
+├── docs/                      # Documentazione
+├── examples/                  # Esempi di utilizzo
+└── bin/                       # Launcher scripts
 ```
 
 ## ⚡ Esempi Pratici
 
 ### Correzione Rapida
 ```bash
-python main.py libro.docx
+correttore libro.docx
 ```
 
 ### Correzione con Quality Control
 ```bash
-python main.py romanzo.docx --mode aggressive --quality-threshold 0.95 --backup
+correttore romanzo.docx --mode aggressive --quality-threshold 0.95 --backup
 ```
 
-### Modalità Demo (senza dipendenze)
+### Analisi Leggibilità
 ```bash
-python main.py documento.docx --demo-mode --preview
+correttore-analyze documento.docx
+# oppure
+python bin/analyze.py documento.docx
 ```
 
 ### Interfaccia Web Completa
 ```bash
-python main.py --web
+python -m correttore
 # Apri http://localhost:5000 nel browser
 ```
 
 ## 🛠️ Risoluzione Problemi
 
 ### Import Errors
-Se vedi errori di import, assicurati di essere nella directory root:
+Se vedi errori di import, reinstalla il package:
 ```bash
 cd C:\Users\Youcanprint1\Desktop\AI\Correttore
-python main.py --help
+pip install -e .
+correttore --help
 ```
 
 ### LanguageTool Non Disponibile
-Il sistema funziona anche senza LanguageTool in modalità demo:
+Installa LanguageTool con lo script dedicato:
 ```bash
-python main.py documento.docx --demo-mode
+python scripts/install_languagetool.py
 ```
 
 ### Web Interface Non Si Avvia
 Controlla che Flask sia installato:
 ```bash
 pip install flask
-python main.py --web
+python -m correttore
 ```
 
 ## 📞 Supporto
 
-- **Help CLI**: `python main.py --help`
-- **Versione**: `python main.py --version`
-- **Test Sistema**: `python main.py --demo-mode test.docx --preview`
+- **Help CLI**: `correttore --help`
+- **Versione**: `correttore --version` o `python -m correttore --version`
+- **Documentazione**: Vedi [docs/README.md](README.md)
 
 ---
 
@@ -132,16 +137,16 @@ python main.py --web
 
 ```bash
 # Correzione normale
-python main.py documento.docx
+correttore documento.docx
 
 # Interfaccia web (raccomandato)
-python main.py --web
+python -m correttore
 
-# Preview senza modifiche
-python main.py documento.docx --preview
+# Analisi leggibilità
+correttore-analyze documento.docx
 
 # Aiuto completo
-python main.py --help
+correttore --help
 ```
 
-**🌐 Per la migliore esperienza utente, usa: `python main.py --web`**
+**🌐 Per la migliore esperienza utente, usa: `python -m correttore`**

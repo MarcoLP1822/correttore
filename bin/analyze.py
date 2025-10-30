@@ -20,11 +20,7 @@ sys.path.insert(0, str(project_root / 'src'))
 
 def main():
     """Entry point per analisi leggibilità"""
-    try:
-        from correttore.utils.readability import main_cli
-    except ImportError:
-        # Fallback
-        from src.utils.readability import main_cli
+    from correttore.utils.readability import main_cli
     
     main_cli()
 

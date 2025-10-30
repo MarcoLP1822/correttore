@@ -74,7 +74,7 @@ class DocumentHandler:
         
         # 2. Backup se richiesto
         backup_path = None
-        if create_backup_copy and self.config.backup_enabled:
+        if create_backup_copy and self.config.get('backup_enabled', True):
             backup_path = create_backup(doc_path)
             logger.info(f"💾 Backup created: {backup_path.name}")
         
@@ -206,7 +206,10 @@ class DocumentHandler:
             int: Numero di backup eliminati
         """
         if retention_days is None:
-            retention_days = self.config.backup_retention_days
+            retention_days = self.config.get('backup_retention_days', 30)
+        
+        # Assicura che sia un intero valido
+        retention_days = int(retention_days) if retention_days is not None else 30
             
         if not backup_dir.exists():
             return 0

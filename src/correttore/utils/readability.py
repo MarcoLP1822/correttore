@@ -9,7 +9,44 @@ Riferimenti:
 """
 
 import re
-from typing import Dict, Optional, Any
+from typing import Dict, Optional, Any, List, Tuple
+from dataclasses import dataclass, field
+
+
+@dataclass
+class SentenceReadability:
+    """Analisi leggibilità singola frase"""
+    text: str
+    gulpease_score: float
+    difficulty_level: str  # facile/media/difficile
+    word_count: int
+    letter_count: int
+    sentence_index: int
+    words_not_in_vdb: List[str] = field(default_factory=list)
+    technical_terms: List[str] = field(default_factory=list)
+    vocabulary_breakdown: Dict[str, int] = field(default_factory=dict)  # Fase 4: fondamentale, alto_uso, alta_disponibilita, fuori_vdb
+    
+    def get_difficulty_color(self) -> str:
+        """Restituisce il colore associato al livello di difficoltà"""
+        if self.gulpease_score >= 80:
+            return '#2d5016'  # Verde scuro - molto facile
+        elif self.gulpease_score >= 60:
+            return '#4a7c2c'  # Verde chiaro - facile
+        elif self.gulpease_score >= 40:
+            return '#f39c12'  # Giallo - difficile
+        else:
+            return '#c0392b'  # Rosso - molto difficile
+    
+    def get_difficulty_emoji(self) -> str:
+        """Restituisce l'emoji associata al livello di difficoltà"""
+        if self.gulpease_score >= 80:
+            return '📗'  # Verde scuro
+        elif self.gulpease_score >= 60:
+            return '📘'  # Verde chiaro
+        elif self.gulpease_score >= 40:
+            return '📙'  # Giallo
+        else:
+            return '📕'  # Rosso
 
 
 class ReadabilityAnalyzer:
@@ -148,6 +185,166 @@ class ReadabilityAnalyzer:
                 return difficulty.replace('_', ' ').title()
         
         return "Non classificato"
+    
+    def split_into_sentences(self, text: str) -> List[str]:
+        """
+        Divide il testo in frasi individuali.
+        
+        Args:
+            text: Il testo da dividere
+            
+        Returns:
+            Lista di frasi
+        """
+        # Gestisce abbreviazioni comuni
+        text_temp = text
+        abbreviations = ['dott.', 'prof.', 'sig.', 'sig.ra', 'dr.', 'ecc.', 'es.', 'pag.', 'tel.', 'n.', 'art.', 'cfr.']
+        
+        # Proteggi le abbreviazioni temporaneamente
+        for i, abbr in enumerate(abbreviations):
+            text_temp = text_temp.replace(abbr, f'ABBR{i}ABBR')
+        
+        # Dividi in frasi usando il pattern di regex
+        sentences = self.SENTENCE_END_RE.split(text_temp)
+        
+        # Ripristina le abbreviazioni e filtra frasi vuote
+        result = []
+        for sentence in sentences:
+            sentence = sentence.strip()
+            if sentence:
+                # Ripristina abbreviazioni
+                for i, abbr in enumerate(abbreviations):
+                    sentence = sentence.replace(f'ABBR{i}ABBR', abbr)
+                result.append(sentence)
+        
+        return result if result else [text]
+    
+    def analyze_by_sentence(self, text: str, vocabulary_service=None) -> List[SentenceReadability]:
+        """
+        Analizza il testo frase per frase calcolando il GULPEASE di ogni frase.
+        
+        Args:
+            text: Il testo da analizzare
+            vocabulary_service: Servizio opzionale per verificare parole nel VdB
+            
+        Returns:
+            Lista di SentenceReadability con analisi per ogni frase
+        """
+        if not text or not text.strip():
+            return []
+        
+        sentences = self.split_into_sentences(text)
+        results = []
+        
+        for idx, sentence in enumerate(sentences):
+            if not sentence.strip():
+                continue
+            
+            # Calcola statistiche per la frase
+            letters = self.count_letters(sentence)
+            words = self.count_words(sentence)
+            gulpease = self.calculate_gulpease(sentence)
+            
+            if gulpease is None:
+                continue
+            
+            # Determina difficoltà
+            difficulty = self.interpret_gulpease(gulpease, 'licenza_media')
+            
+            # Analisi vocabolario avanzata (Fase 4)
+            words_not_in_vdb = []
+            technical_terms = []
+            vocab_breakdown = {'fondamentale': 0, 'alto_uso': 0, 'alta_disponibilita': 0, 'fuori_vdb': 0}
+            
+            if vocabulary_service:
+                word_list = re.findall(r'\b\w+\b', sentence.lower())
+                
+                for word in word_list:
+                    if not vocabulary_service.is_in_vocabulary(word):
+                        words_not_in_vdb.append(word)
+                        vocab_breakdown['fuori_vdb'] += 1
+                    else:
+                        # Ottieni livello parola
+                        level = vocabulary_service.get_word_level(word)
+                        if level in vocab_breakdown:
+                            vocab_breakdown[level] += 1
+                
+                # Classifica termini tecnici
+                technical_terms = vocabulary_service.classify_technical_terms(word_list)
+            
+            sentence_analysis = SentenceReadability(
+                text=sentence,
+                gulpease_score=round(gulpease, 2),
+                difficulty_level=difficulty,
+                word_count=words,
+                letter_count=letters,
+                sentence_index=idx + 1,
+                words_not_in_vdb=words_not_in_vdb,
+                technical_terms=technical_terms,
+                vocabulary_breakdown=vocab_breakdown
+            )
+            
+            results.append(sentence_analysis)
+        
+        return results
+    
+    def get_difficult_sentences(self, sentences: List[SentenceReadability], threshold: float = 60) -> List[SentenceReadability]:
+        """
+        Filtra le frasi difficili da leggere.
+        
+        Args:
+            sentences: Lista di SentenceReadability da filtrare
+            threshold: Soglia Gulpease sotto la quale una frase è considerata difficile
+            
+        Returns:
+            Lista di frasi difficili
+        """
+        return [s for s in sentences if s.gulpease_score < threshold]
+    
+    def get_sentence_statistics(self, sentences: List[SentenceReadability]) -> Dict[str, Any]:
+        """
+        Calcola statistiche aggregate sulle frasi analizzate.
+        
+        Args:
+            sentences: Lista di SentenceReadability
+            
+        Returns:
+            Dizionario con statistiche
+        """
+        if not sentences:
+            return {
+                'total_sentences': 0,
+                'avg_gulpease': 0,
+                'easy_sentences': 0,
+                'medium_sentences': 0,
+                'difficult_sentences': 0,
+                'very_difficult_sentences': 0,
+                'avg_words_per_sentence': 0,
+                'distribution': {}
+            }
+        
+        easy = sum(1 for s in sentences if s.gulpease_score >= 60)
+        difficult = sum(1 for s in sentences if 40 <= s.gulpease_score < 60)
+        very_difficult = sum(1 for s in sentences if s.gulpease_score < 40)
+        
+        avg_gulpease = sum(s.gulpease_score for s in sentences) / len(sentences)
+        avg_words = sum(s.word_count for s in sentences) / len(sentences)
+        
+        return {
+            'total_sentences': len(sentences),
+            'avg_gulpease': round(avg_gulpease, 2),
+            'easy_sentences': easy,
+            'medium_sentences': 0,  # Non usato nella scala standard
+            'difficult_sentences': difficult,
+            'very_difficult_sentences': very_difficult,
+            'avg_words_per_sentence': round(avg_words, 2),
+            'distribution': {
+                'very_easy': sum(1 for s in sentences if s.gulpease_score >= 80),
+                'easy': sum(1 for s in sentences if 60 <= s.gulpease_score < 80),
+                'difficult': sum(1 for s in sentences if 40 <= s.gulpease_score < 60),
+                'very_difficult': sum(1 for s in sentences if s.gulpease_score < 40)
+            }
+        }
     
     def analyze(self, text: str) -> Dict[str, Any]:
         """

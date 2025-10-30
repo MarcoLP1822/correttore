@@ -26,6 +26,7 @@
         .header {
             text-align: center;
             margin-bottom: 40px;
+            position: relative;
         }
         h1 {
             font-size: 28px;
@@ -36,6 +37,32 @@
         .subtitle {
             color: #666;
             font-size: 14px;
+        }
+        .dashboard-link {
+            position: absolute;
+            top: 0;
+            right: 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            color: #495057;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .dashboard-link:hover {
+            background: #e9ecef;
+            border-color: #adb5bd;
+            color: #212529;
+        }
+        .dashboard-link svg {
+            width: 18px;
+            height: 18px;
         }
         .card {
             background: white;
@@ -291,6 +318,12 @@
 <body>
     <div class="container">
         <div class="header">
+            <a href="/dashboard" class="dashboard-link" title="Vai alla Dashboard">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                Dashboard
+            </a>
             <h1>Correttore Italiano</h1>
             <p class="subtitle">Correzione automatica documenti</p>
         </div>
@@ -428,11 +461,16 @@
                     progressFill.style.width = job.progress + '%';
                     
                     if (job.status === 'completed') {
-                        statusText.textContent = 'Completato!';
+                        statusText.textContent = 'Completato! Reindirizzamento alla dashboard...';
                         statusText.style.color = '#28a745';
                         downloadBtn.href = job.download_url;
                         downloadBtn.style.display = 'block';
                         submitBtn.disabled = false;
+                        
+                        // Reindirizza alla dashboard dopo 2 secondi
+                        setTimeout(() => {
+                            window.location.href = `/dashboard?job=${jobId}&highlight=true`;
+                        }, 2000);
                     } else if (job.status === 'failed') {
                         showError(job.error || 'Errore durante elaborazione');
                     } else {

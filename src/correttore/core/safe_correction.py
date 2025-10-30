@@ -13,6 +13,7 @@ from difflib import SequenceMatcher
 import re
 
 from .validation import DocumentValidator, ContentIssue, validate_correction
+from ..models import CorrectionRecord, CorrectionCategory, CorrectionSource
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +73,7 @@ class CorrectionResult:
 class SafeCorrector:
     """Correttore sicuro con validazione e rollback automatico"""
     
-    def __init__(self, conservative_mode: bool = True, quality_threshold: float = 0.55):
+    def __init__(self, conservative_mode: bool = True, quality_threshold: float = 0.55, collector=None, whitelist: Optional[set] = None):
         self.conservative_mode = conservative_mode
         # Soglia abbassata per permettere più correzioni ortografiche e grammaticali
         self.quality_threshold = min(quality_threshold, 0.55)  # 55% - più permissivo per errori evidenti
@@ -83,8 +84,36 @@ class SafeCorrector:
             'rollbacks': 0,
             'quality_rejections': 0
         }
+        # Collector per tracking delle correzioni (opzionale)
+        self.collector = collector
         
-    def correct_with_rollback(self, paragraph, correction_func, correction_type: str = "unknown") -> CorrectionResult:
+        # FASE 6: Whitelist parole da NON correggere (apprese da feedback)
+        self.whitelist = whitelist if whitelist is not None else set()
+        if self.whitelist:
+            logger.debug(f"✅ SafeCorrector loaded {len(self.whitelist)} whitelisted words")
+        
+        # Vocabulary service per validazione VdB (Fase 4)
+        self.vocabulary_service = None
+        try:
+            import sys
+            from pathlib import Path
+            sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
+            from services.vocabulary_service import get_vocabulary_service
+            self.vocabulary_service = get_vocabulary_service()
+            logger.info("📚 VocabularyService integrato in SafeCorrector")
+        except ImportError:
+            logger.debug("VocabularyService non disponibile")
+
+        
+    def correct_with_rollback(
+        self, 
+        paragraph, 
+        correction_func, 
+        correction_type: str = "unknown",
+        source: CorrectionSource = CorrectionSource.SYSTEM,
+        position: int = 0,
+        paragraph_index: int = 0
+    ) -> CorrectionResult:
         """
         Applica una correzione con possibilità di rollback automatico
         se la qualità risulta insufficiente.
@@ -135,6 +164,19 @@ class SafeCorrector:
             self.correction_stats['successful_corrections'] += 1
             logger.debug(f"✅ Applied {correction_type} correction (quality: {quality_score.overall_score:.1%})")
             
+            # Tracking: registra la correzione applicata nel collector
+            if self.collector is not None:
+                self._track_correction(
+                    original_text=original_text,
+                    corrected_text=corrected_text,
+                    quality_score=quality_score,
+                    source=source,
+                    correction_type=correction_type,
+                    position=position,
+                    paragraph_index=paragraph_index,
+                    is_applied=True
+                )
+            
             return CorrectionResult(
                 original_text=original_text,
                 corrected_text=corrected_text,
@@ -147,6 +189,20 @@ class SafeCorrector:
             self.correction_stats['rollbacks'] += 1
             rollback_reason = self._get_rollback_reason(quality_score)
             logger.warning(f"🔄 Rolled back {correction_type} correction: {rollback_reason}")
+            
+            # Tracking: registra anche le correzioni rifiutate
+            if self.collector is not None:
+                self._track_correction(
+                    original_text=original_text,
+                    corrected_text=corrected_text,
+                    quality_score=quality_score,
+                    source=source,
+                    correction_type=correction_type,
+                    position=position,
+                    paragraph_index=paragraph_index,
+                    is_applied=False,
+                    rejection_reason=rollback_reason
+                )
             
             return CorrectionResult(
                 original_text=original_text,
@@ -188,6 +244,17 @@ class SafeCorrector:
             style_score * 0.20 +
             safety_score * 0.15
         )
+        
+        # 5. Vocabulary Quality Bonus/Penalty (VdB validation)
+        if self.vocabulary_service:
+            vocab_adjustment = self._score_vocabulary_quality(original, corrected)
+            overall_score += vocab_adjustment
+            overall_score = max(0.0, min(1.0, overall_score))  # Clamp to [0, 1]
+            
+            if vocab_adjustment < 0:
+                issues.append(f"Vocabulary complexity increased: {vocab_adjustment:+.3f}")
+            elif vocab_adjustment > 0.05:
+                logger.debug(f"✨ Vocabulary simplified: {vocab_adjustment:+.3f}")
         
         # Determina livello di confidenza
         confidence = self._determine_confidence(overall_score, issues)
@@ -434,6 +501,71 @@ class SafeCorrector:
         
         return max(0.0, safety_score)
     
+    def _score_vocabulary_quality(self, original: str, corrected: str) -> float:
+        """
+        Valuta la qualità del vocabolario usando VdB (Nuovo Vocabolario di Base).
+        Restituisce un bonus/penalty nell'intervallo [-0.10, +0.15].
+        
+        Args:
+            original: Testo originale
+            corrected: Testo corretto
+            
+        Returns:
+            float: Bonus (+) o penalty (-) da applicare al quality score
+        """
+        if not self.vocabulary_service:
+            return 0.0
+        
+        # Estrai parole significative (lunghezza >= 3, no punteggiatura)
+        import re
+        word_pattern = re.compile(r'\b[a-zA-ZàèéìòùÀÈÉÌÒÙ]{3,}\b')
+        
+        original_words = word_pattern.findall(original.lower())
+        corrected_words = word_pattern.findall(corrected.lower())
+        
+        if not original_words or not corrected_words:
+            return 0.0
+        
+        # Analizza parole originali
+        original_difficulty = 0.0
+        for word in original_words:
+            analysis = self.vocabulary_service.analyze_word_detailed(word)
+            original_difficulty += analysis.difficulty_score
+        
+        # Analizza parole corrette
+        corrected_difficulty = 0.0
+        for word in corrected_words:
+            analysis = self.vocabulary_service.analyze_word_detailed(word)
+            corrected_difficulty += analysis.difficulty_score
+        
+        # Calcola difficoltà media
+        orig_avg_difficulty = original_difficulty / len(original_words)
+        corr_avg_difficulty = corrected_difficulty / len(corrected_words)
+        
+        # Calcola adjustment
+        # Se corrected è più semplice (difficulty minore) → bonus positivo
+        # Se corrected è più complesso (difficulty maggiore) → penalty negativo
+        difficulty_delta = orig_avg_difficulty - corr_avg_difficulty
+        
+        # Scala il delta in un bonus/penalty ragionevole
+        # difficulty_delta range tipico: [-1.0, +1.0]
+        # Vogliamo: +0.15 max bonus per semplificazioni, -0.10 max penalty per complicazioni
+        if difficulty_delta > 0:
+            # Semplificazione: bonus
+            adjustment = min(0.15, difficulty_delta * 0.20)
+        else:
+            # Complicazione: penalty
+            adjustment = max(-0.10, difficulty_delta * 0.15)
+        
+        # Log per debug
+        if abs(adjustment) > 0.01:
+            logger.debug(
+                f"📚 Vocabulary analysis: orig_diff={orig_avg_difficulty:.2f}, "
+                f"corr_diff={corr_avg_difficulty:.2f}, adjustment={adjustment:+.3f}"
+            )
+        
+        return adjustment
+    
     def _determine_confidence(self, overall_score: float, issues: List[str]) -> CorrectionConfidence:
         """Determina il livello di confidenza basato su score e issues"""
         if overall_score >= 0.98 and len(issues) == 0:
@@ -469,6 +601,164 @@ class SafeCorrector:
     
     def _apply_correction_to_paragraph(self, paragraph, corrected_text: str):
         """Applica la correzione al paragrafo preservando la formattazione"""
+        # Preserva la formattazione del primo run
+        if paragraph.runs:
+            first_run = paragraph.runs[0]
+            # Pulisci tutti i runs
+            for run in paragraph.runs:
+                run.text = ""
+            # Applica il nuovo testo al primo run
+            first_run.text = corrected_text
+        else:
+            # Se non ci sono runs, crea un paragraph vuoto e aggiungi testo
+            paragraph.clear()
+            paragraph.add_run(corrected_text)
+    
+    def _track_correction(
+        self,
+        original_text: str,
+        corrected_text: str,
+        quality_score: QualityScore,
+        source: CorrectionSource,
+        correction_type: str,
+        position: int,
+        paragraph_index: int,
+        is_applied: bool,
+        rejection_reason: Optional[str] = None
+    ):
+        """
+        Traccia una correzione nel collector per il report.
+        
+        Args:
+            original_text: Testo originale
+            corrected_text: Testo corretto
+            quality_score: Punteggio di qualità
+            source: Fonte della correzione
+            correction_type: Tipo di correzione
+            position: Posizione nel documento
+            paragraph_index: Indice del paragrafo
+            is_applied: Se la correzione è stata applicata
+            rejection_reason: Motivo del rifiuto (se non applicata)
+        """
+        if self.collector is None:
+            return
+        
+        # Determina la categoria in base al tipo di correzione e qualità
+        category = self._determine_category_from_correction_type(
+            correction_type, 
+            quality_score,
+            is_applied
+        )
+        
+        # Crea il record
+        record = CorrectionRecord(
+            category=category,
+            source=source,
+            original_text=original_text,
+            corrected_text=corrected_text if is_applied else None,
+            context=original_text,  # Contesto è il testo stesso
+            position=position,
+            length=len(original_text),
+            paragraph_index=paragraph_index,
+            sentence_index=0,  # Approssimato
+            rule_id=f"SAFE_CORRECTION_{correction_type.upper()}",
+            rule_description=f"Safe correction: {correction_type}",
+            message=f"Correction applied with quality score {quality_score.overall_score:.1%}",
+            suggestions=[corrected_text] if corrected_text != original_text else [],
+            confidence_score=quality_score.overall_score,
+            severity=self._map_confidence_to_severity(quality_score.confidence),
+            is_applied=is_applied,
+            is_ignored=not is_applied,
+            additional_info={
+                'correction_type': correction_type,
+                'quality_breakdown': {
+                    'content_preservation': quality_score.content_preservation,
+                    'grammar_improvement': quality_score.grammar_improvement,
+                    'style_preservation': quality_score.style_preservation,
+                    'safety_score': quality_score.safety_score,
+                },
+                'quality_issues': quality_score.issues,
+                'rejection_reason': rejection_reason,
+            }
+        )
+        
+        # Aggiungi al collector (se disponibile)
+        if self.collector is not None:
+            self.collector.add_correction(record)
+            logger.debug(f"📊 Tracked correction: {category.display_name} ({'applied' if is_applied else 'rejected'})")
+        else:
+            logger.debug(f"⚠️  Collector not available, skipping tracking for: {category.display_name}")
+    
+    def _determine_category_from_correction_type(
+        self,
+        correction_type: str,
+        quality_score: QualityScore,
+        is_applied: bool
+    ) -> CorrectionCategory:
+        """
+        Determina la categoria di correzione in base al tipo e qualità.
+        
+        Args:
+            correction_type: Tipo di correzione
+            quality_score: Punteggio di qualità
+            is_applied: Se la correzione è stata applicata
+            
+        Returns:
+            Categoria appropriata
+        """
+        correction_type_lower = correction_type.lower()
+        
+        # Mappatura tipo → categoria
+        if 'spell' in correction_type_lower or 'ortograf' in correction_type_lower:
+            # Errori ortografici
+            if quality_score.grammar_improvement > 0.8:
+                return CorrectionCategory.ERRORI_RICONOSCIUTI
+            else:
+                return CorrectionCategory.SCONOSCIUTE
+        
+        elif 'grammar' in correction_type_lower or 'grammatic' in correction_type_lower:
+            # Errori grammaticali
+            return CorrectionCategory.ERRORI_RICONOSCIUTI
+        
+        elif 'style' in correction_type_lower or 'stile' in correction_type_lower:
+            # Miglioramenti di stile
+            return CorrectionCategory.MIGLIORABILI
+        
+        elif 'punct' in correction_type_lower or 'punteggiatura' in correction_type_lower:
+            # Punteggiatura
+            return CorrectionCategory.PUNTEGGIATURA
+        
+        elif 'ai' in correction_type_lower or 'gpt' in correction_type_lower:
+            # Correzioni AI - categorizziamo in base alla qualità
+            if quality_score.grammar_improvement > 0.8:
+                return CorrectionCategory.ERRORI_RICONOSCIUTI
+            else:
+                return CorrectionCategory.MIGLIORABILI
+        
+        # Default: errori riconosciuti se applicata, sospette se rifiutata
+        if is_applied:
+            return CorrectionCategory.ERRORI_RICONOSCIUTI
+        else:
+            return CorrectionCategory.SOSPETTE
+    
+    def _map_confidence_to_severity(self, confidence: CorrectionConfidence) -> str:
+        """
+        Mappa il livello di confidenza a una severità.
+        
+        Args:
+            confidence: Livello di confidenza
+            
+        Returns:
+            Severità ('critical', 'warning', 'info', 'suggestion')
+        """
+        mapping = {
+            CorrectionConfidence.VERY_HIGH: 'critical',
+            CorrectionConfidence.HIGH: 'warning',
+            CorrectionConfidence.MEDIUM: 'warning',
+            CorrectionConfidence.LOW: 'info',
+            CorrectionConfidence.VERY_LOW: 'suggestion',
+        }
+        return mapping.get(confidence, 'info')
         # Versione semplificata - la versione completa userà il sistema token/run esistente
         paragraph.text = corrected_text
     

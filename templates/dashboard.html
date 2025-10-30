@@ -151,6 +151,130 @@
             </div>
         </div>
 
+        <!-- Readability Analysis Section (se presente) -->
+        {% if readability_data %}
+        <div class="card mb-4 {% if highlight %}border-success shadow-lg{% endif %}" 
+             id="readabilityCard" 
+             data-highlight="{% if highlight %}true{% else %}false{% endif %}">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-book-reader"></i> Analisi Leggibilità Documento Corretto
+                    {% if current_job %}
+                        <span class="badge bg-light text-dark ms-2">{{ current_job.filename }}</span>
+                    {% endif %}
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Punteggio Gulpease -->
+                    <div class="col-md-4 text-center mb-3">
+                        <div class="gulpease-display">
+                            {% if readability_data.gulpease >= 80 %}
+                            <div class="gulpease-score" style="font-size: 72px; font-weight: 700; color: #28a745;">
+                            {% elif readability_data.gulpease >= 60 %}
+                            <div class="gulpease-score" style="font-size: 72px; font-weight: 700; color: #ffc107;">
+                            {% elif readability_data.gulpease >= 40 %}
+                            <div class="gulpease-score" style="font-size: 72px; font-weight: 700; color: #fd7e14;">
+                            {% else %}
+                            <div class="gulpease-score" style="font-size: 72px; font-weight: 700; color: #dc3545;">
+                            {% endif %}
+                                {{ "%.1f"|format(readability_data.gulpease) }}
+                                <small style="font-size: 24px; color: #666;">/100</small>
+                            </div>
+                            <p class="text-muted mt-2">Indice Gulpease</p>
+                            <p class="lead">
+                                <strong>{{ readability_data.difficulty.licenza_media }}</strong>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Statistiche -->
+                    <div class="col-md-8">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="stat-box p-3 bg-light rounded">
+                                    <h6 class="text-muted mb-2">📝 Parole Totali</h6>
+                                    <h3 class="mb-0">{{ "{:,}".format(readability_data.words) }}</h3>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="stat-box p-3 bg-light rounded">
+                                    <h6 class="text-muted mb-2">🔤 Frasi Totali</h6>
+                                    <h3 class="mb-0">{{ "{:,}".format(readability_data.sentences) }}</h3>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="stat-box p-3 bg-light rounded">
+                                    <h6 class="text-muted mb-2">📏 Lunghezza Media Parola</h6>
+                                    <h3 class="mb-0">{{ "%.1f"|format(readability_data.avg_word_length) }}</h3>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="stat-box p-3 bg-light rounded">
+                                    <h6 class="text-muted mb-2">📐 Lunghezza Media Frase</h6>
+                                    <h3 class="mb-0">{{ "%.1f"|format(readability_data.avg_sentence_length) }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Difficoltà per livello -->
+                <hr>
+                <h6 class="mb-3"><i class="fas fa-users"></i> Difficoltà per Livello di Scolarizzazione</h6>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="difficulty-item p-3 bg-light rounded text-center">
+                            <p class="mb-1">📚 Licenza Elementare</p>
+                            <h5 class="mb-0 {% if 'Molto facile' in readability_data.difficulty.licenza_elementare or 'Facile' in readability_data.difficulty.licenza_elementare %}text-success{% elif 'Difficile' in readability_data.difficulty.licenza_elementare %}text-danger{% else %}text-warning{% endif %}">
+                                {{ readability_data.difficulty.licenza_elementare }}
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="difficulty-item p-3 bg-light rounded text-center">
+                            <p class="mb-1">🎓 Licenza Media</p>
+                            <h5 class="mb-0 {% if 'Molto facile' in readability_data.difficulty.licenza_media or 'Facile' in readability_data.difficulty.licenza_media %}text-success{% elif 'Difficile' in readability_data.difficulty.licenza_media %}text-danger{% else %}text-warning{% endif %}">
+                                {{ readability_data.difficulty.licenza_media }}
+                            </h5>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="difficulty-item p-3 bg-light rounded text-center">
+                            <p class="mb-1">🎯 Diploma Superiore</p>
+                            <h5 class="mb-0 {% if 'Molto facile' in readability_data.difficulty.diploma_superiore or 'Facile' in readability_data.difficulty.diploma_superiore %}text-success{% elif 'Difficile' in readability_data.difficulty.diploma_superiore %}text-danger{% else %}text-warning{% endif %}">
+                                {{ readability_data.difficulty.diploma_superiore }}
+                            </h5>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if current_job and current_job.download_url %}
+                <div class="text-center mt-4">
+                    <a href="{{ current_job.download_url }}" class="btn btn-success btn-lg me-2">
+                        <i class="fas fa-download"></i> Scarica Documento Corretto
+                    </a>
+                    {% if current_job.report_url %}
+                    <a href="{{ current_job.report_url }}" class="btn btn-primary btn-lg me-2" target="_blank">
+                        <i class="fas fa-chart-bar"></i> Report Dettagliato HTML
+                    </a>
+                    {% endif %}
+                    {% if current_job.diff_report_url %}
+                    <a href="{{ current_job.diff_report_url }}" class="btn btn-secondary btn-lg me-2" target="_blank">
+                        <i class="fas fa-file-alt"></i> Report Differenze
+                    </a>
+                    {% endif %}
+                    {% if current_job.glossario_report_url %}
+                    <a href="{{ current_job.glossario_report_url }}" class="btn btn-info btn-lg" target="_blank">
+                        <i class="fas fa-book"></i> Report Glossario
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
         <!-- Jobs Table -->
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
@@ -214,9 +338,24 @@
                                 </td>
                                 <td>
                                     {% if job.status == 'completed' and job.download_url %}
-                                        <a href="{{ job.download_url }}" class="btn btn-sm btn-success">
+                                        <a href="{{ job.download_url }}" class="btn btn-sm btn-success me-1" title="Scarica documento">
                                             <i class="fas fa-download"></i>
                                         </a>
+                                        {% if job.report_url %}
+                                        <a href="{{ job.report_url }}" class="btn btn-sm btn-primary me-1" target="_blank" title="Report HTML">
+                                            <i class="fas fa-chart-bar"></i>
+                                        </a>
+                                        {% endif %}
+                                        {% if job.diff_report_url %}
+                                        <a href="{{ job.diff_report_url }}" class="btn btn-sm btn-secondary me-1" target="_blank" title="Report differenze">
+                                            <i class="fas fa-file-alt"></i>
+                                        </a>
+                                        {% endif %}
+                                        {% if job.glossario_report_url %}
+                                        <a href="{{ job.glossario_report_url }}" class="btn btn-sm btn-info" target="_blank" title="Report glossario">
+                                            <i class="fas fa-book"></i>
+                                        </a>
+                                        {% endif %}
                                     {% else %}
                                         <button class="btn btn-sm btn-outline-secondary" disabled>
                                             <i class="fas fa-minus"></i>
@@ -412,6 +551,16 @@
         // Inizializza i dati
         document.addEventListener('DOMContentLoaded', function() {
             refreshData();
+            
+            // Se c'è un job evidenziato, scorri alla sezione leggibilità
+            const readabilityCard = document.getElementById('readabilityCard');
+            if (readabilityCard && readabilityCard.dataset.highlight === 'true') {
+                setTimeout(() => {
+                    readabilityCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    // Aggiungi animazione di evidenziazione
+                    readabilityCard.style.animation = 'pulse 2s ease-in-out';
+                }, 500);
+            }
         });
 
         // Auto-refresh ogni 10 secondi
@@ -420,5 +569,12 @@
         // Aggiorna timestamp iniziale
         document.getElementById('lastUpdate').textContent = new Date().toLocaleString('it-IT');
     </script>
+    
+    <style>
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+    </style>
 </body>
 </html>

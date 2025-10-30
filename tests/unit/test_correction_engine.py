@@ -30,10 +30,10 @@ class TestCorrectionEngine(unittest.TestCase):
         self.settings = Settings()
         
         # Mock tutti i servizi per evitare problemi di inizializzazione
-        with patch('core.correction_engine.OpenAIService') as mock_openai:
-            with patch('core.correction_engine.LanguageToolService') as mock_lt:
-                with patch('core.correction_engine.get_cache') as mock_cache:
-                    with patch('core.correction_engine.SafeCorrector') as mock_safe:
+        with patch('correttore.core.correction_engine.OpenAIService') as mock_openai:
+            with patch('correttore.core.correction_engine.LanguageToolService') as mock_lt:
+                with patch('correttore.core.correction_engine.get_cache') as mock_cache:
+                    with patch('correttore.core.correction_engine.SafeCorrector') as mock_safe:
                         # CorrectionEngine non richiede parametri nel costruttore
                         self.engine = CorrectionEngine()
                         
@@ -304,3 +304,4 @@ class TestCorrectionEngine(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
+

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - Report Correzione</title>
+    <!-- CSS Inline - Generato da Jinja2 -->
+    {% if css_content %}
+    <style>
+{{ css_content | safe }}
+    </style>
+    {% endif %}
+</head>
+<body>
+    <div class="container">
+        <header class="report-header">
+            <h1>📋 Report di Correzione</h1>
+            <div class="document-info">
+                <span class="doc-name">{{ document_name }}</span>
+                <span class="timestamp">{{ timestamp }}</span>
+            </div>
+        </header>
+
+        <nav class="tabs-navigation">
+            <ul class="tabs">
+                {% for tab in tabs %}
+                <li class="tab-item {% if loop.first %}active{% endif %}" data-tab="{{ tab.id }}">
+                    <span class="tab-icon">{{ tab.icon }}</span>
+                    <span class="tab-label">{{ tab.label }}</span>
+                    {% if tab.count > 0 %}
+                    <span class="tab-badge">{{ tab.count }}</span>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </nav>
+
+        <main class="content-area">
+            {{ content | safe }}
+        </main>
+
+        <footer class="report-footer">
+            <p>Generato da <strong>Correttore AI</strong> - {{ generation_time }}</p>
+        </footer>
+    </div>
+
+    <!-- JavaScript Inline - Generato da Jinja2 -->
+    <script>
+{{ js_content | safe }}
+    </script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<div id="tab-sintesi" class="tab-content active">
+    <section class="summary-section">
+        <h2>📊 Sintesi Report</h2>
+        
+        <div class="summary-grid">
+            <!-- Segnalazioni di Correzione -->
+            <div class="summary-card correction-card">
+                <h3>🔴 Segnalazioni di Correzione</h3>
+                <table class="summary-table">
+                    <thead>
+                        <tr>
+                            <th>Tipo</th>
+                            <th>Parole</th>
+                            <th>Contesti</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for category in correction_categories %}
+                        <tr class="category-row category-{{ category.id }}">
+                            <td>
+                                <span class="category-icon">{{ category.icon }}</span>
+                                <span class="category-name">{{ category.name }}</span>
+                            </td>
+                            <td class="count">{{ category.unique_words }}</td>
+                            <td class="count">{{ category.total_contexts }}</td>
+                        </tr>
+                        {% endfor %}
+                        <tr class="total-row">
+                            <td><strong>Totale</strong></td>
+                            <td class="count"><strong>{{ total_correction_words }}</strong></td>
+                            <td class="count"><strong>{{ total_correction_contexts }}</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Segnalazioni di Informazione -->
+            <div class="summary-card info-card">
+                <h3>ℹ️ Segnalazioni di Informazione</h3>
+                <table class="summary-table">
+                    <thead>
+                        <tr>
+                            <th>Tipo</th>
+                            <th>Parole</th>
+                            <th>Contesti</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for category in info_categories %}
+                        <tr class="category-row category-{{ category.id }}">
+                            <td>
+                                <span class="category-icon">{{ category.icon }}</span>
+                                <span class="category-name">{{ category.name }}</span>
+                            </td>
+                            <td class="count">{{ category.unique_words }}</td>
+                            <td class="count">{{ category.total_contexts }}</td>
+                        </tr>
+                        {% endfor %}
+                        <tr class="total-row">
+                            <td><strong>Totale</strong></td>
+                            <td class="count"><strong>{{ total_info_words }}</strong></td>
+                            <td class="count"><strong>{{ total_info_contexts }}</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Metadati Elaborazione -->
+        <div class="metadata-section">
+            <h3>⚙️ Informazioni Elaborazione</h3>
+            <div class="metadata-grid">
+                <div class="metadata-item">
+                    <span class="metadata-label">⏱️ Tempo di elaborazione:</span>
+                    <span class="metadata-value">{{ processing_time }}</span>
+                </div>
+                <div class="metadata-item">
+                    <span class="metadata-label">📝 Parole totali:</span>
+                    <span class="metadata-value">{{ total_words }}</span>
+                </div>
+                <div class="metadata-item">
+                    <span class="metadata-label">🔍 Contesti verificati:</span>
+                    <span class="metadata-value">{{ total_contexts }}</span>
+                </div>
+                <div class="metadata-item">
+                    <span class="metadata-label">🖥️ Sistema:</span>
+                    <span class="metadata-value">{{ system_info }}</span>
+                </div>
+                <div class="metadata-item">
+                    <span class="metadata-label">📅 Data:</span>
+                    <span class="metadata-value">{{ processing_date }}</span>
+                </div>
+                <div class="metadata-item">
+                    <span class="metadata-label">🔧 Versione:</span>
+                    <span class="metadata-value">{{ version }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grafici Visualizzazione -->
+        <div class="charts-section">
+            <h3>📈 Visualizzazioni</h3>
+            
+            <!-- Grafico a Torta: Distribuzione Errori -->
+            <div class="chart-container">
+                <div class="chart-title">Distribuzione Errori per Categoria</div>
+                <div class="chart-canvas-wrapper">
+                    <canvas id="chart-pie" width="400" height="400"
+                            data-chart='{"labels": {{ chart_labels | tojson }}, "values": {{ chart_values | tojson }}}'></canvas>
+                </div>
+                <div class="chart-legend"></div>
+            </div>
+
+            <!-- Grafico a Barre: Confronto Categorie -->
+            <div class="chart-container">
+                <div class="chart-title">Confronto: Parole vs Contesti</div>
+                <div class="chart-canvas-wrapper">
+                    <canvas id="chart-bar" width="800" height="400"
+                            data-chart='{"labels": {{ chart_labels | tojson }}, "values": [{{ chart_words | tojson }}, {{ chart_contexts | tojson }}]}'></canvas>
+                </div>
+                <div class="chart-legend">
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #3498db"></span>
+                        <span class="legend-label">Parole Uniche</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color" style="background: #e74c3c"></span>
+                        <span class="legend-label">Contesti Totali</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

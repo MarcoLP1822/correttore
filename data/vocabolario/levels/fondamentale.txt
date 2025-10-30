@@ -1,0 +1,12 @@
+anno
+casa
+dare
+dire
+donna
+fare
+giorno
+paese
+persona
+tempo
+uomo
+vedere

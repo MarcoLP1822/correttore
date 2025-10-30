@@ -69,11 +69,12 @@ class CorrettoreCLI:
         try:
             # Tenta di avviare LanguageTool automaticamente
             try:
-                from scripts.languagetool_manager import ensure_languagetool_running
-                if not ensure_languagetool_running():
+                from correttore.services.languagetool_manager import get_languagetool_manager
+                lt_manager = get_languagetool_manager()
+                if not lt_manager.ensure_running():
                     logging.warning("⚠️  LanguageTool non disponibile, alcune funzionalità potrebbero essere limitate")
             except ImportError:
-                logging.debug("LanguageTool launcher non disponibile")
+                logging.debug("LanguageTool manager non disponibile")
             
             # Import dinamici per evitare problemi con LanguageTool
             global process_doc, find_latest_docx, get_monitor, DocumentValidator, load_settings, generate_dashboard
@@ -204,15 +205,31 @@ class CorrettoreCLI:
                 shutil.copy(italian_config, current_config)
                 logging.info(f"🇮🇹 Configurazione italiana ottimizzata caricata")
             
-            # Processamento effettivo
+            # Processamento con CorrectionEngine (con tracking per report HTML)
             logging.info(f"🚀 Elaborazione: {input_path.name} → {output_path.name}")
             logging.info(f"🎯 Quality threshold: {options.quality_threshold*100:.0f}%")
-            if process_doc:
-                process_doc(input_path, output_path, options.quality_threshold)
-            else:
-                logging.warning("⚠️  Modulo correttore non disponibile, simulazione processamento")
-                # In modalità demo, simula il processamento
-                time.sleep(1)
+            
+            # Usa sempre il nuovo CorrectionEngine con tracking abilitato
+            from correttore.core.correction_engine import CorrectionEngine
+            from correttore.services.languagetool_manager import get_languagetool_manager
+            
+            # Verifica che LanguageTool sia attivo
+            lt_manager = get_languagetool_manager()
+            if not lt_manager.is_server_running():
+                logging.error("❌ LanguageTool non attivo! Avvialo con: python start_languagetool.py")
+                return False
+            
+            logging.info("📊 Tracking abilitato per report HTML")
+            engine = CorrectionEngine(enable_tracking=True)
+            
+            result = engine.correct_document(
+                input_path=str(input_path),
+                output_path=str(output_path)
+            )
+            
+            if not result.success:
+                logging.error(f"❌ Errore: {result.error_message if result.error_message else 'Unknown error'}")
+                return False
             
             # Registrazione metriche
             elapsed = time.perf_counter() - start_time

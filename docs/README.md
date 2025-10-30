@@ -14,9 +14,10 @@ Benvenuto nella documentazione completa di Correttore v2.0!
 ## 📖 Guide Utente
 
 ### Funzionalità Principali
-- **[Implementazione Web Leggibilità](IMPLEMENTAZIONE_WEB_LEGGIBILITA.md)** - Interfaccia web e dashboard
 - **[Modifiche Soglie](MODIFICHE_SOGLIE.md)** - Configurazione soglie correzione
-- **[Changelog Gulpease](CHANGELOG_GULPEASE.md)** - Storia funzionalità Gulpease
+- **[Integrazione Vocabolario](INTEGRAZIONE_COMPLETATA.md)** - Integrazione Nuovo Vocabolario di Base
+- **[Uso Vocabolario](NVDB_USAGE.md)** - Guida all'uso del NVdB
+- **[Integrazione Tecnica Vocabolario](VOCABULARY_INTEGRATION.md)** - Guida tecnica per sviluppatori
 
 ### Analisi Leggibilità
 La funzionalità di analisi leggibilità usa l'**Indice Gulpease**, formula tarata per l'italiano.
@@ -40,10 +41,32 @@ src/correttore/
 ├── services/       # Servizi esterni
 ├── interfaces/     # CLI & Web
 ├── utils/          # Utilities
+├── models/         # Data models
 └── config/         # Configurazione
 ```
 
 ## 📋 Documenti di Riferimento
+
+### 🎯 Stato Progetto
+- **[PROGETTO 100% COMPLETO](PROGETTO_100_COMPLETO.md)** - 🎉 Riepilogo finale completo (tutte le 7 fasi)
+
+### 📝 Implementazioni per Fase
+- **[FASE 3 - Leggibilità](FASE3_COMPLETATA.md)** - Analisi GULPEASE frase per frase
+- **[FASE 5 - Lemmatizzazione](FASE5_COMPLETATA.md)** - spaCy NER e lemmatizzazione
+- **[FASE 6 - Sistema Feedback](FASE6_COMPLETE.md)** - Auto-learning e dashboard
+- **[FASE 7 - Categorie Speciali](FASE7_COMPLETATA.md)** - 🆕 Lingue straniere e parole sensibili
+
+### 📚 Guide Tecniche
+- **[Piano Implementazione](IMPLEMENTATION_PLAN_REPORT_SYSTEM.md)** - Piano originale completo
+- **[Vocabolario di Base - Guida Utente](NVDB_USAGE.md)** - Come usare il NVdB
+- **[Vocabolario di Base - Integrazione](VOCABULARY_INTEGRATION.md)** - Guida tecnica per sviluppatori
+- **[Sistema Report](REPORT_SYSTEM_USAGE.md)** - Guida utilizzo report HTML
+
+### 🔧 Configurazione e Setup
+- **[Quick Start](QUICKSTART.md)** - Inizia in 5 minuti
+- **[Come Avviare](COME_AVVIARE.md)** - Installazione e primo uso dettagliato
+- **[Modifiche Soglie](MODIFICHE_SOGLIE.md)** - Configurazione soglie correzione
+- **[Migration Report](MIGRATION_REPORT.md)** - Migrazione a Clean Architecture v2.0
 
 ### File nella Directory `docs/`
 
@@ -51,11 +74,11 @@ src/correttore/
 |------|-------------|
 | **QUICKSTART.md** | 🚀 Guida rapida 5 minuti |
 | **COME_AVVIARE.md** | 📖 Guida completa setup |
-| **IMPLEMENTAZIONE_WEB_LEGGIBILITA.md** | 🌐 Web interface e dashboard |
 | **MODIFICHE_SOGLIE.md** | ⚙️ Configurazione soglie |
-| **CHANGELOG_GULPEASE.md** | 📝 Storia Gulpease |
 | **MIGRATION_REPORT.md** | 🔄 Report migrazione v2.0 |
-| **README_OLD.md** | 📜 README precedente (backup) |
+| **INTEGRAZIONE_COMPLETATA.md** | � Integrazione Vocabolario di Base |
+| **NVDB_USAGE.md** | � Guida uso Vocabolario |
+| **VOCABULARY_INTEGRATION.md** | � Guida tecnica vocabolario |
 
 ### File nella Root del Progetto
 

@@ -1,0 +1,9 @@
+# LanguageTool Rules Whitelist
+# Aggiungi ID delle regole da disabilitare, una per riga
+# Linee che iniziano con # sono commenti
+
+# Regole comuni da disabilitare per testi italiani:
+UPPERCASE_SENTENCE_START
+UNPAIRED_BRACKETS
+WHITESPACE_RULE
+MORFOLOGIK_RULE_IT_IT

@@ -14,6 +14,11 @@ from pathlib import Path
 
 from correttore.config.settings import get_languagetool_config
 from correttore.services.intelligent_cache import get_cache
+from correttore.models import (
+    CorrectionRecord,
+    CorrectionCategory,
+    CorrectionSource,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -454,6 +459,145 @@ class LanguageToolService:
         """Genera chiave cache per il testo"""
         import hashlib
         return hashlib.md5(text.encode('utf-8')).hexdigest()
+    
+    def convert_to_correction_records(
+        self, 
+        errors: List[LanguageToolError], 
+        full_text: str
+    ) -> List[CorrectionRecord]:
+        """
+        Converte gli errori LanguageTool in CorrectionRecord per il tracking.
+        
+        Args:
+            errors: Lista di errori LanguageTool
+            full_text: Testo completo analizzato
+            
+        Returns:
+            Lista di CorrectionRecord
+        """
+        records = []
+        
+        for error in errors:
+            # Determina la categoria basandosi sul tipo di errore
+            category = self._map_error_to_category(error)
+            
+            # Estrai il testo originale dalla posizione
+            original_text = full_text[error.offset:error.offset + error.length]
+            
+            # Determina il testo corretto (primo suggerimento se disponibile)
+            corrected_text = error.replacements[0] if error.replacements else None
+            
+            # Estrai contesto esteso (60 caratteri prima e dopo)
+            context_start = max(0, error.offset - 60)
+            context_end = min(len(full_text), error.offset + error.length + 60)
+            context = full_text[context_start:context_end]
+            
+            # Calcola indici paragrafo e frase (approssimativo)
+            paragraph_index = full_text[:error.offset].count('\n\n')
+            sentence_index = full_text[:error.offset].count('. ')
+            
+            # Mappa severità
+            severity_map = {
+                'error': 'critical',
+                'warning': 'warning',
+                'info': 'info',
+            }
+            severity = severity_map.get(error.severity.lower(), 'info')
+            
+            # Crea il record
+            record = CorrectionRecord(
+                category=category,
+                source=CorrectionSource.LANGUAGETOOL,
+                original_text=original_text,
+                corrected_text=corrected_text,
+                context=context,
+                position=error.offset,
+                length=error.length,
+                paragraph_index=paragraph_index,
+                sentence_index=sentence_index,
+                rule_id=error.rule_id,
+                rule_description=error.category,
+                message=error.message,
+                suggestions=error.replacements[:5],  # Max 5 suggerimenti
+                confidence_score=self._calculate_confidence(error),
+                severity=severity,
+                additional_info={
+                    'short_message': error.short_message,
+                    'lt_category': error.category,
+                }
+            )
+            
+            records.append(record)
+        
+        return records
+    
+    def _map_error_to_category(self, error: LanguageToolError) -> CorrectionCategory:
+        """
+        Mappa un errore LanguageTool a una categoria di correzione.
+        
+        Args:
+            error: Errore LanguageTool
+            
+        Returns:
+            Categoria appropriata
+        """
+        rule_id = error.rule_id.upper()
+        category_name = error.category.upper()
+        
+        # Regole per categorie specifiche
+        
+        # Punteggiatura
+        if any(keyword in category_name for keyword in ['PUNCTUATION', 'TYPOGRAPHY', 'COMMA']):
+            return CorrectionCategory.PUNTEGGIATURA
+        
+        if any(keyword in rule_id for keyword in ['COMMA', 'PUNCT', 'DASH', 'QUOTE']):
+            return CorrectionCategory.PUNTEGGIATURA
+        
+        # Parole sconosciute
+        if 'MORFOLOGIK' in rule_id or 'HUNSPELL' in rule_id or 'SPELLING' in category_name:
+            return CorrectionCategory.SCONOSCIUTE
+        
+        # Stile e miglioramenti
+        if any(keyword in category_name for keyword in ['STYLE', 'REDUNDANCY', 'COLLOQUIALISM']):
+            return CorrectionCategory.MIGLIORABILI
+        
+        if 'STYLE' in rule_id or 'REDUNDAN' in rule_id:
+            return CorrectionCategory.MIGLIORABILI
+        
+        # Parole sospette (errori contestuali)
+        if 'CONFUSION' in category_name or 'CONFUSABLE' in rule_id:
+            return CorrectionCategory.SOSPETTE
+        
+        # Default: errori riconosciuti
+        return CorrectionCategory.ERRORI_RICONOSCIUTI
+    
+    def _calculate_confidence(self, error: LanguageToolError) -> float:
+        """
+        Calcola un punteggio di confidenza per l'errore.
+        
+        Args:
+            error: Errore LanguageTool
+            
+        Returns:
+            Punteggio di confidenza (0.0-1.0)
+        """
+        # Inizia con confidenza alta per LanguageTool
+        confidence = 0.85
+        
+        # Aumenta se ha suggerimenti
+        if error.replacements:
+            confidence += 0.05
+            
+        # Aumenta per errori ortografici chiari
+        if 'MORFOLOGIK' in error.rule_id or 'SPELLING' in error.category.upper():
+            confidence += 0.05
+            
+        # Diminuisci per errori di stile
+        if 'STYLE' in error.category.upper():
+            confidence -= 0.15
+            
+        # Limita a [0.5, 1.0]
+        return max(0.5, min(1.0, confidence))
 
 
 # Factory function per uso diretto

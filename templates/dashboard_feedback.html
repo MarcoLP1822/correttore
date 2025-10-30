@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Feedback - Sistema di Correzione AI</title>
+    <link rel="stylesheet" href="dashboard_feedback.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-content">
+                <h1>📊 Dashboard Feedback Sistema</h1>
+                <p class="subtitle">Monitoraggio e analytics del sistema di apprendimento automatico</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-export" onclick="exportAllData()">
+                    <span>📥</span> Esporta Dati
+                </button>
+                <button class="btn btn-refresh" onclick="refreshDashboard()">
+                    <span>🔄</span> Aggiorna
+                </button>
+            </div>
+        </header>
+
+        <!-- Stats Cards -->
+        <section class="stats-cards">
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-content">
+                    <h3 id="totalFeedback">0</h3>
+                    <p>Feedback Totali</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-content">
+                    <h3 id="correctFeedback">0</h3>
+                    <p>Correzioni Approvate</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">❌</div>
+                <div class="stat-content">
+                    <h3 id="errorFeedback">0</h3>
+                    <p>False Positive</p>
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">🎓</div>
+                <div class="stat-content">
+                    <h3 id="learnedCorrections">0</h3>
+                    <p>Correzioni Apprese</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Charts Row -->
+        <section class="charts-section">
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h2>📈 Timeline Feedback (Ultimi 30 giorni)</h2>
+                </div>
+                <canvas id="timelineChart"></canvas>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h2>🎯 Consenso per Categoria</h2>
+                </div>
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </section>
+
+        <!-- Tables Row -->
+        <section class="tables-section">
+            <!-- Top Corrections -->
+            <div class="table-container">
+                <div class="table-header">
+                    <h2>⭐ Top Correzioni Apprese</h2>
+                    <span class="badge" id="learnedBadge">0</span>
+                </div>
+                <div class="table-wrapper">
+                    <table id="learnedTable">
+                        <thead>
+                            <tr>
+                                <th>Originale</th>
+                                <th>Correzione</th>
+                                <th>Feedback</th>
+                                <th>Consenso</th>
+                                <th>Data</th>
+                            </tr>
+                        </thead>
+                        <tbody id="learnedTableBody">
+                            <tr>
+                                <td colspan="5" class="empty-state">
+                                    Nessuna correzione appresa ancora
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Contested Corrections -->
+            <div class="table-container">
+                <div class="table-header">
+                    <h2>⚠️ Correzioni Contestate</h2>
+                    <span class="badge badge-warning" id="contestedBadge">0</span>
+                </div>
+                <div class="table-wrapper">
+                    <table id="contestedTable">
+                        <thead>
+                            <tr>
+                                <th>Testo</th>
+                                <th>Correzione</th>
+                                <th>✅ Corrette</th>
+                                <th>❌ Errori</th>
+                                <th>Azioni</th>
+                            </tr>
+                        </thead>
+                        <tbody id="contestedTableBody">
+                            <tr>
+                                <td colspan="5" class="empty-state">
+                                    Nessuna correzione contestata
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Recent Feedback -->
+        <section class="recent-section">
+            <div class="table-container full-width">
+                <div class="table-header">
+                    <h2>🕐 Feedback Recenti</h2>
+                    <div class="filters">
+                        <select id="filterCategory" onchange="applyFilters()">
+                            <option value="all">Tutte le categorie</option>
+                            <option value="SPELLING">Ortografia</option>
+                            <option value="GRAMMAR">Grammatica</option>
+                            <option value="STYLE">Stile</option>
+                            <option value="VOCABULARY">Vocabolario</option>
+                        </select>
+                        <select id="filterFeedback" onchange="applyFilters()">
+                            <option value="all">Tutti i feedback</option>
+                            <option value="corretta">✅ Corrette</option>
+                            <option value="errore">❌ Errori</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <table id="recentTable">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Documento</th>
+                                <th>Testo Originale</th>
+                                <th>Correzione</th>
+                                <th>Categoria</th>
+                                <th>Feedback</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentTableBody">
+                            <tr>
+                                <td colspan="6" class="empty-state">
+                                    Nessun feedback disponibile
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Actions Section -->
+        <section class="actions-section">
+            <div class="action-card">
+                <h3>🗑️ Gestione Dati</h3>
+                <p>Elimina tutti i feedback salvati nel database</p>
+                <button class="btn btn-danger" onclick="clearAllFeedback()">
+                    Cancella Tutti i Feedback
+                </button>
+            </div>
+            
+            <div class="action-card">
+                <h3>📊 Statistiche Avanzate</h3>
+                <p>Visualizza metriche dettagliate del sistema</p>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <label>Tasso di Consenso:</label>
+                        <span id="consensusRate">0%</span>
+                    </div>
+                    <div class="stat-item">
+                        <label>Media Feedback/Giorno:</label>
+                        <span id="avgFeedbackPerDay">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <label>Categoria più comune:</label>
+                        <span id="topCategory">N/A</span>
+                    </div>
+                    <div class="stat-item">
+                        <label>Ultimo aggiornamento:</label>
+                        <span id="lastUpdate">Mai</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="dashboard-footer">
+            <p>Sistema di Feedback Utente - FASE 6 | Aggiornato: <span id="footerTimestamp">-</span></p>
+        </footer>
+    </div>
+
+    <script src="dashboard_feedback.js"></script>
+</body>
+</html>

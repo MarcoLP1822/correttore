@@ -1,41 +1,41 @@
-# Correzioni personalizzate per errori comuni italiani
-# Formato: errore_comune → correzione_corretta
-
-# Errori specifici rilevati
-bottaga → bottega
-bottaia → bottega
-vlta → volta
-alta → volta
-sugu → sugo
-suga → suga
-fato → fatto
-go → ho
-cassella → casella
-milliore → migliore
-carezzzzavano → carezzavano
-ansiano → anziano
-borggo → borgo
-strignendo → stringendo
-trasformazzione → trasformazione
-CAPTIOLO → CAPITOLO
-Captiolo → Capitolo
-Qvesta → Questa
-qvesta → questa
-duee → due
-prontal → pronta
-Acondroplasiaaa → Acondroplasia
-c erano → c'erano
 
 # Altri errori comuni italiani
-pò → po'
-qual'è → qual è
-un'uomo → un uomo
-la cane → il cane
+# Correzioni personalizzate per errori comuni italiani
+# Errori specifici rilevati
+# Formato: errore_comune → correzione_corretta
+Acondroplasiaaa → Acondroplasia
+CAPTIOLO → CAPITOLO
+Captiolo → Capitolo
 La cane → Il cane
-o fatto → ho fatto
+Qvesta → Questa
 a detto → ha detto
-fallegname → falegname
-d'avero → davvero
-sopratutto → soprattutto
 accelerare → accelerare
 acelerare → accelerare
+alta → volta
+ansiano → anziano
+borggo → borgo
+bottaga → bottega
+bottaia → bottega
+c erano → c'erano
+carezzzzavano → carezzavano
+cassella → casella
+d'avero → davvero
+duee → due
+fallegname → falegname
+fato → fatto
+go → ho
+la cane → il cane
+milliore → migliore
+o fatto → ho fatto
+prontal → pronta
+pò → po'
+qual'è → qual è
+qvesta → questa
+sopratutto → soprattutto
+strignendo → stringendo
+suga → suga
+sugu → sugo
+trasformazzione → trasformazione
+un'uomo → un uomo
+vlta -> volta
+vlta → volta

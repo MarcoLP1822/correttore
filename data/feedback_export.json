@@ -1,0 +1,67 @@
+[
+  {
+    "id": 5,
+    "correction_id": "test_vlta",
+    "original_text": "vlta",
+    "corrected_text": "volta",
+    "category": "SEMANTIC",
+    "feedback": "errore",
+    "timestamp": "2025-10-27T10:49:00.854920",
+    "document_name": "test_doc.docx",
+    "rule_id": null,
+    "context": null,
+    "created_at": "2025-10-27 09:49:00"
+  },
+  {
+    "id": 4,
+    "correction_id": "test_vlta",
+    "original_text": "vlta",
+    "corrected_text": "volta",
+    "category": "SEMANTIC",
+    "feedback": "errore",
+    "timestamp": "2025-10-27T10:49:00.834704",
+    "document_name": "test_doc.docx",
+    "rule_id": null,
+    "context": null,
+    "created_at": "2025-10-27 09:49:00"
+  },
+  {
+    "id": 3,
+    "correction_id": "test_vlta",
+    "original_text": "vlta",
+    "corrected_text": "volta",
+    "category": "SEMANTIC",
+    "feedback": "errore",
+    "timestamp": "2025-10-27T10:49:00.824493",
+    "document_name": "test_doc.docx",
+    "rule_id": null,
+    "context": null,
+    "created_at": "2025-10-27 09:49:00"
+  },
+  {
+    "id": 2,
+    "correction_id": "test_vlta",
+    "original_text": "vlta",
+    "corrected_text": "volta",
+    "category": "SEMANTIC",
+    "feedback": "errore",
+    "timestamp": "2025-10-27T10:49:00.814539",
+    "document_name": "test_doc.docx",
+    "rule_id": null,
+    "context": null,
+    "created_at": "2025-10-27 09:49:00"
+  },
+  {
+    "id": 1,
+    "correction_id": "test_001",
+    "original_text": "pò",
+    "corrected_text": "po'",
+    "category": "APOSTROPHE",
+    "feedback": "errore",
+    "timestamp": "2025-10-27T10:47:16.642194",
+    "document_name": "test_doc.docx",
+    "rule_id": null,
+    "context": null,
+    "created_at": "2025-10-27 09:47:16"
+  }
+]

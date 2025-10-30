@@ -22,29 +22,29 @@ def main():
         print("🌐 Avvio interfaccia web...")
         print("📊 Dashboard disponibile su: http://localhost:5000")
         try:
-            from src.interfaces.web_interface import main as web_main
+            from correttore.interfaces.web_interface import main as web_main
             web_main()
         except ImportError as e:
             print(f"❌ Errore importando web interface: {e}")
-            print("💡 Prova: python -m src.interfaces.web_interface")
+            print("💡 Prova: python -m correttore.interfaces.web_interface")
             return 1
     
     # Se viene passato --cli esplicitamente, avvia la CLI
     elif len(sys.argv) > 1 and sys.argv[1] in ['--cli', '--command', 'cli', 'command']:
         print("💻 Avvio interfaccia CLI...")
-        from src.interfaces.cli import main as cli_main
+        from correttore.interfaces.cli import main as cli_main
         cli_main()
     
     # Se c'è un file come primo argomento, avvia CLI in modalità diretta
     elif len(sys.argv) > 1 and not sys.argv[1].startswith('--'):
-        print("� Avvio correzione diretta...")
-        from src.interfaces.cli import main as cli_main
+        print("📝 Avvio correzione diretta...")
+        from correttore.interfaces.cli import main as cli_main
         cli_main()
     
     # Altrimenti avvia CLI per gestire gli argomenti
     else:
         print("💻 Avvio interfaccia CLI...")
-        from src.interfaces.cli import main as cli_main
+        from correttore.interfaces.cli import main as cli_main
         cli_main()
 
 if __name__ == "__main__":

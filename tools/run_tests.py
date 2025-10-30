@@ -358,3 +358,8 @@ def main():
 
 if __name__ == '__main__':
     sys.exit(main())
+
+# NOTA: Questo file è DIVERSO da run_tests.py root.
+# Root: wrapper pytest semplice
+# Questo: runner unittest complesso con color output
+# Mantieni entrambi se necessario, altrimenti usa run_tests.py root

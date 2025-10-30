@@ -42,7 +42,9 @@ dev = [
 ]
 
 [project.scripts]
-correttore = "correttore.interfaces.cli:main"
+correttore = "correttore.__main__:main"
+correttore-cli = "correttore.interfaces.cli:main"
+correttore-web = "correttore.interfaces.web_interface:main"
 correttore-analyze = "correttore.utils.readability:main_cli"
 
 [project.urls]
@@ -53,9 +55,14 @@ Issues = "https://github.com/MarcoLP1822/correttore/issues"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
+zip-safe = false
+include-package-data = true
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+correttore = ["py.typed", "data/**/*", "templates/**/*"]
 
 [tool.black]
 line-length = 100

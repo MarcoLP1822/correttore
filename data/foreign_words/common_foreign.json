@@ -1,0 +1,119 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "date": "2025-10-27",
+    "description": "Dizionario parole straniere comuni in testi italiani",
+    "usage": "Rilevamento automatico parole in lingue straniere per tab 'Lingue' nel report"
+  },
+  
+  "english": {
+    "description": "Parole inglesi comunemente usate in italiano",
+    "words": [
+      "meeting", "email", "business", "manager", "leader", "team", "staff",
+      "marketing", "brand", "feedback", "briefing", "report", "deadline",
+      "budget", "partner", "sponsor", "layout", "design", "software",
+      "hardware", "upgrade", "download", "upload", "file", "backup",
+      "streaming", "podcast", "blog", "social", "media", "post", "hashtag",
+      "follower", "influencer", "trend", "fashion", "look", "outfit", "style",
+      "shopping", "outlet", "sale", "store", "online", "web", "internet",
+      "computer", "laptop", "tablet", "smartphone", "device", "app",
+      "account", "password", "login", "username", "profile", "privacy",
+      "weekend", "party", "club", "pub", "bar", "drink", "cocktail",
+      "sport", "fitness", "coach", "training", "running", "jogging",
+      "weekend", "brunch", "snack", "fast food", "hamburger", "sandwich",
+      "performance", "show", "star", "cast", "set", "location", "backstage",
+      "preview", "trailer", "sequel", "remake", "live", "on air",
+      "news", "breaking news", "gossip", "celebrity", "fan", "cool",
+      "smart", "funny", "boring", "amazing", "shocking", "wow",
+      "startup", "business plan", "investor", "crowdfunding", "pitch",
+      "freelance", "remote", "smart working", "coworking", "networking",
+      "workshop", "masterclass", "tutorial", "webinar", "conference call",
+      "open source", "cloud", "server", "database", "framework", "plugin",
+      "interface", "dashboard", "widget", "template", "responsive",
+      "mood", "feeling", "sorry", "okay", "yes", "no", "please", "thanks"
+    ]
+  },
+  
+  "latin": {
+    "description": "Espressioni latine in uso",
+    "words": [
+      "ad hoc", "ad interim", "ad libitum", "ad personam", "alias",
+      "alter ego", "a posteriori", "a priori", "auditorium",
+      "bis", "bonus", "camera", "carpe diem", "casus belli",
+      "circa", "citius altius fortius", "coitus interruptus",
+      "conditio sine qua non", "consensus", "curriculum", "curriculum vitae",
+      "de facto", "de iure", "deus ex machina", "dictum",
+      "ergo", "et cetera", "ex aequo", "ex ante", "ex novo", "ex post",
+      "extra", "fac simile", "gratis", "habitat", "honoris causa",
+      "ibidem", "id est", "idem", "in corpore", "in extremis",
+      "in itinere", "in primis", "in progress", "in situ", "in toto",
+      "inter nos", "ipso facto", "iter", "lapsus", "lato sensu",
+      "modus operandi", "modus vivendi", "mortis causa", "mutatis mutandis",
+      "nota bene", "opus", "pari passo", "passim", "per capita",
+      "per se", "placebo", "post mortem", "post scriptum", "pro bono",
+      "pro capite", "pro forma", "pro tempore", "quid", "quorum",
+      "ratio", "referendum", "requiem", "rebus sic stantibus",
+      "sine die", "sine qua non", "status quo", "stricto sensu",
+      "sui generis", "summa cum laude", "tabula rasa", "tamquam",
+      "unicum", "urbi et orbi", "ut supra", "vademecum", "versus",
+      "verba volant", "via", "vice versa", "vox populi"
+    ]
+  },
+  
+  "french": {
+    "description": "Parole francesi in uso",
+    "words": [
+      "abat-jour", "atelier", "avant-garde", "beige", "bijou", "bistrot",
+      "bon ton", "bouquet", "boutique", "buffet", "cabaret", "canapé",
+      "chalet", "champagne", "chic", "collage", "coupé", "crochet",
+      "crêpe", "croissant", "décolleté", "déjà vu", "élite", "entrée",
+      "foulard", "garage", "gourmet", "maître", "ménage", "menu",
+      "naïf", "négligé", "nuance", "papier-mâché", "plissé", "première",
+      "recherché", "réclame", "renaissance", "rendez-vous", "résumé",
+      "rouge", "roulette", "sabotage", "salon", "soirée", "sondage",
+      "soufflé", "toilette", "toupé", "trousseau", "vis-à-vis", "voyeur"
+    ]
+  },
+  
+  "german": {
+    "description": "Parole tedesche in uso",
+    "words": [
+      "angst", "blitz", "bunker", "diesel", "doppelgänger", "ersatz",
+      "fest", "gestalt", "hinterland", "kaputt", "kitsch", "kindergarten",
+      "leitmotiv", "poltergeist", "pretzel", "rucksack", "sauerkraut",
+      "schadenfreude", "spiel", "strafe", "über", "wanderlust", "weltanschauung",
+      "wunderkind", "zeitgeist", "zeppelin"
+    ]
+  },
+  
+  "spanish": {
+    "description": "Parole spagnole/portoghesi in uso",
+    "words": [
+      "aficionado", "armada", "barrio", "bonanza", "cafeteria", "cargo",
+      "embargo", "fiesta", "guerrilla", "hacienda", "junta", "machismo",
+      "macho", "matador", "merengue", "paella", "patio", "plaza",
+      "poncho", "rodeo", "salsa", "siesta", "tango", "tapas", "tornado"
+    ]
+  },
+  
+  "japanese": {
+    "description": "Parole giapponesi in uso",
+    "words": [
+      "anime", "bonsai", "emoji", "futon", "geisha", "haiku", "karaoke",
+      "kamikaze", "karate", "katana", "kimono", "manga", "ninja",
+      "origami", "sake", "samurai", "sashimi", "sensei", "shogun",
+      "sushi", "tempura", "tsunami", "yakuza", "zen"
+    ]
+  },
+  
+  "other": {
+    "description": "Altre lingue",
+    "words": [
+      "avatar", "bazar", "boomerang", "burqa", "cannabis", "caravan",
+      "curry", "dervish", "fatwa", "feng shui", "guru", "harem",
+      "hookah", "jihad", "karma", "kebab", "khaki", "kiosk",
+      "kosher", "mantra", "nirvana", "pajama", "pundit", "safari",
+      "shaman", "sherpa", "slogan", "tsar", "voodoo", "yoga", "zombie"
+    ]
+  }
+}
