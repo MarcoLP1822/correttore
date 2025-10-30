@@ -4,8 +4,8 @@ Dimostra come usare il vocabolario per migliorare la qualità della correzione.
 """
 
 from typing import List, Dict
-from services.vocabulary_service import get_vocabulary_service
-from src.utils.readability import ReadabilityAnalyzer
+from correttore.services.vocabulary_service import get_vocabulary_service
+from correttore.utils.readability import ReadabilityAnalyzer
 
 
 class VocabularyEnhancedCorrector:

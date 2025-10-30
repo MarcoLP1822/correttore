@@ -95,10 +95,7 @@ class SafeCorrector:
         # Vocabulary service per validazione VdB (Fase 4)
         self.vocabulary_service = None
         try:
-            import sys
-            from pathlib import Path
-            sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
-            from services.vocabulary_service import get_vocabulary_service
+            from correttore.services.vocabulary_service import get_vocabulary_service
             self.vocabulary_service = get_vocabulary_service()
             logger.info("📚 VocabularyService integrato in SafeCorrector")
         except ImportError:

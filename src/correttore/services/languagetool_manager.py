@@ -77,27 +77,48 @@ class LanguageToolManager:
             return False
         
         jar_file = jar_files[0]
+        # La working directory deve essere quella del jar file per evitare i warning
+        jar_dir = jar_file.parent
         
         try:
-            # Avvia il server in background
-            cmd = [
-                "java",
-                "-cp", str(jar_file),
-                "org.languagetool.server.HTTPServer",
-                "--port", str(self.port),
-                "--allow-origin", "*",
-                "--languageModel", ""  # Disabilita modelli pesanti per startup veloce
-            ]
+            # Su Windows, usa un batch file wrapper per evitare problemi di processo
+            if os.name == 'nt':
+                # Crea un batch file temporaneo
+                project_root = Path(__file__).parent.parent.parent.parent
+                batch_file = project_root / "start_lt_temp.bat"
+                
+                with open(batch_file, 'w') as f:
+                    f.write(f'@echo off\n')
+                    f.write(f'cd /d "{jar_dir}"\n')
+                    f.write(f'java -cp "{jar_file.name}" org.languagetool.server.HTTPServer --port {self.port} --allow-origin "*" --public\n')
+                
+                cmd = [str(batch_file)]
+            else:
+                # Unix/Linux: comando diretto
+                cmd = [
+                    "java",
+                    "-cp", str(jar_file),
+                    "org.languagetool.server.HTTPServer",
+                    "--port", str(self.port),
+                    "--allow-origin", "*",
+                    "--public"
+                ]
             
             self.logger.info(f"🚀 Avvio LanguageTool server...")
             
-            # Avvia con output redirected per non interferire
+            # Avvia il processo senza finestra visibile
+            startupinfo = None
+            if os.name == 'nt':
+                startupinfo = subprocess.STARTUPINFO()
+                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                startupinfo.wShowWindow = subprocess.SW_HIDE
+            
             self.server_process = subprocess.Popen(
                 cmd,
-                cwd=self.lt_dir,
+                cwd=jar_dir if os.name != 'nt' else None,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
-                creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if os.name == 'nt' else 0
+                startupinfo=startupinfo
             )
             
             # Aspetta che il server sia pronto

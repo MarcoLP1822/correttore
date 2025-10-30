@@ -2,8 +2,8 @@
 Script di test per verificare l'integrazione del Vocabolario di Base.
 """
 
-from src.utils.readability import ReadabilityAnalyzer
-from services.vocabulary_service import get_vocabulary_service
+from correttore.utils.readability import ReadabilityAnalyzer
+from correttore.services.vocabulary_service import get_vocabulary_service
 
 # Test testo semplice
 testo_semplice = """

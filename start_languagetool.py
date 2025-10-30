@@ -10,7 +10,7 @@ from pathlib import Path
 project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
-from src.services.languagetool_manager import get_languagetool_manager
+from correttore.services.languagetool_manager import get_languagetool_manager
 import logging
 
 logging.basicConfig(

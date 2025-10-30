@@ -511,7 +511,7 @@ class ReadabilityReportGenerator:
         Returns:
             Lista di dict con: word, frequency, difficulty_score, alternatives
         """
-        from services.vocabulary_service import VocabularyService
+        from correttore.services.vocabulary_service import VocabularyService
         
         vocab_service = VocabularyService()
         word_details = []

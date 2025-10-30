@@ -33,18 +33,19 @@ from datetime import datetime
 def load_languagetool_functions():
     """Carica le funzioni LanguageTool in modo sicuro."""
     try:
-        # Import dal percorso corretto nella root del progetto
-        import importlib.util
-        scripts_path = project_root / 'scripts' / 'languagetool_manager.py'
+        from correttore.services.languagetool_manager import get_languagetool_manager
         
-        if scripts_path.exists():
-            spec = importlib.util.spec_from_file_location("languagetool_manager", scripts_path)
-            if spec and spec.loader:
-                module = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(module)
-                return module.start_languagetool_simple, module.is_languagetool_running
+        def start_languagetool_simple() -> bool:
+            """Avvia LanguageTool usando il manager."""
+            manager = get_languagetool_manager()
+            return manager.ensure_running()
         
-        raise ImportError("LanguageTool manager not found")
+        def is_languagetool_running() -> bool:
+            """Verifica se LanguageTool è in esecuzione."""
+            manager = get_languagetool_manager()
+            return manager.is_server_running()
+        
+        return start_languagetool_simple, is_languagetool_running
         
     except Exception:
         # Funzioni dummy per demo mode
