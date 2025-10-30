@@ -1,92 +1,90 @@
 # 📚 Documentazione Correttore
 
-Benvenuto nella documentazione completa di Correttore v2.0!
+Benvenuto nella documentazione completa di **Correttore v2.0** - Sistema Enterprise di Correzione Testi Italiani.
+
+---
 
 ## 🚀 Per Iniziare
 
 ### Nuovi Utenti
 - **[Quick Start Guide](QUICKSTART.md)** - Inizia in 5 minuti! ⚡
 - **[Come Avviare](COME_AVVIARE.md)** - Guida dettagliata installazione e primo uso
+- **[Progetto 100% Completo](PROGETTO_100_COMPLETO.md)** - Overview completo del sistema
 
 ### Utenti Esistenti
-- **[Migration Report](MIGRATION_REPORT.md)** - Guida migrazione a v2.0 (Clean Architecture)
+- **[Guida Migrazione](development/migrations/migration_report.md)** - Migrazione a v2.0 (Clean Architecture)
 
-## 📖 Guide Utente
+---
 
-### Funzionalità Principali
-- **[Modifiche Soglie](MODIFICHE_SOGLIE.md)** - Configurazione soglie correzione
-- **[Integrazione Vocabolario](INTEGRAZIONE_COMPLETATA.md)** - Integrazione Nuovo Vocabolario di Base
-- **[Uso Vocabolario](NVDB_USAGE.md)** - Guida all'uso del NVdB
-- **[Integrazione Tecnica Vocabolario](VOCABULARY_INTEGRATION.md)** - Guida tecnica per sviluppatori
+## 📖 Funzionalità
+
+Documentazione delle principali funzionalità del sistema:
+
+### [📁 features/](features/)
+- **[Sistema Report](features/report_system.md)** - Sistema avanzato di reporting HTML
+- **[Vocabolario (NVdB)](features/nvdb.md)** - Integrazione Nuovo Vocabolario di Base
+- **[Integrazione Vocabolario](features/vocabulary.md)** - Guida tecnica sviluppatori
 
 ### Analisi Leggibilità
-La funzionalità di analisi leggibilità usa l'**Indice Gulpease**, formula tarata per l'italiano.
+Sistema di analisi basato sull'**Indice Gulpease**, formula calibrata per l'italiano:
 
-**Quick Reference Gulpease:**
-- 📗 **80-100**: Molto facile (scuola elementare)
-- 📘 **60-79**: Facile (scuola media)
-- 📙 **40-59**: Difficile (scuola superiore)
-- 📕 **0-39**: Molto difficile (università)
+| Punteggio | Livello | Target |
+|-----------|---------|--------|
+| 📗 **80-100** | Molto facile | Scuola elementare |
+| 📘 **60-79** | Facile | Scuola media |
+| 📙 **40-59** | Difficile | Scuola superiore |
+| 📕 **0-39** | Molto difficile | Università |
 
-## 🏗️ Architettura
+---
 
-### Per Developer
-- **[CONTRIBUTING.md](../CONTRIBUTING.md)** - Come contribuire al progetto
-- **[CHANGELOG.md](../CHANGELOG.md)** - Storia completa modifiche
+## 🏗️ Documentazione Tecnica
 
-### Struttura v2.0 (Clean Architecture)
+### [📁 development/](development/)
+
+Risorse per sviluppatori:
+
+- **[Configurazione](development/configuration.md)** - Configurazione soglie e parametri
+- **[Piani Implementazione](development/implementation_plans/)** - Piani tecnici features
+- **[Report Migrazioni](development/migrations/)** - Storico migrazioni e refactoring
+
+### Architettura v2.0 (Clean Architecture)
 ```
 src/correttore/
-├── core/           # Business logic
-├── services/       # Servizi esterni
-├── interfaces/     # CLI & Web
-├── utils/          # Utilities
-├── models/         # Data models
-└── config/         # Configurazione
+├── core/           # Business logic (correction engine, document handler)
+├── services/       # Servizi esterni (OpenAI, LanguageTool, cache)
+├── interfaces/     # CLI & Web (Flask app, CLI commands)
+├── utils/          # Utilities (readability, reports, database)
+├── models/         # Data models (correction tracking, feedback)
+└── config/         # Configurazione (settings, env)
 ```
 
-## 📋 Documenti di Riferimento
+### Contribuire
+- **[CONTRIBUTING.md](../CONTRIBUTING.md)** - Linee guida contributi
+- **[CHANGELOG.md](../CHANGELOG.md)** - Storia completa modifiche
 
-### 🎯 Stato Progetto
-- **[PROGETTO 100% COMPLETO](PROGETTO_100_COMPLETO.md)** - 🎉 Riepilogo finale completo (tutte le 7 fasi)
+---
 
-### 📝 Implementazioni per Fase
-- **[FASE 3 - Leggibilità](FASE3_COMPLETATA.md)** - Analisi GULPEASE frase per frase
-- **[FASE 5 - Lemmatizzazione](FASE5_COMPLETATA.md)** - spaCy NER e lemmatizzazione
-- **[FASE 6 - Sistema Feedback](FASE6_COMPLETE.md)** - Auto-learning e dashboard
-- **[FASE 7 - Categorie Speciali](FASE7_COMPLETATA.md)** - 🆕 Lingue straniere e parole sensibili
+## 📋 Storico Sviluppo
 
-### 📚 Guide Tecniche
-- **[Piano Implementazione](IMPLEMENTATION_PLAN_REPORT_SYSTEM.md)** - Piano originale completo
-- **[Vocabolario di Base - Guida Utente](NVDB_USAGE.md)** - Come usare il NVdB
-- **[Vocabolario di Base - Integrazione](VOCABULARY_INTEGRATION.md)** - Guida tecnica per sviluppatori
-- **[Sistema Report](REPORT_SYSTEM_USAGE.md)** - Guida utilizzo report HTML
+### [📁 changelog/](changelog/)
 
-### 🔧 Configurazione e Setup
-- **[Quick Start](QUICKSTART.md)** - Inizia in 5 minuti
-- **[Come Avviare](COME_AVVIARE.md)** - Installazione e primo uso dettagliato
-- **[Modifiche Soglie](MODIFICHE_SOGLIE.md)** - Configurazione soglie correzione
-- **[Migration Report](MIGRATION_REPORT.md)** - Migrazione a Clean Architecture v2.0
+Cronologia completa dello sviluppo del progetto:
 
-### File nella Directory `docs/`
+- **[Fase 3](changelog/fase_3.md)** - Integrazione sistema report HTML
+- **[Fase 5](changelog/fase_5.md)** - Ottimizzazioni performance
+- **[Fase 6](changelog/fase_6.md)** - Miglioramenti interfaccia
+- **[Fase 7](changelog/fase_7.md)** - Completamento features enterprise
 
-| File | Descrizione |
-|------|-------------|
-| **QUICKSTART.md** | 🚀 Guida rapida 5 minuti |
-| **COME_AVVIARE.md** | 📖 Guida completa setup |
-| **MODIFICHE_SOGLIE.md** | ⚙️ Configurazione soglie |
-| **MIGRATION_REPORT.md** | 🔄 Report migrazione v2.0 |
-| **INTEGRAZIONE_COMPLETATA.md** | � Integrazione Vocabolario di Base |
-| **NVDB_USAGE.md** | � Guida uso Vocabolario |
-| **VOCABULARY_INTEGRATION.md** | � Guida tecnica vocabolario |
+---
 
-### File nella Root del Progetto
+## 🎯 Stato Progetto
 
-| File | Descrizione |
-|------|-------------|
-| **README.md** | 🏠 Documentazione principale |
-| **CHANGELOG.md** | 📋 Changelog completo |
-| **CONTRIBUTING.md** | 🤝 Guida contributi |
+**Status**: ✅ 100% Completo - Sistema Enterprise Production-Ready
+
+Per dettagli completi sullo stato del progetto e tutte le funzionalità implementate, consulta:
+- **[PROGETTO 100% COMPLETO](PROGETTO_100_COMPLETO.md)** - 🎉 Riepilogo finale
+
+---
 
 ## 🎯 Guide per Casi d'Uso
 
@@ -131,6 +129,8 @@ Features web:
 - 📈 Grafici leggibilità
 - 💾 Download risultati
 
+---
+
 ## 🔧 Configurazione
 
 ### File di Configurazione
@@ -149,6 +149,8 @@ OPENAI_MODEL=gpt-4
 MAX_TOKENS=2000
 ```
 
+---
+
 ## 🧪 Testing
 
 ```bash
@@ -161,6 +163,8 @@ pytest --cov=correttore
 # Test specifici
 pytest tests/unit/
 ```
+
+---
 
 ## 📊 Indice Gulpease
 
@@ -175,21 +179,14 @@ Dove:
 - **N_lettere**: Numero di lettere
 - **N_parole**: Numero di parole
 
-### Interpretazione
-
-| Punteggio | Difficoltà | Target |
-|-----------|------------|--------|
-| 80-100 | Molto facile | Licenza elementare |
-| 60-79 | Facile | Licenza media |
-| 40-59 | Difficile | Diploma superiore |
-| 0-39 | Molto difficile | Laurea |
-
 ### Consigli per Migliorare
 
 - ✍️ Usa frasi più corte
 - 📝 Preferisci parole semplici
 - 🎯 Evita subordinate complesse
 - 💡 Dividi periodi lunghi
+
+---
 
 ## 🔍 Troubleshooting
 
@@ -221,11 +218,14 @@ python -m correttore documento.docx --verbose
 cat migration.log
 ```
 
+---
+
 ## 📞 Supporto
 
 - 🐛 **Bug Reports**: [GitHub Issues](https://github.com/MarcoLP1822/correttore/issues)
 - 💬 **Discussioni**: [GitHub Discussions](https://github.com/MarcoLP1822/correttore/discussions)
-- 📧 **Email**: your.email@example.com
+
+---
 
 ## 🗺️ Roadmap
 
@@ -240,6 +240,8 @@ cat migration.log
 - [ ] Multi-lingua
 - [ ] Cloud deployment
 - [ ] Mobile app
+
+---
 
 ## 📚 Risorse Esterne
 

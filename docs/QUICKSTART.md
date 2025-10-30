@@ -289,8 +289,8 @@ pip show correttore
 - [README.md](../README.md) - Overview completa
 - [docs/README.md](README.md) - Indice documentazione
 - [docs/COME_AVVIARE.md](COME_AVVIARE.md) - Guida dettagliata
-- [docs/MIGRATION_REPORT.md](MIGRATION_REPORT.md) - Report migrazione v2.0
-- [docs/NVDB_USAGE.md](NVDB_USAGE.md) - Uso vocabolario di base
+- [development/migrations/migration_report.md](development/migrations/migration_report.md) - Report migrazione v2.0
+- [features/nvdb.md](features/nvdb.md) - Uso vocabolario di base
 - [CHANGELOG.md](../CHANGELOG.md) - Modifiche versione
 
 ## 💡 Tips & Tricks
