@@ -12,7 +12,7 @@ from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, asdict
 from collections import defaultdict, deque
 
-from config.settings import Settings
+from correttore.config.settings import Settings
 
 
 @dataclass

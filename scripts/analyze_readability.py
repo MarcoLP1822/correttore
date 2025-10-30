@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Optional
 
 from docx import Document
-from src.utils.readability import ReadabilityAnalyzer
+from correttore.utils.readability import ReadabilityAnalyzer
 
 
 def extract_text_from_docx(file_path: Path) -> str:

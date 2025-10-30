@@ -1,5 +1,14 @@
 # config/__init__.py
 """
-Configurazione centralizzata del sistema.
-Contiene settings, costanti e configurazione dell'applicazione.
+Cartella di configurazione.
+
+NOTA: Questo è solo un contenitore per file di configurazione statici.
+La configurazione principale del sistema è in: src/correttore/config/settings.py
+
+File presenti:
+- languagetool_whitelist.txt: Whitelist per LanguageTool
+- (altri file .txt, .xml, ecc. per configurazioni esterne)
+
+Per configurazione Python del sistema, importa da:
+    from correttore.config.settings import get_settings
 """
