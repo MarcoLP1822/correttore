@@ -123,6 +123,21 @@ def process_document_async(job_id: str, input_path: Path, options: CLIOptions):
             job_status[job_id]['status'] = 'completed'
             job_status[job_id]['output_file'] = str(output_path)
             job_status[job_id]['download_url'] = f"/download/{output_path.name}"
+            
+            # Aggiungi link ai report HTML se esistono
+            report_html = output_path.parent / f"{output_path.stem}_report.html"
+            if report_html.exists():
+                job_status[job_id]['report_url'] = f"/download/{report_html.name}"
+                print(f"✅ Report HTML trovato: {report_html.name}")
+            
+            # Cerca altri report (diff, glossario, etc.)
+            diff_report = output_path.parent / f"{output_path.stem}_diff.html"
+            if diff_report.exists():
+                job_status[job_id]['diff_report_url'] = f"/download/{diff_report.name}"
+            
+            glossario_report = output_path.parent / f"{output_path.stem}_glossario.html"
+            if glossario_report.exists():
+                job_status[job_id]['glossario_report_url'] = f"/download/{glossario_report.name}"
         else:
             job_status[job_id]['status'] = 'failed'
             job_status[job_id]['error'] = f"Errore: file corretto non creato ({output_path})"
