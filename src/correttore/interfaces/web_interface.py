@@ -314,6 +314,16 @@ def download_file(filename):
     
     return send_file(str(file_path), as_attachment=True)
 
+@app.route('/view/<filename>')
+def view_file(filename):
+    """Visualizza file HTML nel browser (senza forzare download)"""
+    file_path = app.config['OUTPUT_FOLDER'] / filename
+    if not file_path.exists():
+        return jsonify({'error': 'File non trovato'}), 404
+    
+    # Invia il file senza as_attachment per visualizzarlo nel browser
+    return send_file(str(file_path), as_attachment=False)
+
 @app.route('/dashboard')
 def dashboard():
     """Dashboard monitoring"""

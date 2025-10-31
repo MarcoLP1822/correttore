@@ -342,18 +342,21 @@
                                             <i class="fas fa-download"></i>
                                         </a>
                                         {% if job.report_url %}
-                                        <a href="{{ job.report_url }}" class="btn btn-sm btn-primary me-1" target="_blank" title="Report HTML">
-                                            <i class="fas fa-chart-bar"></i>
+                                        <a href="{{ job.report_url.replace('/download/', '/view/') }}" class="btn btn-sm btn-primary me-1" target="_blank" title="Visualizza Report HTML">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{{ job.report_url }}" class="btn btn-sm btn-outline-primary me-1" title="Scarica Report HTML">
+                                            <i class="fas fa-download"></i>
                                         </a>
                                         {% endif %}
                                         {% if job.diff_report_url %}
-                                        <a href="{{ job.diff_report_url }}" class="btn btn-sm btn-secondary me-1" target="_blank" title="Report differenze">
-                                            <i class="fas fa-file-alt"></i>
+                                        <a href="{{ job.diff_report_url.replace('/download/', '/view/') }}" class="btn btn-sm btn-secondary me-1" target="_blank" title="Visualizza Report differenze">
+                                            <i class="fas fa-eye"></i>
                                         </a>
                                         {% endif %}
                                         {% if job.glossario_report_url %}
-                                        <a href="{{ job.glossario_report_url }}" class="btn btn-sm btn-info" target="_blank" title="Report glossario">
-                                            <i class="fas fa-book"></i>
+                                        <a href="{{ job.glossario_report_url.replace('/download/', '/view/') }}" class="btn btn-sm btn-info me-1" target="_blank" title="Visualizza Report glossario">
+                                            <i class="fas fa-eye"></i>
                                         </a>
                                         {% endif %}
                                     {% else %}
