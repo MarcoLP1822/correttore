@@ -409,3 +409,43 @@ def clear_global_cache():
     if _cache_instance:
         _cache_instance.clear_cache()
         _cache_instance = None
+
+
+# ══════════════════════════════════════════════════════════════════════
+# BACKWARD COMPATIBILITY API (for cache_llm.py)
+# ══════════════════════════════════════════════════════════════════════
+
+def get_cached(text: str) -> Optional[str]:
+    """
+    API compatibilità con cache_llm.py.
+    Cerca correzione in cache usando exact match.
+    
+    Args:
+        text: Testo originale da cercare
+        
+    Returns:
+        Testo corretto o None se non in cache
+    """
+    cache = get_cache()
+    result = cache.get_exact_match(text)
+    return result.corrected_text if result else None
+
+
+def set_cached(text: str, corrected: str) -> None:
+    """
+    API compatibilità con cache_llm.py.
+    Salva correzione in cache.
+    
+    Args:
+        text: Testo originale
+        corrected: Testo corretto
+    """
+    cache = get_cache()
+    cache.cache_with_metadata(
+        text=text,
+        correction=corrected,
+        quality=1.0,  # Default quality
+        correction_type="llm",
+        processing_time=0.0,
+        token_count=len(text.split())
+    )

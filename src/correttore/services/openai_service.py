@@ -7,14 +7,17 @@ Encapsula tutte le chiamate AI con retry, rate limiting e gestione errori.
 import logging
 import asyncio
 import time
-from typing import Optional, List, Dict, Any
+import json
+import re
+from typing import Optional, List, Dict, Any, Set
 from dataclasses import dataclass
 from pathlib import Path
+from random import uniform
 
 import openai
-from openai import AsyncOpenAI
+from openai import AsyncOpenAI, RateLimitError, APIConnectionError, BadRequestError
 
-from correttore.config.settings import get_openai_config
+from correttore.config.settings import get_openai_config, OPENAI_MODEL, RETRY_BACKOFF, MAX_RETRY
 from correttore.utils.token_utils import count_tokens
 from correttore.services.intelligent_cache import get_cache
 from correttore.models import (
@@ -24,6 +27,119 @@ from correttore.models import (
 )
 
 logger = logging.getLogger(__name__)
+
+# ══════════════════════════════════════════════════════════════════════
+# UTILITY FUNCTIONS (migrated from utils_openai.py)
+# ══════════════════════════════════════════════════════════════════════
+
+_FENCE_RE = re.compile(r"^```[\w]*\n?|```$", re.S)
+
+def _strip_fences(text: str) -> str:
+    """Rimuove fence markdown (```json, etc.) dal testo."""
+    return _FENCE_RE.sub("", text).strip()
+
+def _parse_corr(raw: str) -> List[Dict]:
+    """Parse JSON con chiave 'corr' da risposta OpenAI."""
+    data = json.loads(raw)
+    if "corr" not in data:
+        raise ValueError("JSON senza chiave 'corr'")
+    return data["corr"]
+
+# System message per il correttore
+SYSTEM_MSG_BASE = """
+Sei un correttore di bozze madrelingua italiano con decenni di esperienza.
+
+• Correggi **solo** refusi, errori ortografici / grammaticali e punteggiatura.  
+• Non eliminare, spostare o accorciare parole, frasi o capoversi.  
+• Non riformulare lo stile; se una parte è già corretta, lasciala invariata.
+• Se trovi una parola TUTTA MAIUSCOLA con refusi (es. CAPPITOLO), correggila e mantieni il maiuscolo: -> CAPITOLO.
+
+NOMI / TERMINI FANTASY ↓  
+Se trovi varianti ortografiche dei nomi presenti nell'elenco seguente,
+uniforma la grafia a quella esatta dell'elenco.
+
+OUTPUT: restituisci **SOLO JSON** con la chiave `'corr'`
+( lista di {id:int, txt:str} ) — niente testo extra.
+"""
+
+def build_messages(context: str, payload_json: str, glossary: Set[str]) -> List[Dict]:
+    """
+    Costruisce i messaggi per OpenAI chat completion.
+    
+    Args:
+        context: Contesto del documento
+        payload_json: JSON con paragrafi da correggere
+        glossary: Set di termini da preservare/uniformare
+        
+    Returns:
+        List di messaggi per OpenAI API
+    """
+    system_msg = SYSTEM_MSG_BASE + "\nLista: " + ", ".join(sorted(glossary))
+    return [
+        {"role": "system", "content": system_msg},
+        {"role": "assistant", "content": "Contesto (NON modificare):\n" + context},
+        {"role": "user", "content": payload_json},
+    ]
+
+async def _retry_async(call_coroutine, *, max_attempts, backoff_seq) -> List[Dict]:
+    """
+    Esegue una coroutine con retry esponenziale e jitter.
+    Gestisce RateLimitError e APIConnectionError.
+    """
+    for attempt, delay in enumerate((*backoff_seq, 0), start=1):
+        try:
+            return await call_coroutine()
+        except (RateLimitError, APIConnectionError) as exc:
+            if attempt >= max_attempts:
+                logger.error("OpenAI: troppi errori (%s). Rinuncio.", exc)
+                raise
+            jitter = uniform(0, 0.3 * delay)
+            wait = delay + jitter
+            logger.warning("OpenAI errore (%s). Retry %s/%s fra %.1fs",
+                          exc.__class__.__name__, attempt, max_attempts, wait)
+            await asyncio.sleep(wait)
+        except BadRequestError as exc:
+            # Context length exceeded o JSON malformato → non ritentare
+            logger.error("Request non valida: %s", exc)
+            raise
+    
+    raise RuntimeError("Unexpected end of retry loop")
+
+async def _chat_async(messages: List[Dict], client: AsyncOpenAI) -> List[Dict]:
+    """Esegue chat completion con retry."""
+    async def _one_call():
+        resp = await client.chat.completions.create(
+            model=OPENAI_MODEL,
+            temperature=0.0,  # Deterministico per correzioni
+            response_format={"type": "json_object"},
+            messages=messages,
+        )
+        return _parse_corr(_strip_fences(resp.choices[0].message.content))
+
+    return await _retry_async(
+        _one_call,
+        max_attempts=MAX_RETRY,
+        backoff_seq=RETRY_BACKOFF,
+    )
+
+# ══════════════════════════════════════════════════════════════════════
+# PUBLIC API FUNCTIONS (for backward compatibility)
+# ══════════════════════════════════════════════════════════════════════
+
+async def get_corrections_async(payload_json: str,
+                                client: AsyncOpenAI,
+                                glossary: Set[str],
+                                context: str = "") -> List[Dict]:
+    """
+    API pubblica per ottenere correzioni da OpenAI (async).
+    Mantiene compatibilità con codice esistente.
+    """
+    msgs = build_messages(context, payload_json, glossary)
+    return await _chat_async(msgs, client)
+
+# ══════════════════════════════════════════════════════════════════════
+# DATACLASSES
+# ══════════════════════════════════════════════════════════════════════
 
 @dataclass
 class CorrectionRequest:

@@ -1,7 +1,7 @@
 import os, json, re, logging
 from openai import AsyncOpenAI
 from correttore.config.settings import OPENAI_MODEL, load_yaml_config
-from correttore.services.cache_llm import get_cached, set_cached
+from correttore.services.intelligent_cache import get_cached, set_cached
 from typing import List, Dict
 
 # Carica configurazione temperatura

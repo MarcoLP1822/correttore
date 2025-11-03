@@ -75,7 +75,7 @@ from correttore.utils.reports import write_glossary_report, write_markdown_repor
 from correttore.utils.token_utils import tokenize, token_starts, count_tokens
 from correttore.config.settings import OPENAI_MODEL, MAX_TOKENS
 from correttore.services.openai_client import get_async_client
-from correttore.utils.utils_openai import get_corrections_async, build_messages
+from correttore.services.openai_service import get_corrections_async, build_messages
 # from correttore.core.spellfix import spellfix_paragraph  # Removed during rollback
 from correttore.core.grammarcheck import grammarcheck
 from correttore.core.llm_correct import llm_correct, llm_correct_batch
