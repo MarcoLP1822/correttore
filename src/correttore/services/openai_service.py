@@ -62,7 +62,7 @@ OUTPUT: restituisci **SOLO JSON** con la chiave `'corr'`
 ( lista di {id:int, txt:str} ) — niente testo extra.
 """
 
-def build_messages(context: str, payload_json: str, glossary: Set[str]) -> List[Dict]:
+def build_messages(context: str, payload_json: str, glossary: Set[str]) -> List[Dict[str, str]]:
     """
     Costruisce i messaggi per OpenAI chat completion.
     
@@ -105,16 +105,17 @@ async def _retry_async(call_coroutine, *, max_attempts, backoff_seq) -> List[Dic
     
     raise RuntimeError("Unexpected end of retry loop")
 
-async def _chat_async(messages: List[Dict], client: AsyncOpenAI) -> List[Dict]:
+async def _chat_async(messages: List[Dict[str, str]], client: AsyncOpenAI) -> List[Dict]:
     """Esegue chat completion con retry."""
     async def _one_call():
         resp = await client.chat.completions.create(
             model=OPENAI_MODEL,
             temperature=0.0,  # Deterministico per correzioni
             response_format={"type": "json_object"},
-            messages=messages,
+            messages=messages,  # type: ignore[arg-type]
         )
-        return _parse_corr(_strip_fences(resp.choices[0].message.content))
+        content = resp.choices[0].message.content or ""
+        return _parse_corr(_strip_fences(content))
 
     return await _retry_async(
         _one_call,
