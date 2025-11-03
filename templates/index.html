@@ -340,6 +340,7 @@
                 <input type="file" id="fileInput" name="file" accept=".docx,.doc">
                 
                 <button type="submit" class="btn" id="submitBtn">Correggi documento</button>
+                <button type="button" class="btn btn-secondary" id="analyzeBtn">🔍 Analizza Qualità</button>
                 <button type="button" class="btn btn-secondary" id="readabilityBtn">📊 Analizza Leggibilità</button>
                 
                 <div class="progress-container" id="progressContainer">
@@ -604,6 +605,101 @@
             if (lower.includes('molto facile') || lower.includes('facile')) return 'badge-success';
             if (lower.includes('difficile')) return 'badge-danger';
             return 'badge-warning';
+        }
+
+        // ============= GESTIONE ANALISI QUALITÀ =============
+        
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        
+        analyzeBtn.addEventListener('click', async () => {
+            if (!fileInput.files.length) {
+                showError('Seleziona prima un file');
+                return;
+            }
+
+            // Nascondi errori precedenti
+            errorText.textContent = '';
+            downloadBtn.style.display = 'none';
+            progressContainer.style.display = 'block';
+            
+            // Disabilita pulsanti
+            analyzeBtn.disabled = true;
+            submitBtn.disabled = true;
+            
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    monitorAnalysisJob(result.job_id);
+                } else {
+                    showError(result.error || 'Errore durante l\'analisi');
+                    analyzeBtn.disabled = false;
+                    submitBtn.disabled = false;
+                }
+            } catch (error) {
+                showError('Errore: ' + error.message);
+                analyzeBtn.disabled = false;
+                submitBtn.disabled = false;
+            }
+        });
+
+        async function monitorAnalysisJob(jobId) {
+            const check = async () => {
+                try {
+                    const response = await fetch(`/status/${jobId}`);
+                    const job = await response.json();
+                    
+                    progressFill.style.width = job.progress + '%';
+                    statusText.textContent = 'Analisi in corso...';
+                    
+                    if (job.status === 'completed') {
+                        statusText.textContent = '✅ Analisi completata!';
+                        statusText.style.color = '#28a745';
+                        
+                        // Mostra risultati
+                        if (job.analysis_summary) {
+                            const summary = job.analysis_summary;
+                            statusText.innerHTML = `
+                                ✅ Analisi completata!<br>
+                                <small style="font-size: 12px;">
+                                    Errori trovati: ${summary.total_errors} | 
+                                    Leggibilità: ${summary.readability_score.toFixed(1)} (${summary.readability_level}) | 
+                                    Qualità: ${summary.quality_rating}
+                                </small>
+                            `;
+                        }
+                        
+                        // Mostra pulsante download report
+                        if (job.report_url) {
+                            downloadBtn.href = job.report_url;
+                            downloadBtn.textContent = '📊 Scarica Report Analisi';
+                            downloadBtn.style.display = 'block';
+                        }
+                        
+                        analyzeBtn.disabled = false;
+                        submitBtn.disabled = false;
+                    } else if (job.status === 'failed') {
+                        showError(job.error || 'Errore durante analisi');
+                        analyzeBtn.disabled = false;
+                        submitBtn.disabled = false;
+                    } else {
+                        setTimeout(check, 1000);
+                    }
+                } catch (error) {
+                    showError('Errore: ' + error.message);
+                    analyzeBtn.disabled = false;
+                    submitBtn.disabled = false;
+                }
+            };
+            check();
         }
     </script>
 </body>

@@ -271,7 +271,7 @@ class LanguageToolService:
                 # Parsing risultato JSON
                 try:
                     json_result = json.loads(result.stdout)
-                    errors = self._parse_languagetool_errors(json_result)
+                    errors = self._parse_languagetool_errors(json_result, text)
                     
                     return LanguageToolResult(
                         text=text,
@@ -318,37 +318,213 @@ class LanguageToolService:
                 error_message=str(e)
             )
     
-    def _parse_languagetool_errors(self, json_result: Dict) -> List[LanguageToolError]:
-        """Parsing degli errori dal JSON di LanguageTool"""
+    def _parse_languagetool_errors(self, json_result: Dict, full_text: str) -> List[LanguageToolError]:
+        """
+        Parsing degli errori dal JSON di LanguageTool.
+        Corregge automaticamente offset/length per catturare parole complete.
+        
+        Args:
+            json_result: Risultato JSON da LanguageTool
+            full_text: Testo completo analizzato (necessario per fixare i confini)
+        
+        Returns:
+            Lista di LanguageToolError con offset/length corretti
+        """
         errors = []
         
         for match in json_result.get('matches', []):
+            offset = match.get('offset', 0)
+            length = match.get('length', 0)
+            context_text = match.get('context', {}).get('text', '')
+            context_offset = match.get('context', {}).get('offset', 0)
+            
+            # Log di debug per vedere cosa riporta LanguageTool PRIMA della correzione
+            logger.debug(
+                f"🔍 LT Match BEFORE fix: offset={offset}, length={length}, "
+                f"text='{full_text[offset:offset+length] if offset < len(full_text) else 'OUT OF BOUNDS'}'"
+            )
+            
+            # CORREGGI offset/length per catturare la parola completa
+            if offset < len(full_text):
+                fixed_offset, fixed_length = self._fix_word_boundaries(full_text, offset, length)
+                
+                # Log se abbiamo corretto
+                if fixed_offset != offset or fixed_length != length:
+                    logger.debug(
+                        f"🔧 Fixed boundaries: offset {offset}→{fixed_offset}, "
+                        f"length {length}→{fixed_length}, "
+                        f"text '{full_text[offset:offset+length]}'→'{full_text[fixed_offset:fixed_offset+fixed_length]}'"
+                    )
+                
+                offset = fixed_offset
+                length = fixed_length
+            
             error = LanguageToolError(
                 message=match.get('message', ''),
                 short_message=match.get('shortMessage', ''),
-                offset=match.get('offset', 0),
-                length=match.get('length', 0),
+                offset=offset,
+                length=length,
                 rule_id=match.get('rule', {}).get('id', ''),
                 category=match.get('rule', {}).get('category', {}).get('name', 'Unknown'),
                 replacements=[r.get('value', '') for r in match.get('replacements', [])],
-                context=match.get('context', {}).get('text', ''),
+                context=context_text,
                 severity=match.get('rule', {}).get('category', {}).get('id', 'info')
             )
             errors.append(error)
         
         return errors
     
+    def _fix_word_boundaries(self, text: str, offset: int, length: int) -> tuple[int, int]:
+        """
+        Corregge offset e length per catturare SOLO UNA parola, escludendo punteggiatura e spazi.
+        
+        LanguageTool a volte riporta offset/length che:
+        1. Non catturano l'intera parola (es: "ignifie" invece di "signifie")
+        2. Catturano troppo (es: "interoperabili e" invece di "interoperabili")
+        
+        Questa funzione estrae SOLO la prima parola completa nell'intervallo.
+        
+        Args:
+            text: Testo completo
+            offset: Offset iniziale dell'errore
+            length: Lunghezza dell'errore
+            
+        Returns:
+            tuple[int, int]: (nuovo_offset, nuova_length) che cattura SOLO la prima parola
+        """
+        
+        def is_word_char(c: str) -> bool:
+            """Carattere che fa parte di una parola (lettere e numeri)"""
+            return c.isalnum()
+        
+        def is_internal_apostrophe(pos: int) -> bool:
+            """Check se apostrofo è interno alla parola (es: l'acqua, d'accordo)"""
+            if pos <= 0 or pos >= len(text) - 1:
+                return False
+            c = text[pos]
+            if c not in ("'", "'"):
+                return False
+            # È interno se ha lettere sia prima che dopo
+            return text[pos - 1].isalnum() and text[pos + 1].isalnum()
+        
+        # STRATEGIA: Trova l'inizio e la fine della PRIMA parola completa
+        
+        # PASSO 1: Se offset punta a spazio/punteggiatura, avanza fino alla prima lettera
+        start = offset
+        while start < len(text) and not is_word_char(text[start]):
+            start += 1
+        
+        if start >= len(text):
+            # Nessuna parola trovata, ritorna originale
+            return offset, length
+        
+        # PASSO 2: Ora start punta all'inizio di una parola. Espandi a SINISTRA
+        while start > 0:
+            prev_char = text[start - 1]
+            if is_word_char(prev_char):
+                start -= 1
+            elif is_internal_apostrophe(start - 1):
+                start -= 1
+            else:
+                break
+        
+        # PASSO 3: Trova la FINE della parola (espandi a destra da start)
+        end = start
+        while end < len(text):
+            curr_char = text[end]
+            if is_word_char(curr_char):
+                end += 1
+            elif is_internal_apostrophe(end):
+                end += 1
+            else:
+                break
+        
+        new_length = end - start
+        
+        # Log se abbiamo fatto correzioni
+        if start != offset or new_length != length:
+            logger.debug(
+                f"🔧 Fixed word boundary: '{text[offset:offset+length]}' → '{text[start:end]}' "
+                f"(offset {offset}→{start}, length {length}→{new_length})"
+            )
+        
+        return start, new_length
+    
     def _filter_whitelisted_errors(self, errors: List[LanguageToolError]) -> List[LanguageToolError]:
-        """Filtra errori basandosi sulla whitelist"""
+        """Filtra errori basandosi sulla whitelist e logica intelligente"""
         filtered = []
         
         for error in errors:
-            if not self.is_rule_whitelisted(error.rule_id):
-                filtered.append(error)
-            else:
+            # 1. Filtra regole whitelistate
+            if self.is_rule_whitelisted(error.rule_id):
                 logger.debug(f"🔇 Filtered whitelisted error: {error.rule_id}")
+                continue
+            
+            # 2. Filtro intelligente per GR_10_003: costruzioni participiali valide
+            if error.rule_id == 'GR_10_003':
+                if self._is_valid_participial_construction(error):
+                    logger.debug(f"🔇 Filtered GR_10_003: valid participial construction")
+                    continue
+            
+            filtered.append(error)
         
         return filtered
+    
+    def _is_valid_participial_construction(self, error: LanguageToolError) -> bool:
+        """
+        Verifica se l'errore GR_10_003 è un falso positivo per costruzione participiale.
+        
+        Es: "Sebbene inizialmente circoscritta" è valido (participio passato)
+        Ma: "Sebbene lui va" non è valido (verbo indicativo)
+        
+        Returns:
+            True se è una costruzione participiale valida (falso positivo)
+        """
+        import re
+        
+        # Estrai il testo segnalato dall'errore
+        context = error.context.lower()
+        
+        # Pattern per identificare costruzioni participiali dopo congiunzioni
+        # Cerca: congiunzione + (avverbi opzionali) + participio passato
+        participial_pattern = re.compile(
+            r'\b(sebbene|benché|nonostante|quantunque|malgrado|ancorché)\s+'  # congiunzione
+            r'(?:inizialmente|originariamente|generalmente|principalmente|sostanzialmente|essenzialmente|'
+            r'già|ancora|sempre|mai|spesso|raramente|talvolta|comunque|tuttavia)?\s*'  # avverbi opzionali
+            r'([\w]+[ao])\b',  # parola che termina in -o/-a (probabile participio)
+            re.I
+        )
+        
+        match = participial_pattern.search(context)
+        if match:
+            potential_participle = match.group(2)
+            
+            # Lista di participi passati comuni che terminano in -a/-o/-i/-e
+            # Questi sono segnali forti di costruzione participiale
+            participial_endings = [
+                'circoscritta', 'circoscritto', 'limitata', 'limitato',
+                'considerata', 'considerato', 'ritenuta', 'ritenuto',
+                'vista', 'visto', 'concepita', 'concepito',
+                'pensata', 'pensato', 'ideata', 'ideato',
+                'organizzata', 'organizzato', 'strutturata', 'strutturato',
+                'definita', 'definito', 'delineata', 'delineato',
+                'caratterizzata', 'caratterizzato', 'qualificata', 'qualificato'
+            ]
+            
+            # Verifica se la parola segnalata è un participio passato
+            if any(potential_participle.endswith(ending) for ending in participial_endings):
+                return True
+            
+            # Pattern più generico: parole che terminano in -ato/-ata/-ito/-ita
+            if re.match(r'.*[ait][ao]$', potential_participle):
+                # Ulteriore verifica: NON deve contenere pronomi soggetto prima
+                # "Sebbene lui va" → NON participiale
+                # "Sebbene circoscritta" → participiale
+                subject_pronouns = r'\b(io|tu|lui|lei|noi|voi|loro|egli|ella|essi|esse)\b'
+                if not re.search(subject_pronouns, context[:50], re.I):
+                    return True
+        
+        return False
     
     def _load_whitelisted_rules(self) -> Set[str]:
         """Carica regole whitelistate da file"""
@@ -481,7 +657,7 @@ class LanguageToolService:
             # Determina la categoria basandosi sul tipo di errore
             category = self._map_error_to_category(error)
             
-            # Estrai il testo originale dalla posizione
+            # Estrai il testo originale dalla posizione (ora già corretta in _parse_languagetool_errors)
             original_text = full_text[error.offset:error.offset + error.length]
             
             # Determina il testo corretto (primo suggerimento se disponibile)
@@ -511,8 +687,8 @@ class LanguageToolService:
                 original_text=original_text,
                 corrected_text=corrected_text,
                 context=context,
-                position=error.offset,
-                length=error.length,
+                position=error.offset,  # Già corretto in _parse_languagetool_errors
+                length=error.length,    # Già corretto in _parse_languagetool_errors
                 paragraph_index=paragraph_index,
                 sentence_index=sentence_index,
                 rule_id=error.rule_id,

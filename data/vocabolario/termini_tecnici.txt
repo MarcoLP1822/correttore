@@ -1,0 +1,47 @@
+# Termini tecnici e parole composte valide
+# Questi termini non verranno segnalati come errori
+
+# PAROLE COMPOSTE ITALIANE
+giuridico-politica
+giuridico-politico
+tardo-medievale
+post-territoriale
+politico-religiose
+politico-religiosa
+politico-economico
+storico-culturale
+socio-economico
+tecnico-scientifico
+
+# NEOLOGISMI POLITICI/SOCIALI
+trumpismo
+populismo
+sovranismo
+globalismo
+europeismo
+federalismo
+multilateralismo
+
+# AGGETTIVI DERIVATI
+divisiva
+divisivo
+inclusiva
+inclusivo
+westfaliano
+westfaliana
+
+# TERMINI TECNICI ACCADEMICI
+governance
+leadership
+welfare
+accountability
+stakeholder
+peer
+review
+framework
+benchmark
+compliance
+and  # usato in espressioni tecniche come "checks and balances"
+or
+versus
+vs

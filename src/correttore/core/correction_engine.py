@@ -51,7 +51,7 @@ class CorrectionEngine:
     Integra AI, grammatica, caching e safety systems.
     """
     
-    def __init__(self, enable_tracking: bool = True):
+    def __init__(self, enable_tracking: bool = True, enable_post_analysis: bool = True):
         self.document_handler = DocumentHandler()
         self.openai_service = OpenAIService()
         self.languagetool_service = LanguageToolService()
@@ -84,10 +84,26 @@ class CorrectionEngine:
             logger.warning(f"⚠️  SpecialCategoriesService not available: {e}")
             self.special_categories_service = None
         
+        # NUOVO: Inizializza DocumentAnalyzer per analisi post-correzione
+        self.enable_post_analysis = enable_post_analysis
+        self.document_analyzer = None
+        if self.enable_post_analysis:
+            try:
+                from correttore.core.document_analyzer import DocumentAnalyzer
+                self.document_analyzer = DocumentAnalyzer(
+                    enable_languagetool=True,
+                    enable_readability=True,
+                    enable_special_categories=True
+                )
+                logger.info("✅ DocumentAnalyzer initialized for post-correction analysis")
+            except Exception as e:
+                logger.warning(f"⚠️  DocumentAnalyzer not available: {e}")
+                self.enable_post_analysis = False
+        
         self.config = get_correction_config()
         # self.app_config = get_app_config()  # Commentato fino a quando non sarà implementato
         
-        logger.info(f"🔧 CorrectionEngine initialized (tracking: {'enabled' if enable_tracking else 'disabled'})")
+        logger.info(f"🔧 CorrectionEngine initialized (tracking: {'enabled' if enable_tracking else 'disabled'}, post_analysis: {'enabled' if enable_post_analysis else 'disabled'})")
         if self.custom_corrections:
             logger.info(f"✅ Loaded {len(self.custom_corrections)} custom corrections from feedback")
         if self.custom_whitelist:
@@ -175,6 +191,24 @@ class CorrectionEngine:
                 
                 # Genera report HTML automaticamente
                 self._generate_html_report(input_path, output_path)
+                
+                # NUOVO: Analisi post-correzione per identificare problemi residui
+                if self.enable_post_analysis and self.document_analyzer:
+                    logger.info("🔍 Running post-correction quality analysis...")
+                    try:
+                        analysis_result = self.document_analyzer.analyze_document(
+                            output_path,
+                            output_report=True
+                        )
+                        if analysis_result.success:
+                            logger.info(f"✅ Quality analysis complete: {analysis_result.total_errors} issues found")
+                            logger.info(f"📊 Readability score: {analysis_result.readability_score:.1f} ({analysis_result.readability_level})")
+                            if analysis_result.report_path:
+                                logger.info(f"📄 Analysis report: {analysis_result.report_path}")
+                        else:
+                            logger.warning(f"⚠️  Quality analysis failed: {analysis_result.error_message}")
+                    except Exception as e:
+                        logger.warning(f"⚠️  Post-correction analysis failed: {e}")
             else:
                 logger.warning("⚠️  Collector is None, skipping report generation")
             

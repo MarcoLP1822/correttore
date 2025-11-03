@@ -6,4 +6,13 @@
 UPPERCASE_SENTENCE_START
 UNPAIRED_BRACKETS
 WHITESPACE_RULE
-MORFOLOGIK_RULE_IT_IT
+# MORFOLOGIK_RULE_IT_IT  ← Commentata per abilitare il controllo ortografico
+
+# Regole stilistiche troppo restrittive:
+# D eufonica - la regola è troppo rigida, "ad espandere" è corretto
+ST_03_001
+
+# NOTA: GR_10_003 (congiuntivo dopo congiunzioni) NON è whitelistata
+# perché disabiliterebbe controlli importanti. I falsi positivi su 
+# costruzioni participiali (es: "Sebbene circoscritta") vengono filtrati
+# con logica intelligente in _filter_whitelisted_errors()

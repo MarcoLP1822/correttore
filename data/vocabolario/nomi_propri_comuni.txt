@@ -1,0 +1,40 @@
+# Nomi propri comuni in testi accademici e letterari
+# Questi nomi non verranno segnalati come errori
+
+# FILOSOFI E PENSATORI
+Aristotele
+Platone
+Socrate
+Marsilio
+Marsilius
+Padova
+Tomaso
+Aquino
+Machiavelli
+Hobbes
+Locke
+Rousseau
+Kant
+Hegel
+Marx
+Weber
+Arendt
+Foucault
+Deleuze
+Bauman
+Beck
+
+# LUOGHI E TRATTATI
+Westfalia
+Westfaliano
+
+# AUTORI ITALIANI
+Dante
+Petrarca
+Boccaccio
+Manzoni
+
+# POLITICI CONTEMPORANEI
+Trump
+Biden
+Dugin

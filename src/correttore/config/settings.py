@@ -38,7 +38,7 @@ class LanguageToolConfig:
     timeout: int = 30
     max_retries: int = 3
     language: str = 'it'
-    jar_path: str = 'languagetool/languagetool-commandline.jar'
+    jar_path: str = 'languagetool/LanguageTool-6.3/languagetool-commandline.jar'
     whitelist_file: str = 'config/languagetool_whitelist.txt'
     custom_rules_file: str = 'config/languagetool_custom_rules.xml'
 
@@ -176,7 +176,7 @@ def get_languagetool_config():
         timeout=languagetool_config.get('timeout', 30),
         max_retries=languagetool_config.get('max_retries', 3),
         language=languagetool_config.get('language', 'it'),
-        jar_path=languagetool_config.get('jar_path', 'languagetool/languagetool-commandline.jar'),
+        jar_path=languagetool_config.get('jar_path', 'languagetool/LanguageTool-6.3/languagetool-commandline.jar'),
         whitelist_file=languagetool_config.get('whitelist_file', 'config/languagetool_whitelist.txt'),
         custom_rules_file=languagetool_config.get('custom_rules_file', 'config/languagetool_custom_rules.xml')
     )

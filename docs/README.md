@@ -7,8 +7,7 @@ Benvenuto nella documentazione completa di **Correttore v2.0** - Sistema Enterpr
 ## 🚀 Per Iniziare
 
 ### Nuovi Utenti
-- **[Quick Start Guide](QUICKSTART.md)** - Inizia in 5 minuti! ⚡
-- **[Come Avviare](COME_AVVIARE.md)** - Guida dettagliata installazione e primo uso
+- **[Getting Started](GETTING_STARTED.md)** - Guida completa per iniziare ⚡
 - **[Progetto 100% Completo](PROGETTO_100_COMPLETO.md)** - Overview completo del sistema
 
 ### Utenti Esistenti
@@ -21,6 +20,8 @@ Benvenuto nella documentazione completa di **Correttore v2.0** - Sistema Enterpr
 Documentazione delle principali funzionalità del sistema:
 
 ### [📁 features/](features/)
+- **[Document Quality Analyzer](features/document_analyzer.md)** - 🆕 Analisi qualità senza correzioni
+- **[Quality Metrics Guide](features/quality_metrics.md)** - 🆕 Metriche Gulpease e Quality Rating
 - **[Sistema Report](features/report_system.md)** - Sistema avanzato di reporting HTML
 - **[Vocabolario (NVdB)](features/nvdb.md)** - Integrazione Nuovo Vocabolario di Base
 - **[Integrazione Vocabolario](features/vocabulary.md)** - Guida tecnica sviluppatori
@@ -34,6 +35,11 @@ Sistema di analisi basato sull'**Indice Gulpease**, formula calibrata per l'ital
 | 📘 **60-79** | Facile | Scuola media |
 | 📙 **40-59** | Difficile | Scuola superiore |
 | 📕 **0-39** | Molto difficile | Università |
+
+**🆕 Novità v2.2**: Ora puoi analizzare la qualità del documento **senza applicare correzioni**!
+- Comando CLI: `correttore analyze documento.docx`
+- Web UI: Button "🔍 Analizza Qualità"
+- API Python: `DocumentAnalyzer().analyze_document()`
 
 ---
 

@@ -272,6 +272,108 @@ def upload_file():
         'message': 'File caricato e accodato per processamento'
     })
 
+@app.route('/analyze', methods=['POST'])
+def analyze_document():
+    """
+    Endpoint per analisi documento senza correzione.
+    Upload → Analisi → Report HTML
+    """
+    global job_counter
+    
+    if 'file' not in request.files:
+        return jsonify({'error': 'Nessun file selezionato'}), 400
+    
+    file = request.files['file']
+    
+    if not file.filename or file.filename == '':
+        return jsonify({'error': 'Nessun file selezionato'}), 400
+    
+    if not allowed_file(file.filename):
+        return jsonify({'error': 'Formato file non supportato. Usare .docx, .doc o .odt'}), 400
+    
+    # Salva file
+    filename = secure_filename(file.filename)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    unique_filename = f"{timestamp}_{filename}"
+    file_path = app.config['UPLOAD_FOLDER'] / unique_filename
+    file.save(str(file_path))
+    
+    # Crea job
+    job_counter += 1
+    job_id = f"analyze_{job_counter}"
+    
+    # Inizializza job status
+    job_status[job_id] = {
+        'status': 'pending',
+        'progress': 0,
+        'filename': filename,
+        'job_type': 'analysis',
+        'created_at': datetime.now().isoformat()
+    }
+    
+    # Avvia analisi in background
+    thread = Thread(target=analyze_document_async, args=(job_id, file_path))
+    thread.daemon = True
+    thread.start()
+    
+    return jsonify({
+        'job_id': job_id,
+        'status': 'started',
+        'message': 'Analisi avviata'
+    })
+
+def analyze_document_async(job_id: str, input_path: Path):
+    """Analizza documento in background"""
+    global job_status
+    
+    try:
+        job_status[job_id]['status'] = 'processing'
+        job_status[job_id]['progress'] = 10
+        
+        from correttore.core.document_analyzer import DocumentAnalyzer
+        
+        # Inizializza analyzer
+        analyzer = DocumentAnalyzer(
+            enable_languagetool=True,
+            enable_readability=True,
+            enable_special_categories=True
+        )
+        
+        job_status[job_id]['progress'] = 30
+        
+        # Esegui analisi con output_dir
+        result = analyzer.analyze_document(
+            input_path, 
+            output_report=True,
+            output_dir=app.config['OUTPUT_FOLDER']
+        )
+        
+        job_status[job_id]['progress'] = 90
+        
+        if result.success and result.report_path:
+            job_status[job_id]['status'] = 'completed'
+            job_status[job_id]['report_url'] = f"/download/{result.report_path.name}"
+            job_status[job_id]['report_view_url'] = f"/view/{result.report_path.name}"
+            job_status[job_id]['analysis_summary'] = {
+                'total_errors': result.total_errors,
+                'readability_score': result.readability_score,
+                'readability_level': result.readability_level,
+                'quality_rating': result.get_quality_rating(),
+                'foreign_words': len(result.foreign_words) if result.foreign_words else 0,
+                'sensitive_words': len(result.sensitive_words) if result.sensitive_words else 0
+            }
+        else:
+            job_status[job_id]['status'] = 'failed'
+            job_status[job_id]['error'] = result.error_message or 'Analysis failed'
+        
+        job_status[job_id]['progress'] = 100
+        job_status[job_id]['completed_at'] = datetime.now().isoformat()
+        
+    except Exception as e:
+        job_status[job_id]['status'] = 'failed'
+        job_status[job_id]['error'] = str(e)
+        print(f"❌ Analysis failed: {e}")
+
 @app.route('/status/<job_id>')
 def get_job_status(job_id):
     """Restituisce status di un job"""

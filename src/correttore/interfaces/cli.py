@@ -353,11 +353,107 @@ class CorrettoreCLI:
    📊 Success rate: {(results['success']/results['total']*100):.1f}%
 """)
 
+    def analyze_document(self, document_path: Path, output_dir: Optional[Path] = None) -> bool:
+        """
+        Analizza un documento senza applicare correzioni.
+        Genera solo report di qualità.
+        
+        Args:
+            document_path: Path del documento da analizzare
+            output_dir: Directory di output per i report (opzionale)
+        
+        Returns:
+            True se analisi completata con successo
+        """
+        from correttore.core.document_analyzer import DocumentAnalyzer
+        
+        logging.info(f"🔍 Analyzing document: {document_path.name}")
+        
+        try:
+            # Setup output directory
+            if output_dir is None:
+                output_dir = Path("outputs")
+            
+            # Inizializza analyzer
+            analyzer = DocumentAnalyzer(
+                enable_languagetool=True,
+                enable_readability=True,
+                enable_special_categories=True
+            )
+            
+            # Esegui analisi
+            result = analyzer.analyze_document(
+                document_path,
+                output_report=True,
+                output_dir=output_dir
+            )
+            
+            if result.success:
+                logging.info("✅ Analysis complete!")
+                logging.info(f"   • Total issues found: {result.total_errors}")
+                logging.info(f"   • Readability score: {result.readability_score:.1f} ({result.readability_level})")
+                
+                if result.foreign_words:
+                    logging.info(f"   • Foreign words: {len(result.foreign_words)}")
+                if result.proper_nouns:
+                    logging.info(f"   • Proper nouns: {len(result.proper_nouns)}")
+                if result.sensitive_words:
+                    logging.info(f"   • Sensitive words: {len(result.sensitive_words)}")
+                
+                if result.report_path:
+                    logging.info(f"   • Report: {result.report_path}")
+                
+                # Quality rating
+                quality = result.get_quality_rating()
+                quality_emoji = {
+                    "Eccellente": "🌟",
+                    "Buona": "✅",
+                    "Sufficiente": "⚠️",
+                    "Scarsa": "❌"
+                }
+                emoji = quality_emoji.get(quality, "📊")
+                logging.info(f"   {emoji} Quality rating: {quality}")
+                
+                return True
+            else:
+                logging.error(f"❌ Analysis failed: {result.error_message}")
+                return False
+                
+        except Exception as e:
+            logging.error(f"❌ Analysis error: {e}")
+            import traceback
+            logging.debug(traceback.format_exc())
+            return False
+
     def run(self, args: List[str]) -> int:
         """Punto di ingresso principale CLI"""
         parser = self.create_parser()
         parsed_args = parser.parse_args(args)
         
+        # Setup logging
+        verbose = getattr(parsed_args, 'verbose', False)
+        quiet = getattr(parsed_args, 'quiet', False)
+        self.setup_logging(verbose, quiet)
+        
+        # Gestione comandi (se presenti)
+        if hasattr(parsed_args, 'command'):
+            if parsed_args.command == 'analyze':
+                # Comando analyze
+                input_file = parsed_args.input_file
+                output_dir = getattr(parsed_args, 'output_dir', None)
+                
+                if not input_file.exists():
+                    logging.error(f"❌ File non trovato: {input_file}")
+                    return 1
+                
+                success = self.analyze_document(input_file, output_dir)
+                return 0 if success else 1
+            
+            elif parsed_args.command == 'correct' or parsed_args.command is None:
+                # Comando correct (default) o nessun comando
+                pass  # Continua con il flusso normale sotto
+        
+        # Flusso normale per correzione (backward compatibility)
         # Converte argparse namespace in CLIOptions
         options = self.create_options_from_args(parsed_args)
         
@@ -420,6 +516,114 @@ class CorrettoreCLI:
             logging.error(f"❌ Errore imprevisto: {str(e)}")
             return 1
 
+    def _add_correct_arguments(self, parser: argparse.ArgumentParser):
+        """Aggiunge argomenti per il comando correct"""
+        # File di input
+        parser.add_argument(
+            "files",
+            nargs="*",
+            type=Path,
+            help="File .docx da correggere. Se omesso, cerca il .docx più recente nella directory corrente"
+        )
+        
+        # Modalità di correzione
+        parser.add_argument(
+            "--mode", "-m",
+            choices=["conservative", "balanced", "aggressive", "historical"],
+            default="balanced",
+            help="Modalità di correzione"
+        )
+        
+        # Output
+        parser.add_argument(
+            "--output-dir", "-o",
+            type=Path,
+            help="Directory di output"
+        )
+        
+        # Quality control
+        parser.add_argument(
+            "--quality-threshold",
+            type=float,
+            default=0.85,
+            help="Soglia minima qualità (0.0-1.0)"
+        )
+        
+        # Backup
+        parser.add_argument(
+            "--backup",
+            action="store_true",
+            default=True,
+            help="Crea backup automatico"
+        )
+        
+        parser.add_argument(
+            "--no-backup",
+            action="store_false",
+            dest="backup",
+            help="Disabilita backup"
+        )
+        
+        # Preview e dry run
+        parser.add_argument(
+            "--preview", "-p",
+            action="store_true",
+            help="Anteprima senza correggere"
+        )
+        
+        parser.add_argument(
+            "--dry-run", "-n",
+            action="store_true",
+            help="Simula senza modificare"
+        )
+        
+        # Batch
+        parser.add_argument(
+            "--batch", "-b",
+            action="store_true",
+            help="Modalità batch"
+        )
+        
+        # Logging
+        parser.add_argument(
+            "--verbose", "-v",
+            action="store_true",
+            help="Output dettagliato"
+        )
+        
+        parser.add_argument(
+            "--quiet", "-q",
+            action="store_true",
+            help="Output minimo"
+        )
+        
+        # Report e monitoring
+        parser.add_argument(
+            "--no-report",
+            action="store_true",
+            help="Disabilita generazione report"
+        )
+        
+        parser.add_argument(
+            "--dashboard",
+            action="store_true",
+            help="Genera dashboard monitoring"
+        )
+        
+        # Config
+        parser.add_argument(
+            "--config", "-c",
+            type=Path,
+            help="File configurazione"
+        )
+        
+        # Demo mode (hidden)
+        parser.add_argument(
+            "--demo-mode",
+            action="store_true",
+            help=argparse.SUPPRESS
+        )
+
     def create_parser(self) -> argparse.ArgumentParser:
         """Crea il parser degli argomenti CLI"""
         parser = argparse.ArgumentParser(
@@ -431,6 +635,11 @@ Esempi di utilizzo:
 
   # Correzione documento singolo (modalità conservativa)
   python correttore.py documento.docx --mode conservative --backup
+  python correttore.py correct documento.docx --mode conservative
+
+  # Analisi qualità senza correzione
+  python correttore.py analyze documento.docx
+  python correttore.py analyze documento.docx --output-dir ./reports/
 
   # Batch processing con quality threshold alto
   python correttore.py *.docx --batch --quality-threshold 0.98
@@ -448,116 +657,56 @@ Per maggiori informazioni: https://github.com/MarcoLP1822/correttore
 """
         )
         
-        # File di input
-        parser.add_argument(
-            "files",
-            nargs="*",
+        # Crea subparsers per comandi (opzionale per backward compatibility)
+        subparsers = parser.add_subparsers(dest='command', help='Comandi disponibili')
+        
+        # ============================================================
+        # Comando: ANALYZE (nuovo)
+        # ============================================================
+        analyze_parser = subparsers.add_parser(
+            'analyze',
+            help='Analizza qualità documento senza applicare correzioni'
+        )
+        analyze_parser.add_argument(
+            'input_file',
             type=Path,
-            help="File .docx da correggere. Se omesso, cerca il .docx più recente nella directory corrente"
+            help='Documento da analizzare (.docx, .doc, .odt)'
         )
-        
-        # Modalità di correzione
-        parser.add_argument(
-            "--mode", "-m",
-            choices=["conservative", "balanced", "aggressive", "historical"],
-            default="balanced",
-            help="Modalità di correzione: conservative (sicura), balanced (equilibrata), aggressive (massima), historical (libri di storia)"
-        )
-        
-        # Output
-        parser.add_argument(
-            "--output-dir", "-o",
+        analyze_parser.add_argument(
+            '--output-dir',
             type=Path,
-            help="Directory di output (default: stessa directory del file originale)"
+            help='Directory per il report di analisi'
+        )
+        analyze_parser.add_argument(
+            '--verbose', '-v',
+            action='store_true',
+            help='Output verboso'
+        )
+        analyze_parser.add_argument(
+            '--quiet', '-q',
+            action='store_true',
+            help='Output minimo'
         )
         
-        # Quality control
-        parser.add_argument(
-            "--quality-threshold",
-            type=float,
-            default=0.85,
-            help="Soglia minima qualità correzioni (0.0-1.0, default: 0.85)"
+        # ============================================================
+        # Comando: CORRECT (esplicito, opzionale)
+        # ============================================================
+        correct_parser = subparsers.add_parser(
+            'correct',
+            help='Correggi documento (comando default)'
         )
+        self._add_correct_arguments(correct_parser)
         
-        # Backup e sicurezza
-        parser.add_argument(
-            "--backup",
-            action="store_true",
-            default=True,
-            help="Crea backup automatico prima della correzione (default: abilitato)"
-        )
+        # ============================================================
+        # Argomenti top-level (backward compatibility - senza comando)
+        # ============================================================
+        self._add_correct_arguments(parser)
         
-        parser.add_argument(
-            "--no-backup",
-            action="store_false",
-            dest="backup",
-            help="Disabilita backup automatico"
-        )
-        
-        # Preview e dry run
-        parser.add_argument(
-            "--preview", "-p",
-            action="store_true",
-            help="Mostra anteprima del documento senza correggere"
-        )
-        
-        parser.add_argument(
-            "--dry-run", "-n",
-            action="store_true",
-            help="Simula la correzione senza modificare i file"
-        )
-        
-        # Batch processing
-        parser.add_argument(
-            "--batch", "-b",
-            action="store_true",
-            help="Modalità batch per processare più file contemporaneamente"
-        )
-        
-        # Logging
-        parser.add_argument(
-            "--verbose", "-v",
-            action="store_true",
-            help="Output dettagliato (debug mode)"
-        )
-        
-        parser.add_argument(
-            "--quiet", "-q",
-            action="store_true",
-            help="Output minimale (solo errori)"
-        )
-        
-        # Reporting
-        parser.add_argument(
-            "--no-report",
-            action="store_true",
-            help="Disabilita generazione report finale"
-        )
-        
-        parser.add_argument(
-            "--dashboard", "-d",
-            action="store_true",
-            help="Genera dashboard HTML di monitoring"
-        )
-        
-        # Configurazione
-        parser.add_argument(
-            "--config", "-c",
-            type=Path,
-            help="File di configurazione personalizzato (default: config.yaml)"
-        )
-        
+        # Version
         parser.add_argument(
             "--version",
             action="version",
-            version="Correttore Enterprise v2.0.0 (Fase 5)"
-        )
-        
-        # Hidden flag per demo/test senza LanguageTool
-        parser.add_argument(
-            "--demo-mode",
-            action="store_true", 
-            help=argparse.SUPPRESS  # Nasconde dall'help
+            version="Correttore Enterprise v2.0.0 (FASE 5 - Analysis Complete)"
         )
         
         return parser

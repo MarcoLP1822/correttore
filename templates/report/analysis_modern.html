@@ -1,0 +1,170 @@
+{% extends "base_modern.html" %}
+
+{% block title %}{{ document_name }} - Analisi Qualità{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="report-header">
+    <h1 class="report-title">📊 Analisi Qualità - {{ document_name }}</h1>
+    <p class="report-subtitle">
+        Generato il {{ timestamp }}
+    </p>
+</div>
+
+<!-- Metrics Grid -->
+<div class="metrics-grid">
+    <div class="metric-card">
+        <div class="metric-label">ERRORI</div>
+        <div class="metric-value error">{{ stats.total_errors }}</div>
+    </div>
+    
+    <div class="metric-card">
+        <div class="metric-label">FOREIGN WORDS</div>
+        <div class="metric-value info">{{ stats.foreign_words }}</div>
+    </div>
+    
+    <div class="metric-card">
+        <div class="metric-label">UNIQUE WORDS</div>
+        <div class="metric-value warning">{{ stats.unique_words }}</div>
+    </div>
+    
+    <div class="metric-card">
+        <div class="metric-label">TOTAL ISSUES</div>
+        <div class="metric-value">{{ stats.total_issues }}</div>
+    </div>
+</div>
+
+<!-- Corrections Applied Section -->
+{% if correction_categories %}
+<section class="section">
+    <h2 class="section-title">📝 Correzioni Applicate</h2>
+    
+    {% for category in correction_categories %}
+    {% if category.total_contexts > 0 %}
+    <div class="category-section">
+        <div class="category-header">
+            <h3 class="category-title">
+                {{ category.name }}
+            </h3>
+            <span class="category-badge">
+                {{ category.unique_words }} parole uniche, {{ category.total_contexts }} contesti
+            </span>
+        </div>
+        
+        <p class="category-description">
+            Categoria contiene correzioni per errori comuni di questo tipo.
+        </p>
+        
+        <!-- Lista compatta errori (stile Corrige.it) -->
+        <div class="errors-compact-list">
+            {% for word, contexts in category.words.items() %}
+            <div class="error-item-compact" onclick="toggleErrorDetails(this)">
+                <span class="error-word-compact">{{ word }}</span>
+                <span class="error-count-badge">{{ contexts|length }} occorrenz{{ 'a' if contexts|length == 1 else 'e' }}</span>
+                
+                <!-- Dettagli nascosti (mostrati al click) -->
+                <div class="error-details-hidden" style="display: none;">
+                    {% for context in contexts %}
+                    <div class="context-item">
+                        <div class="context-text">{{ context.context }}</div>
+                        {% if context.message %}
+                        <div class="context-message">💡 {{ context.message }}</div>
+                        {% endif %}
+                        {% if context.suggestion %}
+                        <div class="context-suggestion">
+                            ✏️ Suggerimento: <strong>{{ context.suggestion }}</strong>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+</section>
+{% endif %}
+
+<!-- Foreign Languages Section -->
+{% if foreign_languages %}
+<section class="section">
+    <h2 class="section-title">� Lingue Straniere Rilevate</h2>
+    
+    <div class="foreign-words-section">
+        <div class="foreign-header">
+            <h3 class="foreign-title">Foreign Words</h3>
+            <span class="foreign-count">{{ foreign_words|length }} parole</span>
+        </div>
+        <p class="foreign-description">
+            Queste parole sono state identificate come termini in lingua straniera ed escluse dal controllo ortografico italiano.
+        </p>
+        <div class="foreign-words-grid">
+            {% for word in foreign_words %}
+            <span class="foreign-word-badge">{{ word }}</span>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Additional Info Section -->
+{% if info_categories %}
+<section class="section">
+    <h2 class="section-title">ℹ️ Informazioni Aggiuntive</h2>
+    
+    {% for category in info_categories %}
+    {% if category.total_contexts > 0 %}
+    <div class="info-category">
+        <div class="info-header">
+            <h3 class="info-title">{{ category.name }}</h3>
+            <span class="info-badge">{{ category.unique_words }} parole uniche</span>
+        </div>
+        
+        {% if category.words %}
+        <div class="info-words">
+            {% for word in category.words.keys() %}
+            <span class="info-word">{{ word }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+    {% endfor %}
+</section>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleErrorDetails(element) {
+    const details = element.querySelector('.error-details-hidden');
+    const isVisible = details.style.display !== 'none';
+    
+    // Chiudi tutti gli altri dettagli aperti nella stessa categoria
+    const parent = element.parentElement;
+    parent.querySelectorAll('.error-details-hidden').forEach(d => {
+        if (d !== details) {
+            d.style.display = 'none';
+            d.parentElement.classList.remove('expanded');
+        }
+    });
+    
+    // Toggle questo elemento
+    if (isVisible) {
+        details.style.display = 'none';
+        element.classList.remove('expanded');
+    } else {
+        details.style.display = 'block';
+        element.classList.add('expanded');
+        
+        // Scroll smooth verso l'elemento espanso
+        setTimeout(() => {
+            element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 100);
+    }
+}
+</script>
+{% endblock %}

@@ -12,9 +12,16 @@ from .correction_tracking import (
     CorrectionStatistics,
 )
 
+from .analysis_result import (
+    DocumentAnalysisResult,
+    AnalysisConfig,
+)
+
 __all__ = [
     "CorrectionCategory",
     "CorrectionSource",
     "CorrectionRecord",
     "CorrectionStatistics",
+    "DocumentAnalysisResult",
+    "AnalysisConfig",
 ]

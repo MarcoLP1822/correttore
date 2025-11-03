@@ -67,8 +67,7 @@ Gli entry point sono definiti in `pyproject.toml`.
 
 ## 📖 Documentazione
 
-- [docs/QUICKSTART.md](../docs/QUICKSTART.md) - Quick start guide
-- [docs/COME_AVVIARE.md](../docs/COME_AVVIARE.md) - Guida dettagliata
+- [docs/GETTING_STARTED.md](../docs/GETTING_STARTED.md) - Guida completa per iniziare
 
 ---
 

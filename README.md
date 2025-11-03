@@ -11,7 +11,8 @@ Sistema enterprise di correzione testi italiani con AI, grammar checking e anali
 - 🤖 **AI-Powered Corrections**: OpenAI GPT per correzioni intelligenti
 - 📝 **Grammar Checking**: Integrazione LanguageTool
 - 📊 **Readability Analysis**: Indice Gulpease per leggibilità
-- 📋 **Report HTML Interattivi**: Report dettagliati simili a Corrige.it (NUOVO!)
+- � **Document Quality Analyzer**: Analisi qualità senza applicare correzioni (NUOVO!)
+- �📋 **Report HTML Interattivi**: Report dettagliati simili a Corrige.it
 - 🏛️ **Historical Italian**: Supporto testi storici
 - 🎯 **Quality Assurance**: Validazione enterprise-grade
 - 🚀 **Performance**: Caching intelligente e processing parallelo
@@ -56,37 +57,44 @@ python scripts/install_languagetool.py
 # Interfaccia Web (consigliato)
 python -m correttore
 
-# CLI
+# CLI - Correzione completa
 correttore documento.docx
 
-# Analisi leggibilità
-correttore-analyze documento.docx
+# CLI - Analisi qualità (senza correzione) 🆕
+correttore analyze documento.docx --output-dir reports/
 ```
 
 ### Uso Programmatico
 
 ```python
-from correttore import CorrectionEngine, DocumentHandler
+from correttore import CorrectionEngine
+from correttore.core.document_analyzer import DocumentAnalyzer
 from correttore.utils.html_report_generator import generate_orthography_report
 
-# Inizializza
-engine = CorrectionEngine()
-handler = DocumentHandler()
+# 1. Analisi qualità (NUOVO - senza applicare correzioni)
+analyzer = DocumentAnalyzer(
+    enable_languagetool=True,
+    enable_readability=True,
+    enable_special_categories=True
+)
 
-# Carica e correggi documento
-doc = handler.load_document("input.docx")
-result = engine.correct_document(doc)
+result = analyzer.analyze_document(
+    "input.docx",
+    output_report=True,
+    output_dir="reports/"
+)
 
-# Salva risultato
-handler.save_document(result, "output.docx")
+print(f"Quality Score: {result.quality_rating}")
+print(f"Readability: {result.readability_score:.1f} ({result.readability_level})")
+print(f"Total Errors: {result.total_errors}")
+print(f"Report: {result.report_path}")
 
-# Genera report HTML (NUOVO!)
-if hasattr(engine, 'collector'):
-    generate_orthography_report(
-        engine.collector,
-        "output_report.html",
-        "Il Mio Documento"
-    )
+# 2. Correzione completa con analisi post-correzione
+engine = CorrectionEngine(enable_post_analysis=True)
+correction_result = engine.correct_document(
+    "input.docx",
+    output_path="output_corretto.docx"
+)
 ```
 
 ## 📚 Documentazione
@@ -94,8 +102,7 @@ if hasattr(engine, 'collector'):
 La documentazione completa è disponibile nella cartella [`docs/`](docs/):
 
 - **[PROGETTO 100% COMPLETO](docs/PROGETTO_100_COMPLETO.md)** - 🌟 Riepilogo finale tutte le fasi
-- **[Quick Start](docs/QUICKSTART.md)** - Inizia in 5 minuti
-- **[Come Avviare](docs/COME_AVVIARE.md)** - Setup completo e primo uso
+- **[Getting Started](docs/GETTING_STARTED.md)** - Guida completa per iniziare
 - **[Documentazione Completa](docs/README.md)** - Indice completo guide
 
 ### Implementazioni per Fase

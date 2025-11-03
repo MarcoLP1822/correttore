@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>20251103_122321_ordine-con-note-tascabile_68dbb566217df.docx - Analysis Report</title>
+    
+    <style>
+        /* Design Tokens */
+        :root {
+          --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Helvetica Neue', Arial, sans-serif;
+          --font-mono: 'SF Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
+          
+          --text-xs: 0.75rem;
+          --text-sm: 0.875rem;
+          --text-base: 1rem;
+          --text-lg: 1.125rem;
+          --text-xl: 1.25rem;
+          --text-2xl: 1.5rem;
+          
+          --color-primary-50: #eff6ff;
+          --color-primary-500: #3b82f6;
+          --color-primary-600: #2563eb;
+          
+          --color-success-50: #f0fdf4;
+          --color-success-500: #22c55e;
+          
+          --color-warning-50: #fffbeb;
+          --color-warning-500: #f59e0b;
+          
+          --color-danger-50: #fef2f2;
+          --color-danger-500: #ef4444;
+          --color-danger-600: #dc2626;
+          
+          --color-neutral-50: #f9fafb;
+          --color-neutral-100: #f3f4f6;
+          --color-neutral-200: #e5e7eb;
+          --color-neutral-500: #6b7280;
+          --color-neutral-600: #4b5563;
+          --color-neutral-700: #374151;
+          --color-neutral-800: #1f2937;
+          --color-neutral-900: #111827;
+          
+          --space-2: 0.5rem;
+          --space-3: 0.75rem;
+          --space-4: 1rem;
+          --space-6: 1.5rem;
+          --space-8: 2rem;
+          
+          --radius-sm: 0.25rem;
+          --radius-md: 0.375rem;
+          --radius-lg: 0.5rem;
+          
+          --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+          --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+        
+        /* Reset */
+        *, *::before, *::after {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+        }
+        
+        body {
+          font-family: var(--font-sans);
+          font-size: var(--text-sm);
+          line-height: 1.5;
+          color: var(--color-neutral-800);
+          background-color: var(--color-neutral-50);
+        }
+        
+        h1, h2, h3 {
+          font-weight: 600;
+          color: var(--color-neutral-900);
+          line-height: 1.25;
+        }
+        
+        /* Container */
+        .container {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: var(--space-6);
+        }
+        
+        /* Header */
+        .report-header {
+          margin-bottom: var(--space-8);
+          padding-bottom: var(--space-4);
+          border-bottom: 2px solid var(--color-neutral-200);
+        }
+        
+        .report-title {
+          font-size: var(--text-2xl);
+          margin-bottom: var(--space-2);
+        }
+        
+        .report-subtitle {
+          font-size: var(--text-sm);
+          color: var(--color-neutral-600);
+        }
+        
+        /* Metrics Grid */
+        .metrics-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+          gap: var(--space-4);
+          margin-bottom: var(--space-8);
+        }
+        
+        .metric-card {
+          background: white;
+          border: 1px solid var(--color-neutral-200);
+          border-radius: var(--radius-lg);
+          padding: var(--space-4);
+        }
+        
+        .metric-card:hover {
+          box-shadow: var(--shadow-md);
+        }
+        
+        .metric-label {
+          font-size: var(--text-xs);
+          color: var(--color-neutral-600);
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          font-weight: 500;
+          margin-bottom: var(--space-2);
+        }
+        
+        .metric-value {
+          font-size: var(--text-2xl);
+          font-weight: 600;
+        }
+        
+        .metric-value.error { color: var(--color-danger-600); }
+        .metric-value.warning { color: var(--color-warning-500); }
+        .metric-value.success { color: var(--color-success-500); }
+        .metric-value.info { color: var(--color-primary-600); }
+        
+        /* Section */
+        .section {
+          margin-bottom: var(--space-8);
+        }
+        
+        .section-title {
+          font-size: var(--text-xl);
+          margin-bottom: var(--space-4);
+          padding-bottom: var(--space-2);
+          border-bottom: 2px solid var(--color-neutral-200);
+        }
+        
+        /* Error Card */
+        .error-card {
+          background: white;
+          border: 1px solid var(--color-neutral-200);
+          border-left: 3px solid var(--color-danger-500);
+          border-radius: var(--radius-md);
+          padding: var(--space-4);
+          margin-bottom: var(--space-3);
+        }
+        
+        .error-card:hover {
+          box-shadow: var(--shadow-sm);
+        }
+        
+        .error-badge {
+          display: inline-block;
+          font-size: var(--text-xs);
+          padding: 2px 8px;
+          border-radius: var(--radius-sm);
+          font-weight: 500;
+          text-transform: uppercase;
+          background: var(--color-danger-50);
+          color: var(--color-danger-600);
+          margin-bottom: var(--space-2);
+        }
+        
+        .error-content {
+          font-size: var(--text-sm);
+          margin-bottom: var(--space-2);
+        }
+        
+        .error-text-original {
+          background: var(--color-danger-50);
+          padding: 2px 4px;
+          border-radius: var(--radius-sm);
+          text-decoration: line-through;
+        }
+        
+        .error-text-corrected {
+          background: var(--color-success-50);
+          padding: 2px 4px;
+          border-radius: var(--radius-sm);
+          font-weight: 500;
+        }
+        
+        .error-message {
+          font-size: var(--text-xs);
+          color: var(--color-neutral-600);
+        }
+        
+        /* Foreign Group */
+        .foreign-group {
+          background: var(--color-primary-50);
+          border: 1px solid var(--color-primary-200);
+          border-radius: var(--radius-lg);
+          padding: var(--space-4);
+          margin-bottom: var(--space-4);
+        }
+        
+        .foreign-title {
+          font-size: var(--text-base);
+          font-weight: 600;
+          color: var(--color-primary-600);
+          margin-bottom: var(--space-3);
+        }
+        
+        .foreign-words {
+          display: flex;
+          flex-wrap: wrap;
+          gap: var(--space-2);
+        }
+        
+        .foreign-word {
+          font-size: var(--text-xs);
+          padding: 4px 8px;
+          background: white;
+          border: 1px solid var(--color-primary-200);
+          border-radius: var(--radius-sm);
+          color: var(--color-primary-600);
+          font-family: var(--font-mono);
+        }
+    </style>
+    
+    
+</head>
+<body>
+    <div class="container">
+        
+<!-- Header -->
+<div class="report-header">
+    <h1 class="report-title">📊 Document Analysis Report</h1>
+    <p class="report-subtitle">
+        <strong>20251103_122321_ordine-con-note-tascabile_68dbb566217df.docx</strong> • 
+        Generated 03/11/2025 13:18:02
+    </p>
+</div>
+
+<!-- Metrics Grid -->
+<div class="metrics-grid">
+    <div class="metric-card">
+        <div class="metric-label">Total Errors</div>
+        <div class="metric-value error">473</div>
+    </div>
+    
+    <div class="metric-card">
+        <div class="metric-label">Foreign Words</div>
+        <div class="metric-value info">1</div>
+    </div>
+    
+    <div class="metric-card">
+        <div class="metric-label">Readability</div>
+        <div class="metric-value warning">
+            44
+        </div>
+    </div>
+    
+    <div class="metric-card">
+        <div class="metric-label">Words</div>
+        <div class="metric-value">0</div>
+    </div>
+</div>
+
+<!-- Errors by Category -->
+
+<div class="section">
+    <h2 class="section-title">Errors by Category</h2>
+    
+    
+    <div class="section" style="margin-top: 2rem;">
+        <h3 style="font-size: var(--text-lg); color: var(--color-neutral-700); margin-bottom: var(--space-4);">
+            X (377)
+        </h3>
+        
+        
+        <div class="error-card">
+            <div class="error-badge">X</div>
+            <div class="error-content">
+                
+                <span>giuridico-politica</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">X</div>
+            <div class="error-content">
+                
+                <span>tardo-medievale</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">X</div>
+            <div class="error-content">
+                
+                <span class="error-text-original">westfaliano</span>
+                →
+                <span class="error-text-corrected">australiano</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">X</div>
+            <div class="error-content">
+                
+                <span class="error-text-original">and</span>
+                →
+                <span class="error-text-corrected">AN</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">X</div>
+            <div class="error-content">
+                
+                <span class="error-text-original">trumpismo</span>
+                →
+                <span class="error-text-corrected">tempismo</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">X</div>
+            <div class="error-content">
+                
+                <span class="error-text-original">divisiva</span>
+                →
+                <span class="error-text-corrected">divisivo</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">X</div>
+            <div class="error-content">
+                
+                <span>post-territoriale</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">X</div>
+            <div class="error-content">
+                
+                <span>politico-religiose</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">X</div>
+            <div class="error-content">
+                
+                <span class="error-text-original">igitur</span>
+                →
+                <span class="error-text-corrected">agitar</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">X</div>
+            <div class="error-content">
+                
+                <span class="error-text-original">cum</span>
+                →
+                <span class="error-text-corrected">CSM</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">X</div>
+            <div class="error-content">
+                
+                <span class="error-text-original">veritate</span>
+                →
+                <span class="error-text-corrected">meritate</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">X</div>
+            <div class="error-content">
+                
+                <span class="error-text-original">capitulo</span>
+                →
+                <span class="error-text-corrected">capitalo</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">X</div>
+            <div class="error-content">
+                
+                <span class="error-text-original">quod</span>
+                →
+                <span class="error-text-corrected">quid</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">X</div>
+            <div class="error-content">
+                
+                <span class="error-text-original">legislator</span>
+                →
+                <span class="error-text-corrected">legislatore</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">X</div>
+            <div class="error-content">
+                
+                <span class="error-text-original">sive</span>
+                →
+                <span class="error-text-corrected">dive</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">X</div>
+            <div class="error-content">
+                
+                <span class="error-text-original">vel</span>
+                →
+                <span class="error-text-corrected">El</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">X</div>
+            <div class="error-content">
+                
+                <span class="error-text-original">eius</span>
+                →
+                <span class="error-text-corrected">AIDS</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">X</div>
+            <div class="error-content">
+                
+                <span class="error-text-original">valientior</span>
+                →
+                <span class="error-text-corrected">Valentina</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">X</div>
+            <div class="error-content">
+                
+                <span class="error-text-original">pars</span>
+                →
+                <span class="error-text-corrected">Parè</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">X</div>
+            <div class="error-content">
+                
+                <span class="error-text-original">suam</span>
+                →
+                <span class="error-text-corrected">Guam</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        
+        
+        <p style="text-align: center; color: var(--color-neutral-500); font-size: var(--text-xs); margin-top: var(--space-4);">
+            ... and 357 more
+        </p>
+        
+    </div>
+    
+    <div class="section" style="margin-top: 2rem;">
+        <h3 style="font-size: var(--text-lg); color: var(--color-neutral-700); margin-bottom: var(--space-4);">
+            ¿ (17)
+        </h3>
+        
+        
+        <div class="error-card">
+            <div class="error-badge">¿</div>
+            <div class="error-content">
+                
+                <span>seno</span>
+                
+            </div>
+            
+            <div class="error-message">Parola potenzialmente sensibile (anatomia)</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">¿</div>
+            <div class="error-content">
+                
+                <span>sangue</span>
+                
+            </div>
+            
+            <div class="error-message">Parola potenzialmente sensibile (violenza)</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">¿</div>
+            <div class="error-content">
+                
+                <span>Fatta</span>
+                
+            </div>
+            
+            <div class="error-message">Parola potenzialmente sensibile (doppi_sensi)</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">¿</div>
+            <div class="error-content">
+                
+                <span>fatto</span>
+                
+            </div>
+            
+            <div class="error-message">Parola potenzialmente sensibile (doppi_sensi)</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">¿</div>
+            <div class="error-content">
+                
+                <span>fatto</span>
+                
+            </div>
+            
+            <div class="error-message">Parola potenzialmente sensibile (doppi_sensi)</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">¿</div>
+            <div class="error-content">
+                
+                <span>fatto</span>
+                
+            </div>
+            
+            <div class="error-message">Parola potenzialmente sensibile (doppi_sensi)</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">¿</div>
+            <div class="error-content">
+                
+                <span>Dio</span>
+                
+            </div>
+            
+            <div class="error-message">Parola potenzialmente sensibile (parolacce)</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">¿</div>
+            <div class="error-content">
+                
+                <span>Dio</span>
+                
+            </div>
+            
+            <div class="error-message">Parola potenzialmente sensibile (parolacce)</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">¿</div>
+            <div class="error-content">
+                
+                <span>Dio</span>
+                
+            </div>
+            
+            <div class="error-message">Parola potenzialmente sensibile (parolacce)</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">¿</div>
+            <div class="error-content">
+                
+                <span>Dio</span>
+                
+            </div>
+            
+            <div class="error-message">Parola potenzialmente sensibile (parolacce)</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">¿</div>
+            <div class="error-content">
+                
+                <span>fatto</span>
+                
+            </div>
+            
+            <div class="error-message">Parola potenzialmente sensibile (doppi_sensi)</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">¿</div>
+            <div class="error-content">
+                
+                <span>fatto</span>
+                
+            </div>
+            
+            <div class="error-message">Parola potenzialmente sensibile (doppi_sensi)</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">¿</div>
+            <div class="error-content">
+                
+                <span>fatto</span>
+                
+            </div>
+            
+            <div class="error-message">Parola potenzialmente sensibile (doppi_sensi)</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">¿</div>
+            <div class="error-content">
+                
+                <span>violenza</span>
+                
+            </div>
+            
+            <div class="error-message">Parola potenzialmente sensibile (violenza)</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">¿</div>
+            <div class="error-content">
+                
+                <span>vecchio</span>
+                
+            </div>
+            
+            <div class="error-message">Parola potenzialmente sensibile (discriminazione)</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">¿</div>
+            <div class="error-content">
+                
+                <span>fatto</span>
+                
+            </div>
+            
+            <div class="error-message">Parola potenzialmente sensibile (doppi_sensi)</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">¿</div>
+            <div class="error-content">
+                
+                <span>corpo</span>
+                
+            </div>
+            
+            <div class="error-message">Parola potenzialmente sensibile (violenza)</div>
+            
+        </div>
+        
+        
+        
+    </div>
+    
+    <div class="section" style="margin-top: 2rem;">
+        <h3 style="font-size: var(--text-lg); color: var(--color-neutral-700); margin-bottom: var(--space-4);">
+            L (79)
+        </h3>
+        
+        
+        <div class="error-card">
+            <div class="error-badge">L</div>
+            <div class="error-content">
+                
+                <span class="error-text-original">checks</span>
+                →
+                <span class="error-text-corrected">check</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">L</div>
+            <div class="error-content">
+                
+                <span class="error-text-original">balances</span>
+                →
+                <span class="error-text-corrected">bilance</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">L</div>
+            <div class="error-content">
+                
+                <span class="error-text-original">efficiens</span>
+                →
+                <span class="error-text-corrected">efficiente</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">L</div>
+            <div class="error-content">
+                
+                <span class="error-text-original">legis</span>
+                →
+                <span class="error-text-corrected">Fénis</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">L</div>
+            <div class="error-content">
+                
+                <span class="error-text-original">populus</span>
+                →
+                <span class="error-text-corrected">copula</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">L</div>
+            <div class="error-content">
+                
+                <span class="error-text-original">electionem</span>
+                →
+                <span class="error-text-corrected">electron</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">L</div>
+            <div class="error-content">
+                
+                <span class="error-text-original">voluntatem</span>
+                →
+                <span class="error-text-corrected">polentate</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">L</div>
+            <div class="error-content">
+                
+                <span class="error-text-original">civium</span>
+                →
+                <span class="error-text-corrected">Civita</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">L</div>
+            <div class="error-content">
+                
+                <span class="error-text-original">expressam</span>
+                →
+                <span class="error-text-corrected">espressa</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">L</div>
+            <div class="error-content">
+                
+                <span class="error-text-original">iubens</span>
+                →
+                <span class="error-text-corrected">Ruben</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">L</div>
+            <div class="error-content">
+                
+                <span class="error-text-original">actus</span>
+                →
+                <span class="error-text-corrected">cactus</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">L</div>
+            <div class="error-content">
+                
+                <span class="error-text-original">humanos</span>
+                →
+                <span class="error-text-corrected">fumano</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">L</div>
+            <div class="error-content">
+                
+                <span class="error-text-original">potestatum</span>
+                →
+                <span class="error-text-corrected">potentati</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">L</div>
+            <div class="error-content">
+                
+                <span class="error-text-original">originem</span>
+                →
+                <span class="error-text-corrected">origine</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">L</div>
+            <div class="error-content">
+                
+                <span class="error-text-original">duobus</span>
+                →
+                <span class="error-text-corrected">duo bus</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">L</div>
+            <div class="error-content">
+                
+                <span class="error-text-original">finibus</span>
+                →
+                <span class="error-text-corrected">minibus</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">L</div>
+            <div class="error-content">
+                
+                <span class="error-text-original">quibus</span>
+                →
+                <span class="error-text-corrected">qui bus</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">L</div>
+            <div class="error-content">
+                
+                <span class="error-text-original">felicitatem</span>
+                →
+                <span class="error-text-corrected">felicitate</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">L</div>
+            <div class="error-content">
+                
+                <span class="error-text-original">temporalem</span>
+                →
+                <span class="error-text-corrected">temporale</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        <div class="error-card">
+            <div class="error-badge">L</div>
+            <div class="error-content">
+                
+                <span class="error-text-original">iustitiam</span>
+                →
+                <span class="error-text-corrected">giustizia</span>
+                
+            </div>
+            
+            <div class="error-message">Trovato un probabile errore di battitura.</div>
+            
+        </div>
+        
+        
+        
+        <p style="text-align: center; color: var(--color-neutral-500); font-size: var(--text-xs); margin-top: var(--space-4);">
+            ... and 59 more
+        </p>
+        
+    </div>
+    
+</div>
+
+
+<!-- Foreign Languages -->
+
+<div class="section">
+    <h2 class="section-title">🌍 Foreign Languages Detected</h2>
+    
+    
+    <div class="foreign-group">
+        <div class="foreign-title">Foreign Language (79)</div>
+        <div class="foreign-words">
+            
+            <span class="foreign-word">checks</span>
+            
+            <span class="foreign-word">balances</span>
+            
+            <span class="foreign-word">efficiens</span>
+            
+            <span class="foreign-word">legis</span>
+            
+            <span class="foreign-word">populus</span>
+            
+            <span class="foreign-word">electionem</span>
+            
+            <span class="foreign-word">voluntatem</span>
+            
+            <span class="foreign-word">civium</span>
+            
+            <span class="foreign-word">expressam</span>
+            
+            <span class="foreign-word">iubens</span>
+            
+            <span class="foreign-word">actus</span>
+            
+            <span class="foreign-word">humanos</span>
+            
+            <span class="foreign-word">potestatum</span>
+            
+            <span class="foreign-word">originem</span>
+            
+            <span class="foreign-word">duobus</span>
+            
+            <span class="foreign-word">finibus</span>
+            
+            <span class="foreign-word">quibus</span>
+            
+            <span class="foreign-word">felicitatem</span>
+            
+            <span class="foreign-word">temporalem</span>
+            
+            <span class="foreign-word">iustitiam</span>
+            
+            <span class="foreign-word">felicitatem</span>
+            
+            <span class="foreign-word">aeternam</span>
+            
+            <span class="foreign-word">doctrinam</span>
+            
+            <span class="foreign-word">evangelicam</span>
+            
+            <span class="foreign-word">names</span>
+            
+            <span class="foreign-word">politikon</span>
+            
+            <span class="foreign-word">Manager</span>
+            
+            <span class="foreign-word">Post</span>
+            
+            <span class="foreign-word">media</span>
+            
+            <span class="foreign-word">via</span>
+            
+            <span class="foreign-word">post</span>
+            
+            <span class="foreign-word">circa</span>
+            
+            <span class="foreign-word">anime</span>
+            
+            <span class="foreign-word">media</span>
+            
+            <span class="foreign-word">no</span>
+            
+            <span class="foreign-word">maître</span>
+            
+            <span class="foreign-word">élite</span>
+            
+            <span class="foreign-word">circa</span>
+            
+            <span class="foreign-word">circa</span>
+            
+            <span class="foreign-word">via</span>
+            
+            <span class="foreign-word">social</span>
+            
+            <span class="foreign-word">smart</span>
+            
+            <span class="foreign-word">smart</span>
+            
+            <span class="foreign-word">online</span>
+            
+            <span class="foreign-word">circa</span>
+            
+            <span class="foreign-word">web</span>
+            
+            <span class="foreign-word">software</span>
+            
+            <span class="foreign-word">social</span>
+            
+            <span class="foreign-word">media</span>
+            
+            <span class="foreign-word">online</span>
+            
+            
+            <span style="color: var(--color-neutral-500); font-size: var(--text-xs);">
+                +29 more
+            </span>
+            
+        </div>
+    </div>
+    
+</div>
+
+
+<!-- Readability Details -->
+
+<div class="section">
+    <h2 class="section-title">📈 Readability Analysis</h2>
+    
+    <div class="metric-card" style="max-width: 400px;">
+        <div class="metric-label">Gulpease Score</div>
+        <div class="metric-value warning">
+            44.0
+        </div>
+        <p style="font-size: var(--text-sm); color: var(--color-neutral-600); margin-top: var(--space-2);">
+            <strong>Level:</strong> Difficile
+        </p>
+    </div>
+</div>
+
+
+
+    </div>
+    
+    
+</body>
+</html>
