@@ -1,0 +1,84 @@
+{
+  "metadata": {
+    "document_name": "Documento di Test Corrige",
+    "generation_time": "2025-11-03T17:16:34.832742",
+    "generator": "ReportGenerator v1.0"
+  },
+  "correction_stats": {
+    "total_paragraphs": 7,
+    "paragraphs_processed": 7,
+    "corrections_applied": 5,
+    "corrections_rejected": 1,
+    "rollbacks_performed": 0,
+    "processing_time": 12.5,
+    "success_rate": 0.95,
+    "average_quality_score": 0.92,
+    "total_tokens_used": 2500,
+    "api_calls_made": 10,
+    "cache_hits": 3
+  },
+  "document_diff": {
+    "total_paragraphs": 7,
+    "modified_paragraphs": 5,
+    "global_stats": {
+      "modification_rate": 0.7142857142857143,
+      "total_changes": 5,
+      "average_similarity": 0.98
+    }
+  },
+  "quality_summary": {
+    "total_reports": 7,
+    "passed_count": 6,
+    "average_score": 0.9171428571428571
+  },
+  "sections": [
+    {
+      "title": "Resoconto Ortografia - Documento di Test Corrige",
+      "content": "\nDocumento controllato il 03/11/2025 alle 17:16\n\nIl presente resoconto è organizzato per categorie di segnalazione secondo lo standard professionale di correzione ortografica e grammaticale.\n",
+      "level": 1,
+      "metadata": null
+    },
+    {
+      "title": "Quadro di sintesi",
+      "content": "\n**Informazioni Generali:**\n\n| Informazione | Valore |\n|--------------|--------|\n| **Paragrafi controllati** | 7 |\n| **Parole totali (stima)** | 52 |\n| **Segnalazioni totali** | 5 |\n| **Modifiche applicate** | 5 |\n| **Tempo elaborazione** | 12.5s |\n\n**Distribuzione Segnalazioni per Categoria:**\n\n| Categoria | Segnalazioni | % sul totale |\n|-----------|--------------|-------------|\n| **Sospette** | 2 | 40.0% |\n| **Migliorabili** | 1 | 20.0% |\n| **Punteggiatura** | 1 | 20.0% |\n| **Varianti** | 1 | 20.0% |\n\n",
+      "level": 2,
+      "metadata": null
+    },
+    {
+      "title": "Sospette",
+      "content": "*Questa sezione segnala parole in sé corrette ma che potrebbero essere un errore rispetto al contesto e che vale la pena controllare. Si tratta di indicazioni molto utili nella correzione finale, perché controllando qualche parola in più si possono evitare errori subdoli.*\n\n**2 errori nell'uso di 2 parole**\n\n**Info:** altri errori potrebbero essere presenti tra le parole. Accanto a ogni segnalazione puoi usare i bottoni **Corretta** ed **Errore** per segnalare la soluzione per il caso segnalato.\n\n---\n\n### ditali\n\n**Suggerimento:** di tali\n\n*Possibile confusione: ditali → di tali*\n\n**Contesto:**\n- ...Non sono sicuro ditali argomenti da trattare nella riunione....\n\n[ Corretta ] [ Errore ]\n\n---\n\n### errrore\n\n**Suggerimento:** errore\n\n*Corretto errore ortografico: errrore → errore*\n\n**Contesto:**\n- ...Questo è un errrore di battitura nel testo....\n\n[ Corretta ] [ Errore ]\n\n---\n\n",
+      "level": 2,
+      "metadata": {
+        "count": 2,
+        "category": "SOSPETTE"
+      }
+    },
+    {
+      "title": "Migliorabili",
+      "content": "*Questa sezione segnala parole ed espressioni che è possibile migliorare rispetto alle norme redazionali correnti: usi linguistici o grafici che è possibile rendere più adatti a contesti formali o di editoria professionale.*\n\n**1 errore nell'uso di 1 parola**\n\n---\n\n### 1a\n\n**Suggerimento:** 1ª\n\n*Usare ordinale con ª: 1ª, 2ª*\n\n**Contesto:**\n- ...Questa è la 1a edizione del libro....\n\n\n---\n\n",
+      "level": 2,
+      "metadata": {
+        "count": 1,
+        "category": "MIGLIORABILI"
+      }
+    },
+    {
+      "title": "Punteggiatura",
+      "content": "*Questa sezione elenca i casi nei quali l'uso della punteggiatura potrebbe essere sbagliato dal punto di vista formale. Si tratta di segnalazioni da valutare caso per caso, poiché la punteggiatura si può presentare in moltissimi modi, validi in determinati contesti ma errati in altri.*\n\n**1 errore nell'uso di 1 parola**\n\n---\n\n### ,\n\n*Spazio prima della punteggiatura*\n\n**Contesto:**\n- ...Abbiamo visitato Roma , Firenze e Venezia....\n\n\n---\n\n",
+      "level": 2,
+      "metadata": {
+        "count": 1,
+        "category": "PUNTEGGIATURA"
+      }
+    },
+    {
+      "title": "Varianti",
+      "content": "*Questa sezione aiuta a verificare la coerenza ortografica all'interno del testo. In un testo ben scritto, le parole che possono presentare varianti grafiche dovrebbero essere scritte usando una sola delle varianti.*\n\n**1 errore nell'uso di 1 parola**\n\n---\n\n### obbiettivo\n\n*Varianti disponibili: obiettivo*\n\n**Varianti disponibili:** obiettivo\n\n**Contesto:**\n- ...Il nostro obbiettivo principale è la qualità....\n\n\n---\n\n",
+      "level": 2,
+      "metadata": {
+        "count": 1,
+        "category": "VARIANTI"
+      }
+    }
+  ]
+}

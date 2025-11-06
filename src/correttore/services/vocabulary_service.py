@@ -428,6 +428,7 @@ class VocabularyService:
                 'fondamentale': {'count': 0, 'percentage': 0.0},
                 'alto_uso': {'count': 0, 'percentage': 0.0},
                 'alta_disponibilita': {'count': 0, 'percentage': 0.0},
+                'non_classificato': {'count': 0, 'percentage': 0.0},
                 'fuori_vdb': {'count': 0, 'percentage': 0.0, 'words': []}
             }
         
@@ -436,6 +437,7 @@ class VocabularyService:
             'fondamentale': 0,
             'alto_uso': 0,
             'alta_disponibilita': 0,
+            'non_classificato': 0,  # Parole nel VdB ma senza livello
             'fuori_vdb': 0
         }
         
@@ -444,11 +446,16 @@ class VocabularyService:
         for word in words_lower:
             if word in self._vocabulary_full:
                 level = self._vocabulary_full[word].get('livello')
-                if level in counts:
+                if level is None or level == 'null':
+                    # Parola nel vocabolario ma non classificata
+                    counts['non_classificato'] += 1
+                elif level in counts:
                     counts[level] += 1
                 else:
-                    counts['fuori_vdb'] += 1
+                    # Livello sconosciuto, conta come non classificato
+                    counts['non_classificato'] += 1
             else:
+                # Parola veramente non presente nel vocabolario
                 counts['fuori_vdb'] += 1
                 if word not in fuori_vdb_words:
                     fuori_vdb_words.append(word)
@@ -468,6 +475,10 @@ class VocabularyService:
             'alta_disponibilita': {
                 'count': counts['alta_disponibilita'],
                 'percentage': round((counts['alta_disponibilita'] / total) * 100, 2)
+            },
+            'non_classificato': {
+                'count': counts['non_classificato'],
+                'percentage': round((counts['non_classificato'] / total) * 100, 2)
             },
             'fuori_vdb': {
                 'count': counts['fuori_vdb'],

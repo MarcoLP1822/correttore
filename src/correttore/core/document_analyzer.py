@@ -901,10 +901,10 @@ class DocumentAnalyzer:
             output_dir.mkdir(parents=True, exist_ok=True)
             
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            report_name = f"{document_path.stem}_analysis_{timestamp}.html"
-            report_path = output_dir / report_name
+            report_name = f"Analisi Qualità - {timestamp}_{document_path.stem}_{document_path.stem.split('_')[-1]}.docx"
+            report_path = output_dir / report_name.replace('.docx', '.html')
             
-            # Genera report MODERNO
+            # Genera report MODERNO con design originale
             generator = HTMLReportGenerator()
             
             # Prepara dati di leggibilità per report moderno
@@ -929,7 +929,7 @@ class DocumentAnalyzer:
     
     def _map_lt_error_to_category(self, error: LanguageToolError) -> CorrectionCategory:
         """
-        Mappa categoria LanguageTool a CorrectionCategory.
+        Mappa categoria LanguageTool a CorrectionCategory (standard Corrige.it).
         
         Args:
             error: Errore LanguageTool
@@ -937,22 +937,38 @@ class DocumentAnalyzer:
         Returns:
             CorrectionCategory appropriata
         """
-        category_lower = error.category.lower()
+        rule_id = error.rule_id.upper() if error.rule_id else ""
+        category_upper = error.category.upper()
         
-        # Mapping basato su category di LanguageTool
-        if 'typography' in category_lower or 'punctuation' in category_lower:
+        # 1. PUNTEGGIATURA: Typography, punctuation, spazi, virgole (PRIORITÀ ALTA)
+        if any(keyword in category_upper for keyword in ['TYPOGRAPHY', 'TIPOGRAFIA', 'PUNCTUATION', 'COMMA', 'WHITESPACE']):
             return CorrectionCategory.PUNTEGGIATURA
-        elif 'grammar' in category_lower:
+        
+        if any(keyword in rule_id for keyword in ['COMMA', 'PUNCT', 'WHITESPACE', 'SPACE', 'PERIOD', 'COLON', 'SEMICOLON', 'DASH', 'QUOTE', 'PARENTHESIS']):
+            return CorrectionCategory.PUNTEGGIATURA
+        
+        # 2. SCONOSCIUTE: Parole non riconosciute (MORFOLOGIK)
+        if any(keyword in rule_id for keyword in ['MORFOLOGIK', 'HUNSPELL', 'SPELLING']):
+            return CorrectionCategory.SCONOSCIUTE
+        
+        # 3. ERRORI_RICONOSCIUTI: Grammatica vera
+        if 'GRAMMAR' in category_upper:
             return CorrectionCategory.ERRORI_RICONOSCIUTI
-        elif 'spelling' in category_lower or 'misspelling' in category_lower:
-            # IMPORTANTE: Gli errori di spelling devono passare per il filtro intelligente
-            return CorrectionCategory.ERRORI_RICONOSCIUTI
-        elif 'style' in category_lower:
+        
+        # 4. MIGLIORABILI: Style e redundancy
+        if 'STYLE' in category_upper or 'REDUNDANC' in category_upper:
             return CorrectionCategory.MIGLIORABILI
-        elif 'confused' in category_lower:
+        
+        # 5. SOSPETTE: Confused words e possibili errori
+        if 'CONFUSED' in category_upper or 'SEMANTICS' in category_upper:
             return CorrectionCategory.SOSPETTE
-        else:
-            return CorrectionCategory.ERRORI_RICONOSCIUTI
+        
+        # 6. VARIANTI: Consistency
+        if 'CONSISTENCY' in category_upper:
+            return CorrectionCategory.VARIANTI
+        
+        # Default: Sconosciute (più conservativo che errori riconosciuti)
+        return CorrectionCategory.SCONOSCIUTE
     
     def _map_severity_to_confidence(self, severity: str) -> float:
         """

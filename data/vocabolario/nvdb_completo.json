@@ -28,8 +28,8 @@
   },
   "vocabolario": {
     "abbagliante": {
-      "livello": "alta_disponibilita",
-      "note": "corsivo chiaro nel PDF originale"
+      "livello": "alto_uso",
+      "note": "tondo chiaro nel PDF originale"
     },
     "abbaiare": {
       "livello": "alto_uso",
@@ -40,8 +40,8 @@
       "note": "neretto tondo nel PDF originale"
     },
     "abbandonato": {
-      "livello": "fondamentale",
-      "note": "neretto tondo nel PDF originale - p.pass., agg."
+      "livello": "alto_uso",
+      "note": "tondo chiaro nel PDF originale"
     },
     "abbandono": {
       "livello": null,

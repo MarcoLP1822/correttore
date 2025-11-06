@@ -30,41 +30,41 @@ class CorrectionCategory(Enum):
     # ═══════════════════════════════════════════════════════════
     
     ERRORI_RICONOSCIUTI = "X"
-    """Errori ortografici/grammaticali certi (icona: X)"""
+    """Errori di ortografia o grammatica riconosciuti - errori certi (icona: X)"""
     
     SCONOSCIUTE = "?"
-    """Parole non presenti nel database (icona: ?)"""
+    """Sconosciute: parole non riconosciute - non presenti nel database (icona: ?)"""
     
     SOSPETTE = "!"
-    """Parole corrette ma contestualmente sospette (icona: !)"""
+    """Sospette - parole corrette ma contestualmente sospette (icona: !)"""
     
     MIGLIORABILI = "æ"
-    """Espressioni migliorabili per stile/professionalità (icona: æ)"""
+    """Migliorabili - espressioni migliorabili per stile/professionalità (icona: æ)"""
     
     PUNTEGGIATURA = ";"
-    """Errori di punteggiatura e convenzioni tipografiche (icona: ;)"""
+    """Punteggiatura - errori di punteggiatura e convenzioni tipografiche (icona: ;)"""
     
     # ═══════════════════════════════════════════════════════════
     # SEGNALAZIONI D'INFORMAZIONE (Non errori)
     # ═══════════════════════════════════════════════════════════
     
     IMBARAZZANTI = "¿"
-    """Parole valide ma potenzialmente imbarazzanti/volgari (icona: ¿)"""
+    """Imbarazzanti - parole valide ma potenzialmente imbarazzanti/volgari (icona: ¿)"""
     
     VARIANTI = "≈"
-    """Forme alternative accettabili, varianti regionali (icona: ≈)"""
+    """Varianti - forme alternative accettabili, varianti regionali (icona: ≈)"""
     
     NOMI_SIGLE = "N"
-    """Nomi propri, sigle, acronimi riconosciuti (icona: N)"""
+    """Nomi propri, sigle ecc. - nomi propri, sigle, acronimi riconosciuti (icona: N)"""
     
     LINGUE = "L"
-    """Parole in lingue straniere riconosciute (icona: L)"""
+    """Parole di altre lingue - parole in lingue straniere riconosciute (icona: L)"""
     
     CON_INFO = "ⓘ"
-    """Segnalazioni con informazioni aggiuntive (icona: ⓘ)"""
+    """Con info - segnalazioni con informazioni aggiuntive (icona: ⓘ)"""
     
     LINK = "@"
-    """Link e riferimenti web (icona: @)"""
+    """Link - link e riferimenti web (icona: @)"""
     
     @property
     def is_error_category(self) -> bool:
@@ -80,18 +80,18 @@ class CorrectionCategory(Enum):
     
     @property
     def display_name(self) -> str:
-        """Nome visualizzato per l'interfaccia utente."""
+        """Nome visualizzato per l'interfaccia utente (standard Corrige.it)."""
         names = {
-            CorrectionCategory.ERRORI_RICONOSCIUTI: "Errori Riconosciuti",
-            CorrectionCategory.SCONOSCIUTE: "Sconosciute",
+            CorrectionCategory.ERRORI_RICONOSCIUTI: "Errori di ortografia o grammatica riconosciuti",
+            CorrectionCategory.SCONOSCIUTE: "Sconosciute: parole non riconosciute",
             CorrectionCategory.SOSPETTE: "Sospette",
             CorrectionCategory.MIGLIORABILI: "Migliorabili",
             CorrectionCategory.PUNTEGGIATURA: "Punteggiatura",
             CorrectionCategory.IMBARAZZANTI: "Imbarazzanti",
             CorrectionCategory.VARIANTI: "Varianti",
-            CorrectionCategory.NOMI_SIGLE: "Nomi/Sigle",
-            CorrectionCategory.LINGUE: "Lingue",
-            CorrectionCategory.CON_INFO: "Con Altre Informazioni",
+            CorrectionCategory.NOMI_SIGLE: "Nomi propri, sigle ecc.",
+            CorrectionCategory.LINGUE: "Parole di altre lingue",
+            CorrectionCategory.CON_INFO: "Con info",
             CorrectionCategory.LINK: "Link",
         }
         return names.get(self, self.value)

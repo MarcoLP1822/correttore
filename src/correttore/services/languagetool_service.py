@@ -451,8 +451,11 @@ class LanguageToolService:
         return start, new_length
     
     def _filter_whitelisted_errors(self, errors: List[LanguageToolError]) -> List[LanguageToolError]:
-        """Filtra errori basandosi sulla whitelist e logica intelligente"""
+        """Filtra errori basandosi sulla whitelist, vocabolario personalizzato e logica intelligente"""
         filtered = []
+        
+        # Carica vocabolario personalizzato
+        custom_vocab = self._load_custom_vocabulary()
         
         for error in errors:
             # 1. Filtra regole whitelistate
@@ -460,7 +463,18 @@ class LanguageToolService:
                 logger.debug(f"🔇 Filtered whitelisted error: {error.rule_id}")
                 continue
             
-            # 2. Filtro intelligente per GR_10_003: costruzioni participiali valide
+            # 2. NUOVO: Filtra errori ortografici se la parola è nel vocabolario personalizzato
+            if error.rule_id in {"MORFOLOGIK_RULE_IT_IT", "ITALIAN_SPELLCHECK", "HUNSPELL_RULE_IT_IT",
+                                 "MORFOLOGIK_SPELLER_RULE", "SPELL_RULE", "IT_SPELLING_RULE"}:
+                # Estrai la parola dall'errore
+                error_word = error.context[error.offset:error.offset + error.length].lower().strip()
+                
+                # Se la parola è nel vocabolario personalizzato, ignora l'errore
+                if error_word in custom_vocab:
+                    logger.debug(f"✓ Parola '{error_word}' nel vocabolario personalizzato - errore ignorato")
+                    continue
+            
+            # 3. Filtro intelligente per GR_10_003: costruzioni participiali valide
             if error.rule_id == 'GR_10_003':
                 if self._is_valid_participial_construction(error):
                     logger.debug(f"🔇 Filtered GR_10_003: valid participial construction")
@@ -469,6 +483,35 @@ class LanguageToolService:
             filtered.append(error)
         
         return filtered
+    
+    def _load_custom_vocabulary(self) -> set:
+        """Carica il vocabolario personalizzato dal file nvdb_parole.json"""
+        if hasattr(self, '_custom_vocab_cache'):
+            return self._custom_vocab_cache
+        
+        try:
+            from pathlib import Path
+            import json
+            
+            # Percorso al vocabolario - parte dalla directory src/correttore/services
+            # quindi dobbiamo salire 3 livelli per arrivare alla root del progetto
+            current_file = Path(__file__)  # .../src/correttore/services/languagetool_service.py
+            project_root = current_file.parent.parent.parent.parent  # Saliamo a .../Correttore
+            vocab_path = project_root / "data" / "vocabolario" / "nvdb_parole.json"
+            
+            if vocab_path.exists():
+                with open(vocab_path, 'r', encoding='utf-8') as f:
+                    parole = json.load(f)
+                    self._custom_vocab_cache = set(p.lower() for p in parole)
+                logger.info(f"✓ Vocabolario personalizzato caricato nel servizio: {len(self._custom_vocab_cache)} parole")
+            else:
+                logger.warning(f"⚠️ Vocabolario non trovato: {vocab_path}")
+                self._custom_vocab_cache = set()
+        except Exception as e:
+            logger.error(f"❌ Errore nel caricamento vocabolario: {e}")
+            self._custom_vocab_cache = set()
+        
+        return self._custom_vocab_cache
     
     def _is_valid_participial_construction(self, error: LanguageToolError) -> bool:
         """
@@ -722,14 +765,14 @@ class LanguageToolService:
         
         # Regole per categorie specifiche
         
-        # Punteggiatura
-        if any(keyword in category_name for keyword in ['PUNCTUATION', 'TYPOGRAPHY', 'COMMA']):
+        # Punteggiatura e Tipografia (spazi, virgole, punti, ecc.)
+        if any(keyword in category_name for keyword in ['PUNCTUATION', 'TYPOGRAPHY', 'TIPOGRAFIA', 'COMMA', 'WHITESPACE']):
             return CorrectionCategory.PUNTEGGIATURA
         
-        if any(keyword in rule_id for keyword in ['COMMA', 'PUNCT', 'DASH', 'QUOTE']):
+        if any(keyword in rule_id for keyword in ['COMMA', 'PUNCT', 'DASH', 'QUOTE', 'WHITESPACE', 'SPACE', 'PERIOD', 'COLON', 'SEMICOLON']):
             return CorrectionCategory.PUNTEGGIATURA
         
-        # Parole sconosciute
+        # Parole sconosciute (errori ortografici)
         if 'MORFOLOGIK' in rule_id or 'HUNSPELL' in rule_id or 'SPELLING' in category_name:
             return CorrectionCategory.SCONOSCIUTE
         
@@ -744,7 +787,7 @@ class LanguageToolService:
         if 'CONFUSION' in category_name or 'CONFUSABLE' in rule_id:
             return CorrectionCategory.SOSPETTE
         
-        # Default: errori riconosciuti
+        # Default: errori riconosciuti (grammatica, concordanze, ecc.)
         return CorrectionCategory.ERRORI_RICONOSCIUTI
     
     def _calculate_confidence(self, error: LanguageToolError) -> float:

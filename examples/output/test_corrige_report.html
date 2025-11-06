@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resoconto Ortografia</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f9f9f9;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            margin: -30px -30px 30px -30px;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        
+        header .subtitle {
+            opacity: 0.9;
+            font-size: 0.95em;
+        }
+        
+        nav {
+            background: #f5f5f5;
+            padding: 15px;
+            margin: 20px -30px;
+            border-left: 4px solid #667eea;
+        }
+        
+        nav h2 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+        
+        nav ul {
+            list-style: none;
+            column-count: 2;
+            column-gap: 20px;
+        }
+        
+        nav li {
+            margin: 5px 0;
+            break-inside: avoid;
+        }
+        
+        nav a {
+            color: #555;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        
+        nav a:hover {
+            color: #667eea;
+        }
+        
+        nav .count {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            margin-left: 5px;
+            min-width: 25px;
+            text-align: center;
+        }
+        
+        section {
+            margin: 40px 0;
+            padding: 20px 0;
+            border-top: 2px solid #eee;
+        }
+        
+        section:first-of-type {
+            border-top: none;
+        }
+        
+        h2 {
+            color: #667eea;
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            font-weight: 400;
+        }
+        
+        h3 {
+            color: #764ba2;
+            font-size: 1.3em;
+            margin: 25px 0 10px 0;
+            font-weight: 500;
+        }
+        
+        .category-description {
+            background: #f8f9fa;
+            padding: 15px;
+            border-left: 4px solid #667eea;
+            margin: 15px 0;
+            font-style: italic;
+            color: #555;
+        }
+        
+        .correction-item {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+            transition: box-shadow 0.2s;
+        }
+        
+        .correction-item:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .word-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .original-word {
+            font-size: 1.4em;
+            font-weight: 600;
+            color: #d63031;
+            margin-right: 10px;
+        }
+        
+        .occurrence-count {
+            background: #ffe5e5;
+            color: #d63031;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.85em;
+        }
+        
+        .corrected-word {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        
+        .corrected-word strong {
+            color: #28a745;
+        }
+        
+        .suggestion {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        
+        .explanation {
+            color: #666;
+            font-style: italic;
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        
+        .variants {
+            margin: 10px 0;
+            padding: 10px;
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            border-radius: 4px;
+        }
+        
+        .context {
+            margin: 15px 0;
+        }
+        
+        .context-title {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 8px;
+        }
+        
+        .context-text {
+            background: #f8f9fa;
+            padding: 12px;
+            border-left: 3px solid #ccc;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            color: #444;
+            line-height: 1.5;
+            margin: 5px 0;
+        }
+        
+        .buttons {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.2s;
+        }
+        
+        .btn-correct {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-correct:hover {
+            background: #218838;
+        }
+        
+        .btn-error {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-error:hover {
+            background: #c82333;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: 500;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .stats-box {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: 600;
+            color: #667eea;
+        }
+        
+        .info-link {
+            display: inline-block;
+            margin: 10px 0;
+            color: #2196F3;
+            text-decoration: none;
+        }
+        
+        .info-link:hover {
+            text-decoration: underline;
+        }
+        
+        hr {
+            border: none;
+            border-top: 1px solid #eee;
+            margin: 30px 0;
+        }
+        
+        @media print {
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; padding: 20px; }
+            header { background: #667eea; }
+            .correction-item { break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <header>
+            <h1>Resoconto Ortografia - Documento di Test Corrige</h1>
+            <div class="subtitle">Documento controllato il 03/11/2025 alle 17:16
+
+Il presente resoconto è organizzato per categorie di segnalazione secondo lo standard professionale di correzione ortografica e grammaticale.</div>
+        </header>
+
+        <nav>
+            <h2>📑 Indice delle Categorie</h2>
+            <ul>
+                <li><a href="#sospette">Sospette <span class="count">2</span></a></li>
+                <li><a href="#migliorabili">Migliorabili <span class="count">1</span></a></li>
+                <li><a href="#punteggiatura">Punteggiatura <span class="count">1</span></a></li>
+                <li><a href="#varianti">Varianti <span class="count">1</span></a></li>
+
+            </ul>
+        </nav>
+
+        <section id="quadro-di-sintesi">
+            <h2>Quadro di sintesi</h2>
+<strong>Informazioni Generali:</strong><br>
+<br>
+<table><br>
+<thead><tr><br>
+<th>Informazione</th><br>
+<th>Valore</th><br>
+</tr></thead><tbody><br>
+<tr><br>
+<td><strong>Paragrafi controllati</strong></td><br>
+<td>7</td><br>
+</tr><br>
+<tr><br>
+<td><strong>Parole totali (stima)</strong></td><br>
+<td>52</td><br>
+</tr><br>
+<tr><br>
+<td><strong>Segnalazioni totali</strong></td><br>
+<td>5</td><br>
+</tr><br>
+<tr><br>
+<td><strong>Modifiche applicate</strong></td><br>
+<td>5</td><br>
+</tr><br>
+<tr><br>
+<td><strong>Tempo elaborazione</strong></td><br>
+<td>12.5s</td><br>
+</tr><br>
+</tbody></table><br>
+<br>
+<strong>Distribuzione Segnalazioni per Categoria:</strong><br>
+<br>
+<table><br>
+<thead><tr><br>
+<th>Categoria</th><br>
+<th>Segnalazioni</th><br>
+<th>% sul totale</th><br>
+</tr></thead><tbody><br>
+<tr><br>
+<td><strong>Sospette</strong></td><br>
+<td>2</td><br>
+<td>40.0%</td><br>
+</tr><br>
+<tr><br>
+<td><strong>Migliorabili</strong></td><br>
+<td>1</td><br>
+<td>20.0%</td><br>
+</tr><br>
+<tr><br>
+<td><strong>Punteggiatura</strong></td><br>
+<td>1</td><br>
+<td>20.0%</td><br>
+</tr><br>
+<tr><br>
+<td><strong>Varianti</strong></td><br>
+<td>1</td><br>
+<td>20.0%</td><br>
+</tr><br>
+</tbody></table><br>
+<br>
+        </section>
+
+        <section id="sospette">
+            <h2>Sospette</h2>
+<div class="category-description">Questa sezione segnala parole in sé corrette ma che potrebbero essere un errore rispetto al contesto e che vale la pena controllare. Si tratta di indicazioni molto utili nella correzione finale, perché controllando qualche parola in più si possono evitare errori subdoli.</div><br>
+<br>
+<strong>2 errori nell'uso di 2 parole</strong><br>
+<br>
+<strong>Info:</strong> altri errori potrebbero essere presenti tra le parole. Accanto a ogni segnalazione puoi usare i bottoni <strong>Corretta</strong> ed <strong>Errore</strong> per segnalare la soluzione per il caso segnalato.<br>
+<br>
+<p>---</p><br>
+<br>
+<h3>ditali</h3><br>
+<br>
+<strong>Suggerimento:</strong> di tali<br>
+<br>
+<div class="category-description">Possibile confusione: ditali → di tali</div><br>
+<br>
+<strong>Contesto:</strong><br>
+<ul><br>
+<li>...Non sono sicuro ditali argomenti da trattare nella riunione....</li><br>
+</ul><br>
+<br>
+<p><div class="buttons"><button class="btn btn-correct">✓ Corretta</button><button class="btn btn-error">✗ Errore</button></div></p><br>
+<br>
+<p>---</p><br>
+<br>
+<h3>errrore</h3><br>
+<br>
+<strong>Suggerimento:</strong> errore<br>
+<br>
+<div class="category-description">Corretto errore ortografico: errrore → errore</div><br>
+<br>
+<strong>Contesto:</strong><br>
+<ul><br>
+<li>...Questo è un errrore di battitura nel testo....</li><br>
+</ul><br>
+<br>
+<p><div class="buttons"><button class="btn btn-correct">✓ Corretta</button><button class="btn btn-error">✗ Errore</button></div></p><br>
+<br>
+<p>---</p><br>
+<br>
+        </section>
+
+        <section id="migliorabili">
+            <h2>Migliorabili</h2>
+<div class="category-description">Questa sezione segnala parole ed espressioni che è possibile migliorare rispetto alle norme redazionali correnti: usi linguistici o grafici che è possibile rendere più adatti a contesti formali o di editoria professionale.</div><br>
+<br>
+<strong>1 errore nell'uso di 1 parola</strong><br>
+<br>
+<p>---</p><br>
+<br>
+<h3>1a</h3><br>
+<br>
+<strong>Suggerimento:</strong> 1ª<br>
+<br>
+<div class="category-description">Usare ordinale con ª: 1ª, 2ª</div><br>
+<br>
+<strong>Contesto:</strong><br>
+<ul><br>
+<li>...Questa è la 1a edizione del libro....</li><br>
+</ul><br>
+<br>
+<p>---</p><br>
+<br>
+        </section>
+
+        <section id="punteggiatura">
+            <h2>Punteggiatura</h2>
+<div class="category-description">Questa sezione elenca i casi nei quali l'uso della punteggiatura potrebbe essere sbagliato dal punto di vista formale. Si tratta di segnalazioni da valutare caso per caso, poiché la punteggiatura si può presentare in moltissimi modi, validi in determinati contesti ma errati in altri.</div><br>
+<br>
+<strong>1 errore nell'uso di 1 parola</strong><br>
+<br>
+<p>---</p><br>
+<br>
+<h3>,</h3><br>
+<br>
+<div class="category-description">Spazio prima della punteggiatura</div><br>
+<br>
+<strong>Contesto:</strong><br>
+<ul><br>
+<li>...Abbiamo visitato Roma , Firenze e Venezia....</li><br>
+</ul><br>
+<br>
+<p>---</p><br>
+<br>
+        </section>
+
+        <section id="varianti">
+            <h2>Varianti</h2>
+<div class="category-description">Questa sezione aiuta a verificare la coerenza ortografica all'interno del testo. In un testo ben scritto, le parole che possono presentare varianti grafiche dovrebbero essere scritte usando una sola delle varianti.</div><br>
+<br>
+<strong>1 errore nell'uso di 1 parola</strong><br>
+<br>
+<p>---</p><br>
+<br>
+<h3>obbiettivo</h3><br>
+<br>
+<div class="category-description">Varianti disponibili: obiettivo</div><br>
+<br>
+<strong>Varianti disponibili:</strong> obiettivo<br>
+<br>
+<strong>Contesto:</strong><br>
+<ul><br>
+<li>...Il nostro obbiettivo principale è la qualità....</li><br>
+</ul><br>
+<br>
+<p>---</p><br>
+<br>
+        </section>
+
+    </div>
+</body>
+</html>

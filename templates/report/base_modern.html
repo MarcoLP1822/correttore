@@ -563,6 +563,85 @@
           font-weight: 600;
           color: var(--color-success-700);
         }
+        
+        /* TAB Navigation (Corrige.it style) */
+        .tabs-navigation {
+          display: flex;
+          flex-wrap: wrap;
+          gap: var(--space-2);
+          margin-bottom: var(--space-4);
+          padding: var(--space-3);
+          background: white;
+          border: 1px solid var(--color-neutral-200);
+          border-radius: var(--radius-lg);
+          overflow-x: auto;
+        }
+        
+        .tab-button {
+          display: flex;
+          align-items: center;
+          gap: var(--space-2);
+          padding: var(--space-3) var(--space-4);
+          background: var(--color-neutral-50);
+          border: 1px solid var(--color-neutral-200);
+          border-radius: var(--radius-md);
+          font-size: var(--text-sm);
+          font-weight: 500;
+          color: var(--color-neutral-700);
+          cursor: pointer;
+          transition: all 0.2s ease;
+          white-space: nowrap;
+        }
+        
+        .tab-button:hover {
+          background: var(--color-neutral-100);
+          border-color: var(--color-primary-500);
+        }
+        
+        .tab-button.active {
+          background: var(--color-primary-500);
+          color: white;
+          border-color: var(--color-primary-600);
+          box-shadow: var(--shadow-sm);
+        }
+        
+        .tab-count {
+          display: inline-block;
+          padding: 2px 6px;
+          background: rgba(0, 0, 0, 0.1);
+          border-radius: var(--radius-sm);
+          font-size: var(--text-xs);
+          font-weight: 600;
+        }
+        
+        .tab-button.active .tab-count {
+          background: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* TAB Content Panels */
+        .tabs-content {
+          position: relative;
+        }
+        
+        .tab-panel {
+          display: none;
+          animation: fadeIn 0.3s ease;
+        }
+        
+        .tab-panel.active {
+          display: block;
+        }
+        
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
     </style>
     
     {% block extra_styles %}{% endblock %}

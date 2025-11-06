@@ -220,18 +220,18 @@ class HTMLReportGenerator:
             }
         ]
         
-        # Mappa categorie
+        # Mappa categorie (NOMI ESATTI da Corrige.it)
         category_map = {
-            CorrectionCategory.ERRORI_RICONOSCIUTI: ('errori', '❌', 'Errori Riconosciuti'),
-            CorrectionCategory.SCONOSCIUTE: ('sconosciute', '❓', 'Sconosciute'),
+            CorrectionCategory.ERRORI_RICONOSCIUTI: ('errori', '❌', 'Errori di ortografia o grammatica riconosciuti'),
+            CorrectionCategory.SCONOSCIUTE: ('sconosciute', '❓', 'Sconosciute: parole non riconosciute'),
             CorrectionCategory.SOSPETTE: ('sospette', '⚠️', 'Sospette'),
             CorrectionCategory.MIGLIORABILI: ('migliorabili', '✨', 'Migliorabili'),
             CorrectionCategory.PUNTEGGIATURA: ('punteggiatura', '🔣', 'Punteggiatura'),
             CorrectionCategory.IMBARAZZANTI: ('imbarazzanti', '😳', 'Imbarazzanti'),
             CorrectionCategory.VARIANTI: ('varianti', '↔️', 'Varianti'),
-            CorrectionCategory.NOMI_SIGLE: ('nomi', '👤', 'Nomi/Sigle'),
-            CorrectionCategory.LINGUE: ('lingue', '🌐', 'Lingue'),
-            CorrectionCategory.CON_INFO: ('info', 'ℹ️', 'Con Info'),
+            CorrectionCategory.NOMI_SIGLE: ('nomi', '👤', 'Nomi propri, sigle ecc.'),
+            CorrectionCategory.LINGUE: ('lingue', '🌐', 'Parole di altre lingue'),
+            CorrectionCategory.CON_INFO: ('info', 'ℹ️', 'Con info'),
         }
         
         # Aggiungi tabs per categorie con errori

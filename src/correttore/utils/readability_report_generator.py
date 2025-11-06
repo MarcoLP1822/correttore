@@ -375,6 +375,7 @@ class ReadabilityReportGenerator:
             fondamentale = vocab_breakdown.get('fondamentale', {})
             alto_uso = vocab_breakdown.get('alto_uso', {})
             alta_disp = vocab_breakdown.get('alta_disponibilita', {})
+            non_classificato = vocab_breakdown.get('non_classificato', {})
             fuori_vdb = vocab_breakdown.get('fuori_vdb', {})
             
             vdb_stats_html = f"""
@@ -398,6 +399,12 @@ class ReadabilityReportGenerator:
                         <div class="vdb-level-count">{alta_disp.get('count', 0)} parole</div>
                         <div class="vdb-level-percentage">{alta_disp.get('percentage', 0):.1f}%</div>
                         <div class="vdb-level-description">Parole note ma meno frequenti</div>
+                    </div>
+                    <div class="vdb-level-card" style="border-left-color: #95a5a6;">
+                        <div class="vdb-level-name">📒 Non Classificate</div>
+                        <div class="vdb-level-count">{non_classificato.get('count', 0)} parole</div>
+                        <div class="vdb-level-percentage">{non_classificato.get('percentage', 0):.1f}%</div>
+                        <div class="vdb-level-description">Nel vocabolario ma senza livello assegnato</div>
                     </div>
                     <div class="vdb-level-card" style="border-left-color: #e74c3c;">
                         <div class="vdb-level-name">📕 Fuori VdB</div>
@@ -1479,14 +1486,15 @@ class ReadabilityReportGenerator:
             
             // Dati VdB dal vocab_breakdown
             const vdbData = {
-                labels: ['Fondamentali', 'Alto Uso', 'Alta Disponibilità', 'Fuori VdB'],
+                labels: ['Fondamentali', 'Alto Uso', 'Alta Disponibilità', 'Non Classificate', 'Fuori VdB'],
                 values: [
                     vdbBreakdown.fondamentale?.count || 0,
                     vdbBreakdown.alto_uso?.count || 0,
                     vdbBreakdown.alta_disponibilita?.count || 0,
+                    vdbBreakdown.non_classificato?.count || 0,
                     vdbBreakdown.fuori_vdb?.count || 0
                 ],
-                colors: ['#2ecc71', '#3498db', '#f39c12', '#e74c3c']
+                colors: ['#2ecc71', '#3498db', '#f39c12', '#95a5a6', '#e74c3c']
             };
             
             const ctx = canvas.getContext('2d');

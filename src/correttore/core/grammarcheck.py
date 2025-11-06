@@ -2,13 +2,44 @@
 import re
 import threading
 import logging
-from typing import cast
+import json
+from pathlib import Path
+from typing import cast, Set
 import language_tool_python as lt
 
 ###############################################################################
 # 1) Istanza di LanguageTool dedicata a ogni thread
 ###############################################################################
 _THREAD_LOCAL = threading.local()
+
+# Cache per il vocabolario personalizzato
+_CUSTOM_VOCABULARY: Set[str] = set()
+
+def _load_custom_vocabulary() -> Set[str]:
+    """Carica il vocabolario personalizzato dal file nvdb_parole.json"""
+    global _CUSTOM_VOCABULARY
+    
+    if _CUSTOM_VOCABULARY:  # già caricato
+        return _CUSTOM_VOCABULARY
+    
+    try:
+        # Percorso al vocabolario - parte dalla directory src/correttore/core
+        # quindi dobbiamo salire 3 livelli per arrivare alla root del progetto
+        current_file = Path(__file__)  # .../src/correttore/core/grammarcheck.py
+        project_root = current_file.parent.parent.parent.parent  # Saliamo a .../Correttore
+        vocab_path = project_root / "data" / "vocabolario" / "nvdb_parole.json"
+        
+        if vocab_path.exists():
+            with open(vocab_path, 'r', encoding='utf-8') as f:
+                parole = json.load(f)
+                _CUSTOM_VOCABULARY = set(p.lower() for p in parole)
+            logging.info(f"✓ Vocabolario personalizzato caricato: {len(_CUSTOM_VOCABULARY)} parole")
+        else:
+            logging.warning(f"⚠️ Vocabolario non trovato: {vocab_path}")
+    except Exception as e:
+        logging.error(f"❌ Errore nel caricamento vocabolario: {e}")
+    
+    return _CUSTOM_VOCABULARY
 
 # Regole che vogliamo SEMPRE far girare - ESPANSE PER CORREZIONE COMPLETA
 _SAFE_RULES = {
@@ -119,9 +150,13 @@ def grammarcheck(text: str) -> str:
     • la regola deve essere whitelisted (_SAFE_RULES)
     • deve esserci UN solo suggerimento   ──oppure──
       max 3 suggerimenti composti ognuno da UNA sola parola.
+    • la parola NON deve essere nel vocabolario personalizzato (nvdb_parole.json)
     Tutto il resto viene ignorato.
     """
     original = text
+
+    # Carica vocabolario personalizzato
+    custom_vocab = _load_custom_vocabulary()
 
     # ── 1. Otteniamo i match di LT ──────────────────────────────────
     try:
@@ -143,8 +178,19 @@ def grammarcheck(text: str) -> str:
         # 2b. Se non ci sono suggerimenti, non possiamo correggere
         if not m.replacements:
             continue
+        
+        # 2c. NUOVO: Filtra errori ortografici se la parola è nel vocabolario personalizzato
+        if m.ruleId in {"MORFOLOGIK_RULE_IT_IT", "ITALIAN_SPELLCHECK", "HUNSPELL_RULE_IT_IT", 
+                        "MORFOLOGIK_SPELLER_RULE", "SPELL_RULE", "IT_SPELLING_RULE"}:
+            # Estrai la parola segnalata come errore
+            error_word = original[m.offset:m.offset + m.errorLength].lower().strip()
+            
+            # Se la parola è nel vocabolario personalizzato, ignora l'errore
+            if error_word in custom_vocab:
+                logging.debug(f"✓ Parola '{error_word}' nel vocabolario personalizzato - errore ignorato")
+                continue
 
-        # 2c. Decidiamo se accettare il suggerimento - CRITERI MIGLIORATI
+        # 2d. Decidiamo se accettare il suggerimento - CRITERI MIGLIORATI
         apply = False
         repl = ""  # Initialize to avoid unbound variable
         
