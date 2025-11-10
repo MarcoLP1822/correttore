@@ -52,7 +52,7 @@ def test_readability_analyzer():
     print("TEST READABILITY ANALYZER")
     print("=" * 70)
     
-    analyzer = ReadabilityAnalyzer(use_vocabulary=True)
+    analyzer = ReadabilityAnalyzer()
     
     # Test testo semplice
     print("\n📝 TESTO SEMPLICE:")

@@ -33,6 +33,13 @@ class MockParagraph:
     def __init__(self, text):
         self.text = text
         self._original_text = text
+        # Add runs attribute to make it compatible with _apply_text_preserving_format
+        self.runs = []
+    
+    def clear(self):
+        """Mock clear method for paragraph"""
+        self.text = ""
+        self.runs = []
 
 def create_test_paragraphs():
     """Crea paragrafi di test con vari tipi di errori"""

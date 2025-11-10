@@ -213,7 +213,7 @@ class TestOpenAIMockIntegration(unittest.TestCase):
         """Setup per test mock."""
         self.settings = Settings()
         
-    @patch('services.openai_service.OpenAI')
+    @patch('correttore.services.openai_service.OpenAI')
     def test_service_initialization_mock(self, mock_openai):
         """Test inizializzazione servizio con mock."""
         mock_client = Mock()
@@ -224,7 +224,7 @@ class TestOpenAIMockIntegration(unittest.TestCase):
         self.assertIsNotNone(service)
         mock_openai.assert_called_once()
         
-    @patch('services.openai_service.OpenAI')
+    @patch('correttore.services.openai_service.OpenAI')
     def test_correction_response_parsing(self, mock_openai):
         """Test parsing risposta correzione."""
         mock_client = Mock()
@@ -241,7 +241,7 @@ class TestOpenAIMockIntegration(unittest.TestCase):
         
         self.assertEqual(result, "Testo corretto dal mock.")
         
-    @patch('services.openai_service.OpenAI')
+    @patch('correttore.services.openai_service.OpenAI')
     def test_retry_mechanism(self, mock_openai):
         """Test meccanismo retry."""
         mock_client = Mock()
@@ -262,7 +262,7 @@ class TestOpenAIMockIntegration(unittest.TestCase):
             self.assertEqual(result, "Success")
             mock_retry.assert_called_once()
             
-    @patch('services.openai_service.OpenAI')
+    @patch('correttore.services.openai_service.OpenAI')
     def test_context_preservation(self, mock_openai):
         """Test preservazione contesto nelle correzioni."""
         mock_client = Mock()

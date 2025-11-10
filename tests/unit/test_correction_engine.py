@@ -276,6 +276,10 @@ class TestCorrectionEngine(unittest.TestCase):
         """Test applicazione testo preservando formato."""
         mock_paragraph = Mock()
         mock_paragraph.text = "Testo originale"
+        # Configure mock runs to be iterable
+        mock_run = Mock()
+        mock_run.text = "Testo"
+        mock_paragraph.runs = [mock_run]
         new_text = "Testo corretto"
         
         # Il metodo _apply_text_preserving_format modifica il paragrafo in place

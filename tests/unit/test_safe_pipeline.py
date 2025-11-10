@@ -220,6 +220,13 @@ async def test_error_handling():
     class MockParagraph:
         def __init__(self, text):
             self.text = text
+            # Add runs attribute to make it compatible with _apply_text_preserving_format
+            self.runs = []
+        
+        def clear(self):
+            """Mock clear method for paragraph"""
+            self.text = ""
+            self.runs = []
     
     # Test con funzione che genera errore
     def failing_correction(text):

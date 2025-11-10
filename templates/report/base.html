@@ -7,7 +7,8 @@
     <!-- CSS Inline - Generato da Jinja2 -->
     {% if css_content %}
     <style>
-{{ css_content | safe }}
+        /* CSS content injected by template */
+        {{ css_content | safe }}
     </style>
     {% endif %}
 </head>

@@ -14,31 +14,14 @@ def test_performance_metrics():
     print("="*50)
     
     try:
-        sys.path.append('src/core')
-        from correttore import _introduces_regression, _minor_change  # type: ignore[reportMissingImports]
+        # Add src to path for imports
+        project_root = Path(__file__).parent.parent
+        sys.path.insert(0, str(project_root / 'src'))
         
-        # Test velocità funzione anti-regressione
-        start_time = time.time()
+        from correttore.core.correttore import _minor_change
         
-        test_cases = [
-            ("vlta testo", "volta testo", "alta testo"),
-            ("bottaga falegname", "bottega falegname", "bottaia falegname"),
-            ("sugu pomodoro", "sugo pomodoro", "suga pomodoro"),
-            ("testo normale", "testo normale", "testo normale"),
-        ] * 1000  # 4000 test totali
-        
-        regression_count = 0
-        for original, ai_corrected, grammar_checked in test_cases:
-            if _introduces_regression(original, ai_corrected, grammar_checked):
-                regression_count += 1
-        
-        end_time = time.time()
-        elapsed = end_time - start_time
-        
-        print(f"✅ Test velocità _introduces_regression:")
-        print(f"   • {len(test_cases)} test completati in {elapsed:.3f}s")
-        print(f"   • Velocità: {len(test_cases)/elapsed:.0f} test/sec")
-        print(f"   • Regressioni rilevate: {regression_count}")
+        # Note: _introduces_regression function has been removed from the codebase
+        # Skipping regression detection tests
         
         # Test velocità _minor_change
         start_time = time.time()
@@ -57,15 +40,14 @@ def test_performance_metrics():
         end_time = time.time()
         elapsed2 = end_time - start_time
         
-        print(f"\n✅ Test velocità _minor_change:")
+        print(f"✅ Test velocità _minor_change:")
         print(f"   • {len(minor_test_cases)} test completati in {elapsed2:.3f}s")
         print(f"   • Velocità: {len(minor_test_cases)/elapsed2:.0f} test/sec")
         print(f"   • Cambi minori rilevati: {minor_count}")
         
         # Stima overhead aggiuntivo
-        total_overhead = elapsed + elapsed2
         print(f"\n📈 Stima overhead nuova pipeline:")
-        print(f"   • Overhead per 1000 paragrafi: ~{total_overhead:.3f}s")
+        print(f"   • Overhead per 1000 paragrafi: ~{elapsed2:.3f}s")
         print(f"   • Overhead trascurabile rispetto a AI/LanguageTool calls")
         
     except ImportError as e:

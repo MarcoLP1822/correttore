@@ -14,6 +14,7 @@ from docx import Document as DocxDocument  # Renamed to avoid type confusion
 from docx.text.paragraph import Paragraph
 
 from correttore.core.document_handler import DocumentHandler, DocumentInfo
+from correttore.core.validation import ValidationResult
 from correttore.services.openai_service import OpenAIService
 from correttore.services.languagetool_service import LanguageToolService
 from correttore.services.intelligent_cache import get_cache

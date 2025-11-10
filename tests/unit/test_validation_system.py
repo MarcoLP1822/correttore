@@ -72,6 +72,13 @@ def test_safe_correction_system():
     class MockParagraph:
         def __init__(self, text):
             self.text = text
+            # Add runs attribute to make it compatible with _apply_text_preserving_format
+            self.runs = []
+        
+        def clear(self):
+            """Mock clear method for paragraph"""
+            self.text = ""
+            self.runs = []
         
     def mock_spellcheck(text):
         return text.replace("ortographia", "ortografia")
@@ -121,6 +128,13 @@ def test_integration():
         class MockParagraph:
             def __init__(self, text):
                 self.text = text
+                # Add runs attribute to make it compatible with _apply_text_preserving_format
+                self.runs = []
+            
+            def clear(self):
+                """Mock clear method for paragraph"""
+                self.text = ""
+                self.runs = []
                 
         mock_para = MockParagraph(text)
         

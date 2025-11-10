@@ -27,8 +27,8 @@ def main():
         from correttore.interfaces.web_interface import main as web_main
     except ImportError:
         # Fallback a vecchio import path per compatibilità
-        from src.interfaces.cli import main as cli_main
-        from src.interfaces.web_interface import main as web_main
+        from correttore.interfaces.cli import main as cli_main
+        from correttore.interfaces.web_interface import main as web_main
     
     # Se non ci sono argomenti, avvia web interface
     if len(sys.argv) == 1:

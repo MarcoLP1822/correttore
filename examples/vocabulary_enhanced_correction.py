@@ -16,7 +16,7 @@ class VocabularyEnhancedCorrector:
     
     def __init__(self):
         self.vocab_service = get_vocabulary_service()
-        self.readability_analyzer = ReadabilityAnalyzer(use_vocabulary=True)
+        self.readability_analyzer = ReadabilityAnalyzer()
     
     def validate_correction(self, original_word: str, suggested_word: str) -> Dict:
         """
